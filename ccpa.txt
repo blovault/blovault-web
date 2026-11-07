@@ -1,5 +1,5 @@
 BLO VAULT — CCPA / CPRA OPT-OUT NOTICE
-Last Updated: April 4, 2026
+Last Updated: November 7, 2026
 
 This notice is for California residents under the California Consumer Privacy Act (CCPA) as amended by the California Privacy Rights Act (CPRA).
 
@@ -26,7 +26,10 @@ Include in your request:
 We will respond within 45 days of receiving a verifiable consumer request, as required by law. If we need more time, we will notify you.
 
 IN-APP CONTROLS
-You may delete all local data using Panic Delete (Settings → Data & Privacy). You may disconnect linked accounts through Settings at any time.
+- Delete all local data with Panic Delete: Settings (More) → Security → "Delete account & data".
+- Delete your account for good: Settings (More) → Security → "Delete account permanently".
+- Disconnect linked accounts: Settings (More) → Accounts.
+See our Privacy Policy (https://blovault.com/privacy-policy.html), Section 9, for what is deleted and when.
 
 AUTHORIZED AGENT
 You may designate an authorized agent to submit a request on your behalf. We may require verification of the agent's authority and your identity before processing the request.

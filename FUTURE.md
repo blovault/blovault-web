@@ -4,10 +4,10 @@ Items to close out when hardening **domain, legal, and security** for the public
 
 ## Contact / branding
 
-- [ ] **`@blovault.com` email** — Create `privacy@`, `support@`, `security@` (or split roles), then replace everywhere: app, policies, Plaid, stores.
+- [x] **`@blovault.com` email** — `info@blovault.com` and `dev@blovault.com` exist and are used in the app and policies. Separate `privacy@`, `support@`, `security@` not created.
 - [ ] **Single canonical support address** — Same address in App Store, Play, Plaid, and vulnerability disclosure copy.
 - [ ] **Formal VDP** — `security@` or a dedicated security page; replace the temporary Gmail paragraph in this repo’s README.
-- [ ] (Optional) **GitHub Pages custom domain** — e.g. `legal.blovault.com` → Pages for this repository.
+- [x] **GitHub Pages custom domain** — `blovault.com` is live (CNAME).
 
 ## Legal / policy
 
@@ -18,7 +18,7 @@ Items to close out when hardening **domain, legal, and security** for the public
 
 ## Security / engineering (sync with app roadmap)
 
-- [ ] **TLS certificate public-key pinning** — Ship pinning in the client for configured hosts (e.g. Supabase) so runtime behavior matches Privacy Policy §10 and Plaid security answers.
+- [x] **TLS certificate public-key pinning** — Decision: not used (TLS with platform validation only); documented in Privacy Policy §10 (Nov 6, 2026).
 - [ ] **Jailbreak / root detection** — If added, update policy and store listings.
 - [ ] **Auth failures / Panic Delete** — If you define thresholds (e.g. N failed attempts), match implementation and docs.
 - [ ] **Sentry & Supabase** — Document production projects, RLS, and key-rotation runbooks.
@@ -35,4 +35,4 @@ Items to close out when hardening **domain, legal, and security** for the public
 
 ---
 
-*Last updated: 2026-04-04*
+*Last updated: 2026-11-07*
