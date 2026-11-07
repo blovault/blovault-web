@@ -1,7 +1,7 @@
 # BLO VAULT — Information Security Policy
 
-**Version:** 1.0  
-**Effective:** April 2026  
+**Version:** 1.1  
+**Effective:** November 2026  
 **Owner:** Chan Hong (BLO VAULT operator)  
 **Classification:** Internal / Partner disclosure (Plaid)
 
@@ -11,7 +11,7 @@
 
 This Information Security Policy (“Policy”) defines how **BLO VAULT** identifies, mitigates, and monitors information security risks for the **BLO VAULT** mobile application, its supporting backend services used as a **Plaid proxy**, and related operational processes.
 
-**Scope includes:** iOS, Android, and macOS client builds distributed to end users; Supabase-backed Edge Functions and data stores used for Plaid token proxying; development, build, and release workflows; subprocessors listed in the public Privacy Policy.
+**Scope includes:** iOS, Android, and macOS client builds distributed to end users; Supabase-backed Edge Functions and data stores used for Plaid token proxying, authentication, and encrypted backup storage; development, build, and release workflows; subprocessors listed in the public Privacy Policy.
 
 **Out of scope:** Security programs of financial institutions, Plaid, Inc., Apple, Google, or other third parties (governed by their own policies).
 
@@ -42,7 +42,7 @@ The program includes:
 
 ## 4. Risk management methodology
 
-1. **Identify** — Map data flows (Plaid → App → local encrypted store; App ↔ Supabase proxy; optional Sentry; subscriptions via Apple/Google/RevenueCat). Document assets and subprocessors.
+1. **Identify** — Map data flows (Plaid → App → local encrypted store; Apple FinanceKit → App → local encrypted store; App ↔ Supabase proxy; encrypted backup to iCloud, or to Supabase as fallback; optional Sentry; subscriptions via Apple/Google/RevenueCat). Document assets and subprocessors.
 2. **Mitigate** — Apply controls proportional to risk (encryption, access control, least privilege on backend, secure development practices).
 3. **Monitor** — Run static analysis and tests in pipeline; track crashes and regressions; reassess after incidents or major releases.
 
@@ -52,8 +52,9 @@ The program includes:
 
 | Category | Examples | Handling |
 |----------|----------|----------|
-| **Highly sensitive** | Plaid-linked financial transaction and balance data used in-app | Stored **only on the user device** in **AES-256** encrypted storage (SQLCipher). Not stored as raw ledger on BLO VAULT central servers. |
-| **Sensitive** | Encrypted Plaid access tokens, minimal account metadata in Supabase | Encrypted at application layer before storage; access limited to authenticated user sessions and **Row Level Security (RLS)** on Supabase. |
+| **Highly sensitive** | Plaid-linked and Apple Card / Apple Cash (FinanceKit) transaction and balance data used in-app | Stored **only on the user device** in **AES-256** encrypted storage (SQLCipher). FinanceKit data is read on the device and never sent to BLO VAULT servers. No readable copy of the ledger is stored on BLO VAULT servers. |
+| **Highly sensitive** | Encrypted vault backups | Encrypted on the device (**AES-256-GCM**) with a key derived from a random recovery key before upload. Kept in the user's private iCloud container by default; uploaded to Supabase as ciphertext only if iCloud cannot be used and the user has confirmed the recovery code. BLO VAULT cannot decrypt either copy. |
+| **Sensitive** | Encrypted Plaid access tokens, opaque link ids (Plaid item/account ids), Apple user identifier and optional email or Hide My Email relay address (Supabase Auth), operational usage counts, plan and beta-access records, optional feedback. No readable account names or balances. | Encrypted at application layer before storage; access limited to authenticated user sessions and **Row Level Security (RLS)** on Supabase. |
 | **Operational** | Build secrets, API keys (developer environment) | Stored outside public repositories; not committed to version control. |
 | **Diagnostic** | Crash reports (if Sentry enabled) | Client configured to reduce identifiable user fields; governed by Sentry’s terms and project settings. |
 
@@ -64,7 +65,8 @@ The program includes:
 
 ## 6. Access control
 
-- **Consumer access to the App:** **Face ID / Touch ID** or device PIN/passcode via platform APIs before access to financial data; **session timeout** (e.g., **5 minutes** of inactivity) requiring re-authentication.
+- **Sign-in:** On iOS, **Sign in with Apple** is the primary sign-in (same account across devices and reinstalls); Apple passwords are never received. On other platforms, a pseudonymous Supabase user is used. The session is kept in the device Keychain and is never included in backups.
+- **Consumer access to the App:** **Face ID / Touch ID** or device PIN/passcode via platform APIs before access to financial data; **session timeout** (**15 minutes** of inactivity) requiring re-authentication.
 - **Backend / Supabase:** Access via **short-lived JWTs** tied to user sessions; **RLS** restricts data to the owning user. Developer access to Supabase dashboard follows vendor best practices (e.g., **SSO** where configured).
 - **Principle of least privilege:** No standing employee access to end-user financial ledger content on servers (by architecture: raw transaction history is not centralized on BLO VAULT servers).
 
@@ -73,8 +75,10 @@ The program includes:
 ## 7. Cryptography and transmission security
 
 - **Data at rest (device):** **AES-256** (SQLCipher); key material protected via **iOS Keychain / Android Keystore** (or equivalent secure storage).
-- **Data in transit:** **HTTPS (TLS)** for all application traffic to BLO VAULT-controlled and configured services. For **critical API endpoints** (including Supabase and other client-configured domains), **certificate public-key pinning** is used **where supported by the platform**, consistent with partner security disclosures.
+- **Data in transit:** **HTTPS (TLS)** for all application traffic to BLO VAULT-controlled and configured services, using the platform's standard certificate validation. Certificate pinning is **not** used.
+- **Backups:** Vault backups are encrypted on the device with **AES-256-GCM** using a key derived from a random recovery key. The recovery key is also kept in iCloud Keychain (end-to-end encrypted by Apple) for iCloud backups; the server backup does not contain the recovery key.
 - **Tokens:** Plaid access tokens are **encrypted** before persistence in Supabase.
+- **On-device assistant:** The optional assistant runs an on-device language model through the **Cactus SDK**; financial ledger content is not sent to cloud LLM providers for inference.
 
 ---
 
@@ -111,7 +115,7 @@ Incidents are logged; post-incident review updates controls and this Policy as n
 
 ## 11. Vendor and third-party management
 
-Subprocessors (e.g., **Plaid**, **Supabase**, **RevenueCat**, **Apple**, **Google**, **Sentry**) are selected for fit with BLO VAULT’s architecture. Contracts or standard terms are accepted per vendor. Consumer-facing disclosures appear in the **Privacy Policy** (`privacy-policy.md`). Changes to material subprocessors trigger Privacy Policy updates.
+Subprocessors, as listed in Section 4 of the Privacy Policy, are **Plaid**, **Supabase**, **RevenueCat**, **Apple / Google** (in-app purchases, platform services, optional OS speech processing), **Sentry** (optional, only if a DSN is configured), and **Google ML Kit** (on-device text recognition); some features also request non-identifying reference or market data over HTTPS. They are selected for fit with BLO VAULT’s architecture. Contracts or standard terms are accepted per vendor. Consumer-facing disclosures appear in the **Privacy Policy** (`privacy-policy.md`). Changes to material subprocessors trigger Privacy Policy updates.
 
 ---
 
@@ -121,25 +125,22 @@ Aligned with the **Data Retention and Disposal** practices supplied with the Pla
 
 | Data type | Retention (summary) | Disposal method |
 |-----------|---------------------|-----------------|
-| **Financial transaction data (on-device)** | Active subscription period **+ 44 days** (grace / wind-down) | **AES-256** encrypted local wipe; user **Panic Delete** |
-| **Plaid access tokens** | Revoked within a **defined period after subscription termination** | Supabase secure deletion + **Plaid `/item/remove`** |
-| **W-2 / tax-related OCR extracts** (if feature enabled) | **7 years** (IRS-aligned), **local encrypted storage only** | Secure local deletion per legal retention completion |
-| **Account metadata (backend)** | **44 days** post-subscription (where applicable) | Local DB wipe + Supabase deletion workflows |
+| **Financial transaction data (on-device)** | Until the user deletes it | Immediate local wipe via **Panic Delete**, **Delete account & data**, or **Delete account permanently**; uninstalling also removes it |
+| **Plaid connections / access tokens** | Removed at Plaid when the 14-day free trial, subscription, or beta access ends; after Panic Delete or **Delete account & data**, by the last day of the current calendar month; after **Delete account permanently**, by the last day of the current calendar month | Plaid `/item/remove` + Supabase deletion |
+| **iCloud backup copies and synced recovery key** | Current copy plus one previous copy | Deleted immediately by Panic Delete and account deletion; the user may also remove them via iCloud settings |
+| **Server backup (fallback)** | One copy per account | Deleted immediately by **Delete account permanently**; by the last day of the current month for Panic Delete / **Delete account & data** |
+| **Sign in with Apple data** (Apple user identifier, email or relay address) | While the account exists | Deleted with the account; the App's Apple sign-in token is revoked where Apple allows |
+| **Feedback records and attachments** | While needed for support, unless deleted earlier | Deleted on account deletion |
 | **Biometric data** | Not stored by BLO VAULT | N/A (OS-only) |
-| **SSN fields** | Not stored — excluded at OCR stage | Volatile handling per design |
+| **Complimentary (permanent) beta access** | Connections removed after 90 days without opening the App | Plaid `/item/remove`; the user may link again |
 
-**Disposal sequence (subscription end — target procedure):**  
-**T+0:** `/item/remove` for linked items to stop third-party billing where applicable.  
-**T+14 days:** Data may remain encrypted with access locked during grace.  
-**T+44 days:** Target completion of permanent deletion from local device and Supabase for covered categories (subject to tax-record exception above).
-
-*Operational automation of every timing target is implemented incrementally; until automated, **manual and user-initiated deletion** (including Panic Delete) satisfies immediate user requests.*
+*Details follow Section 9 of the Privacy Policy, which governs if the two differ.*
 
 ---
 
 ## 13. Monitoring and logging
 
-- **Application stability:** Optional **Sentry** for crashes/performance; configuration minimizes PII in events.
+- **Application stability:** Optional **Sentry** for crashes/performance, only if a DSN is configured; configuration minimizes PII in events.
 - **Backend:** Supabase and Edge Function logs used for abuse detection, rate limiting (e.g., requests per user), and incident investigation, within retention limits of the platform.
 
 ---
