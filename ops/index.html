@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-COYaAM+/IkDeoT825lyBXYxujwcGewzpV5kz5rq+PjI='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-gLLRygSjLpLqwzGR0cqWzxs5fIwYFgQ7+rBsLdedna8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -625,6 +625,10 @@ body.mopen{overflow:hidden}
       return `<section><div class="sechead"><h2>New bank linking</h2></div><div class="box"><div class="modebox"><div><div>Status: <span class="pill ${on?'bad':'mute'}">${on?'Paused':'Open'}</span></div><div class="note">${on?'Paused: users cannot connect new accounts. Existing accounts keep syncing and reconnecting still works.':'Open: users can connect new accounts.'}${st.link_paused_updated_at?' Changed '+esc(ago(st.link_paused_updated_at))+'.':''}</div></div>
       <div class="acts"><button class="btn${on?'':' danger'}" type="button" data-act="linkpause">${on?'Resume linking':'Pause linking'}</button></div></div>
       <p class="note">Takes effect within about a minute. No app update needed.</p></div></section>`})()}
+    ${(()=>{const st=snap.settings||{}, v=st.link_requires_code||'off', lab={all:'All users',testflight:'TestFlight only',off:'Off'}[v]||'Off';
+      return `<section><div class="sechead"><h2>Invite code to link</h2></div><div class="box"><div class="modebox"><div><div>Require invite code to link: <span class="pill ${v==='off'?'mute':'bad'}">${esc(lab)}</span></div><div class="note">Users without an active invite cannot connect a new account. Reconnecting existing accounts is never blocked.${st.link_requires_code_updated_at?' Changed '+esc(ago(st.link_requires_code_updated_at))+'.':''}</div></div>
+      <div class="acts"><button class="btn" type="button" data-act="linkcode">Change</button></div></div>
+      <p class="note">Takes effect within about a minute. No app update needed.</p></div></section>`})()}
     ${(()=>{const rm=snap.removals||{}, pd=rm.pending_deletions||{};
       return `<section><div class="sechead"><h2>Scheduled removals</h2></div>
       <div class="kpis">${[kpi('Pending account deletions',n0(pd.count),pd.oldest_scheduled_at?'oldest due '+fmtDate(pd.oldest_scheduled_at):'none waiting')].join('')}</div>
@@ -982,6 +986,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       submit:pause?'Pause linking':'Resume linking',toast:pause?'New linking is paused':'New linking is open',
       run:()=>api('set_link_paused',{paused:pause})},btn);
   }
+  function actLinkCode(btn){
+    const cur=snap.settings?.link_requires_code||'off';
+    openModal({title:'Require invite code to link',danger:true,
+      intro:'<div class="callout bad">Users without an active invite will not be able to connect a new account. Existing accounts keep syncing and reconnecting still works.</div>',
+      fields:[{name:'value',label:'Require invite code to link',type:'select',value:cur,options:[['all','All users'],['testflight','TestFlight only'],['off','Off']]}],
+      submit:'Save',toast:'Invite-code rule updated',
+      run:v=>api('set_link_requires_code',{value:v.value})},btn);
+  }
   function actRun(btn){
     const live=reaperMode()==='live';
     openModal({title:'Run cleanup job now',
@@ -1139,7 +1151,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(um){ if(menu&&menu.btn===um) closeMenu(true); else openMenu(um); return; }
     if(menu&&!menu.el.contains(e.target)) closeMenu();
     const ac=e.target.closest('[data-act]');
-    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); return; }
+    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); return; }
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const uo=e.target.closest('[data-uopen]');
