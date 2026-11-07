@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-U4S3l0WdRuGxTiWjDVDW9gzClEgC2Q/XU3NZDakC3oo='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-COYaAM+/IkDeoT825lyBXYxujwcGewzpV5kz5rq+PjI='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -507,7 +507,7 @@ body.mopen{overflow:hidden}
   const addrOf=x=>{const raw=String(srcOf(x)==='email'?(x.email_from||x.contact_email||''):(x.contact_email||'')).trim();const m=raw.match(/<([^>]+)>/);return (m?m[1]:raw).trim();};
   const isOpen=x=>!['implemented','rejected'].includes(x.status);
 
-  const noteOf=sh=>{const u=(snap.users?.items||[]).find(x=>x.short===sh);return u&&u.invite_note?String(u.invite_note):''};
+  const noteOf=sh=>{const u=(snap.users?.items||[]).find(x=>x.short===sh);return u&&(u.display_name||u.invite_note)?String(u.display_name||u.invite_note):''};
   const who=sh=>{const n=noteOf(sh);if(!n) return sh;return (n.length>24?n.slice(0,23)+'…':n)+' ('+sh+')'};
   function testerList(){
     const inv=(snap.beta_invites?.items||[]).filter(i=>i.redeemed_at);
@@ -518,7 +518,7 @@ body.mopen{overflow:hidden}
       if(!isBeta&&!iv) return;
       const exp=isBeta&&src==='beta_limited'?dOf(e.expires_at):null;
       const days=exp?Math.ceil((exp-Date.now())/864e5):null;
-      out.push({u,src:isBeta?src:null,exp,days,name:u.invite_note||(iv&&iv.note)||u.short,active:isBeta&&!(exp&&days<0)});
+      out.push({u,src:isBeta?src:null,exp,days,name:u.display_name||u.invite_note||(iv&&iv.note)||u.short,active:isBeta&&!(exp&&days<0)});
     });
     return out;
   }
@@ -572,7 +572,7 @@ body.mopen{overflow:hidden}
     const us=snap.users?.items||[], i=us.findIndex(x=>x.id===selUser); if(i<0) return '';
     const x=us[i], its=(snap.plaid?.items||[]).filter(it=>it.user_short===x.short&&it.billing_state!=='billed');
     const canSched=its.some(it=>it.is_active&&!it.removal_scheduled_at), canCancel=its.some(it=>it.removal_scheduled_at);
-    return `<section class="box" style="margin:12px 0"><div class="sechead"><h2>User ${esc(x.short)}${x.invite_note?' · '+esc(x.invite_note):''}</h2></div>
+    return `<section class="box" style="margin:12px 0"><div class="sechead"><h2>User ${esc(x.short)}${(x.display_name||x.invite_note)?' · '+esc(x.display_name||x.invite_note):''}</h2></div>
       <dl class="kv"><dt>Access</dt><dd>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' until '+fmtDate(x.entitlement.expires_at):''):'None'}</dd><dt>Trial ends</dt><dd>${x.entitlement?'—':esc(fmtDate(x.trial_ends_at))}</dd><dt>App version</dt><dd>${esc(x.app_version||'—')}</dd><dt>Last opened</dt><dd>${esc(ago(x.last_active_at))}</dd></dl>
       ${table(['Item','Institution','Product','State','Removal','Liabilities'],its.map(it=>`<tr><td class="mono">${esc(it.item_id_short)}</td><td>${esc(inst(it.institution_id))}</td><td>${esc(it.product_assumed||'—')}${it.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(it)}</td><td>${it.removal_scheduled_at?'<span class="pill warn">'+esc(fmtDate(it.removal_scheduled_at))+'</span>':'—'}</td><td>${it.liabilities_at?esc(fmtDate(it.liabilities_at)):'—'}</td></tr>`),'No bank connections for this user.')}
       <div class="acts"><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false">Actions${svg('chev')}</button>${canSched?'<button class="btn" type="button" data-uact="sched">Schedule Item removal</button>':''}${canCancel?'<button class="btn" type="button" data-uact="cancel">Cancel Item removal</button>':''}<button class="btn" type="button" data-uact="close">Close</button></div></section>`;
@@ -872,7 +872,7 @@ body.mopen{overflow:hidden}
   const uidCheck=(x,v)=>{const id=uidOf(x,v); if(!id) return 'Enter the full user id.'; if(/^[0-9a-f]{8}$/i.test(x.short||'')&&!id.toLowerCase().startsWith(x.short.toLowerCase())) return 'That id does not match user '+x.short+'.'; return '';};
   const daysOf=v=>{const n=Number(v);return Number.isInteger(n)&&n>=1&&n<=365?n:0;};
   const daysField={name:'days',label:'Number of days (1–365)',type:'number',min:1,max:365,value:'30',required:true,showIf:v=>v.pick==='custom'};
-  const userLine=x=>`<p>User <b class="mono">${esc(x.short)}</b>${x.invite_note?' ('+esc(x.invite_note)+')':''}</p>`;
+  const userLine=x=>`<p>User <b class="mono">${esc(x.short)}</b>${(x.display_name||x.invite_note)?' ('+esc(x.display_name||x.invite_note)+')':''}</p>`;
 
   function actGrant(x,btn){
     openModal({title:'Grant access',intro:userLine(x)+'<p>Gives this user full access without a paid subscription.</p>',
