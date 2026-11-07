@@ -15,7 +15,7 @@ This Information Security Policy (“Policy”) defines how **BLO VAULT** identi
 
 **Out of scope:** Security programs of financial institutions, Plaid, Inc., Apple, Google, or other third parties (governed by their own policies).
 
-This Policy is **operationalized** through documented procedures referenced below, tooling (CI/CD, monitoring), and periodic review.
+This Policy is **operationalized** through documented procedures referenced below, tooling (CI on every change, the operations dashboard), and a review of this Policy at least once a year and after any security incident.
 
 ---
 
@@ -67,8 +67,8 @@ The program includes:
 
 - **Sign-in:** On iOS, **Sign in with Apple** is the primary sign-in (same account across devices and reinstalls); Apple passwords are never received. On other platforms, a pseudonymous Supabase user is used. The session is kept in the device Keychain and is never included in backups.
 - **Consumer access to the App:** **Face ID / Touch ID** or device PIN/passcode via platform APIs before access to financial data; **session timeout** (**15 minutes** of inactivity) requiring re-authentication.
-- **Backend / Supabase:** Access via **short-lived JWTs** tied to user sessions; **RLS** restricts data to the owning user. Developer access to Supabase dashboard follows vendor best practices (e.g., **SSO** where configured).
-- **Principle of least privilege:** No standing employee access to end-user financial ledger content on servers (by architecture: raw transaction history is not centralized on BLO VAULT servers).
+- **Backend / Supabase:** App requests carry the user's Supabase session token (short-lived access token, refreshed by the client); **RLS** restricts each table to the owning user. Service-role keys are used only inside Edge Functions and never shipped in the App. Dashboard access to Supabase, Plaid, Apple and GitHub is limited to the developer's own accounts.
+- **Principle of least privilege:** BLO VAULT is operated by a single developer and has no other staff with system access. By design, raw transaction history is not stored on BLO VAULT servers, so there is no server-side copy of a user's ledger for anyone to access.
 
 ---
 
@@ -84,18 +84,18 @@ The program includes:
 
 ## 8. Secure development and change management
 
-- **Secure SDLC practices** aligned with **OWASP Mobile Top 10** awareness; security-minded design for authentication, storage, and Plaid integration.
-- **Automated checks:** **GitHub Actions** CI runs **static analysis** (`flutter analyze`), **automated tests**, and **dependency vulnerability scanning** on security-relevant paths.
+- **Secure development:** Every change is made on a branch, reviewed before commit, and merged only after tests pass; security-relevant design (authentication, local storage, Plaid integration) follows the OWASP Mobile Top 10 categories as a checklist.
+- **Automated checks:** **GitHub Actions** CI runs on every push to `main`: static analysis (`flutter analyze`), the full automated test suite (`flutter test`), and type checks and tests for the Plaid Edge Functions (Deno). Dependency vulnerability scanning is not automated; dependencies are reviewed manually (see Section 9).
 - **Code review:** Security-sensitive changes reviewed before merge where practicable for solo-operator workflow.
-- **Planned hardening (roadmap):** Additional controls (e.g., jailbreak/root detection, tamper detection, expanded memory hygiene) are tracked against the main product roadmap and rolled in as implemented.
+- **Not currently implemented:** jailbreak/root detection and tamper detection. If they are added, this Policy and the Privacy Policy will be updated first.
 
 ---
 
 ## 9. Vulnerability and patch management
 
-- **Dependency and supply chain:** Monitor advisories; upgrade packages per severity-based targets (e.g., **Critical ~24h**, **High ~72h**, **Medium ~7 days**) where feasible for a small team.
-- **Disclosure intake:** Security issues may be reported to **info@blovault.com** (temporary); acknowledgment targeted within **48 hours**; status updates within **7 days** when practical; remediation timelines aligned with severity.
-- **Formal security@ address** and published VDP page are planned when `@blovault.com` mail is available (see repository **FUTURE.md**).
+- **Dependency and supply chain:** Package advisories (pub.dev, CocoaPods, Deno) are reviewed when dependencies are updated and when a security advisory is published for a package in use. A vulnerability that can expose user data is fixed before any other work; server-side exposure can be cut off immediately with Edge Function changes and remote kill switches, without waiting for an app release.
+- **Disclosure intake:** Security issues can be reported to **info@blovault.com**. Reports are acknowledged within **2 business days**. The reporter is told whether the issue is confirmed and what will be done.
+- **Reporting address:** info@blovault.com is the single contact for security reports until a dedicated address is published on blovault.com.
 
 ---
 
@@ -105,7 +105,7 @@ Documented response paths include:
 
 | Scenario | Initial steps |
 |----------|----------------|
-| **Suspected Plaid token exposure** | Suspend or limit affected Edge Function paths if needed; invoke **Plaid `/item/remove`** for impacted items; notify affected users as required; document for GLBA-aligned financial privacy obligations where applicable. |
+| **Suspected Plaid token exposure** | Suspend or limit affected Edge Function paths if needed; invoke **Plaid `/item/remove`** for impacted items; notify affected users as required; document the incident and the response. |
 | **Encryption key compromise** | Guide users through **Panic Delete** / re-enrollment; rotate server-side secrets and keys per runbooks. |
 | **Unauthorized access / abuse** | Suspend affected services as needed; preserve logs per retention; root-cause analysis; user notification per legal requirements (e.g., breach timelines under applicable law). |
 
@@ -141,7 +141,7 @@ Aligned with the **Data Retention and Disposal** practices supplied with the Pla
 ## 13. Monitoring and logging
 
 - **Application stability:** Optional **Sentry** for crashes/performance, only if a DSN is configured; configuration minimizes PII in events.
-- **Backend:** Supabase and Edge Function logs used for abuse detection, rate limiting (e.g., requests per user), and incident investigation, within retention limits of the platform.
+- **Backend:** Supabase and Edge Function logs are used for abuse detection and incident investigation, within the platform's log retention. BLO VAULT does not run its own per-user rate limiting; Plaid and Supabase enforce their own limits, and Plaid linking can be paused for all users from the operations dashboard.
 
 ---
 
