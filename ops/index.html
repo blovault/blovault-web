@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-vfEsFoY/0FYqSmXCKOCH+mS7xMgqrHShgSg72nRNgRk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-IVT9EGcMHc5lWAkr3zmmLxNMwE/gOTi5hKa86DeDx3U='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -718,7 +718,6 @@ body.mopen{overflow:hidden}
     const active7=(snap.users?.items||[]).filter(u=>ts.some(x=>x.u===u)&&dOf(u.last_active_at)&&Date.now()-dOf(u.last_active_at)<7*864e5).length;
     return `<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
     <div class="kpis">${[kpi('Testers used',`${used} / ${BETA_CEILING}`,'beta access granted'),kpi('Active in 7 days',active7,'testers who opened the app'),kpi('Invites unused',unused,`${n0(b.redeemed)} redeemed`)].join('')}</div>
-    ${flagsCard()}
     <section><div class="sechead"><h2>Testers</h2><span class="note">${ts.length} total</span></div>
     <div class="fb">${ts.length?ts.map((x,i)=>{const u=x.u, perm=x.src==='beta_permanent', ended=!x.src||(x.days!=null&&x.days<0);
       const exp=!x.src?'Access ended':perm?'Permanent':x.exp?(x.days<0?'Ended '+fmtDate(x.exp):'Ends '+fmtDate(x.exp)+' · '+x.days+' day'+(x.days===1?'':'s')+' left'):'No expiry';
@@ -729,7 +728,8 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Invites</h2></div>
     <div class="kpis">${[kpi('Unused codes',unused),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed_at?fmtDate(x.redeemed_at)+' · <span class="mono">'+esc(x.redeemed_by_short)+'</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed_at?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed_at?fmtDate(x.redeemed_at)+' · <span class="mono">'+esc(x.redeemed_by_short)+'</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed_at?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>
+    ${flagsCard()}`;
   };
 
   /* ---------- admin actions: toast, modal, menu ---------- */
