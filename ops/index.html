@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-12OzQAx7MM9Kc/zi2rS39N1Qgg9grDNE3qwsFNbquO4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-4iImDf8/ZSoPqW1kEXG/hS5QsSCenpwQsmilduUxgz4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -485,12 +485,12 @@ body.mopen{overflow:hidden}
     const ev=`<text class="ev" x="${lx}" y="${Math.max(12,ly-11)}" text-anchor="${pts.length===1?'middle':'end'}">${esc(fmtV(last.v))}</text>`;
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trend, latest ${esc(fmtV(last.v))}">${defs}${g}${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>${one}<circle cx="${lx}" cy="${ly}" r="7" fill="${color}" opacity=".18"/><circle cx="${lx}" cy="${ly}" r="3.75" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>${ev}${xl}</svg>${cap}`;
   }
-  function stackedBars(rows,keys,{h=160}={}){
+  function stackedBars(rows,keys,{h=160,fmt,totals}={}){
     if(!rows.length) return '<div class="note">No data in this window.</div>';
     const W=400,H=h,L=30,R=8,T=12,B=24, tot=rows.map(r=>keys.reduce((s,k)=>s+n0(r[k[0]]),0)), max=niceMax(Math.max(1,...tot));
     const bw=(W-L-R)/rows.length, y=v=>T+(H-T-B)*(1-v/max);
-    const g=ticksSvg(tickVals(max,true),max,y,L,R,W,tickTxt);
-    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});});
+    const g=ticksSvg(tickVals(max,!fmt),max,y,L,R,W,fmt||tickTxt);
+    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});if(totals&&acc)bars+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${(y(acc)-3).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--fg2)">${esc(fmt?fmt(acc):acc)}</text>`;});
     const lab=[0,Math.floor(rows.length/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i).map((i,j,a)=>`<text x="${L+i*bw+bw/2}" y="${H-6}" text-anchor="${j===0&&a.length>1?'start':j===a.length-1&&a.length>1?'end':'middle'}">${esc(rows[i].label)}</text>`).join('');
     const legend='<div class="legend">'+keys.map(([,l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')+'</div>';
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stacked counts by period">${g}${bars}${lab}</svg>${legend}`;
@@ -521,6 +521,7 @@ body.mopen{overflow:hidden}
     const m={pending_disconnect:['Disconnects soon','warn'],pending_expiration:['Consent expiring','warn'],permission_revoked:['Access revoked','bad'],new_accounts_available:['New accounts','info'],login_repaired:['Login repaired','good']}[i.item_status];
     return m?`<span class="pill ${m[1]}">${m[0]}</span>`:'<span class="pill good">healthy</span>';
   }
+  const tierRank=x=>{if(x.is_anonymous)return 8;const s=x.entitlement?.source;if(s)return {owner:0,revenuecat:1,beta_permanent:2,beta_limited:3}[s]??3;return {pro:1,trial:4,free:5,expired:6}[x.plan]??7};
   function planPill(x){const p=x.plan;const cls=p==='pro'?'good':p==='trial'?'info':p==='expired'?'bad':'mute';
     let t=esc(ENUM[p]||p||'unknown'); if(p==='trial'&&x.trial_days_remaining!=null) t+=' · '+x.trial_days_remaining+'d left'; return `<span class="pill ${cls}">${t}</span>`;}
   const flagsOf=()=>Array.isArray(snap.webhook_flags)?snap.webhook_flags:(snap.webhook_flags?.items||[]);
@@ -617,6 +618,7 @@ body.mopen{overflow:hidden}
     const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
     return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(cp.transactions)+' / mo'),kpi('Investments Items',n0(bp.investments),usd(cp.investments)+' / mo'),kpi('Est. total / mo',usd(p.est_monthly_cost_usd),monthName(p.billing_month))].join('')}</div>
     <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p></div>
+    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month).slice(0,3)+' '+String(m.billing_month).slice(2,4),tx:m.cost_by_product?m.cost_by_product.transactions:m.est_cost_usd,inv:m.cost_by_product?.investments})),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true})}</div><p class="note">Estimated from the billing ledger at contract rates; Plaid's invoice is the source of truth.</p></div>
     <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
@@ -1149,6 +1151,8 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       const json=await api('snapshot',{});
       json.general={generated_at:json.generated_at};
       snap=json;
+      const ts=v=>Date.parse(v)||0;
+      snap.users?.items?.sort((a,b)=>tierRank(a)-tierRank(b)||ts(b.last_active_at)-ts(a.last_active_at)||ts(b.last_sign_in_at)-ts(a.last_sign_in_at)||ts(b.created_at)-ts(a.created_at));
       denied=false; loadErr=''; lastLoadAt=Date.now();
       recordHistory();
     }catch(err){
