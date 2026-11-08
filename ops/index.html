@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-p+XcuTVkA3Pnnj/Pi4P+oUitVQMEE+DIQt511axp7EY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-cuHjr2RhuAferuiUp9RhFBcbpCN5xAoBUjvbCwNvAA8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -747,11 +747,19 @@ body.mopen{overflow:hidden}
     if(tf.builds===null) return `<section>${head}${tf.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(tf.err)}</span><button class="btn" type="button" data-tfrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading builds…</p>'}</section>`;
     return `<section>${head}${tf.err?`<p class="note">Could not refresh: ${esc(tf.err)}</p>`:''}${table(['Build','Uploaded','Status','Friends','Actions'],tf.builds.map(b=>{const st=tfStatus(b);return `<tr><td class="mono">${esc(b.version)} (${esc(b.build)})</td><td>${esc(fmtDate(b.uploaded))}</td><td><span class="pill ${st[0]}">${esc(st[1])}</span></td><td>${b.in_group?'Yes':'—'}</td><td>${tfCan(b)?`<button class="btn" type="button" data-act="tfsubmit" data-tf="${esc(b.id)}">Add to Friends + submit</button>`:''}</td></tr>`}),'No builds found.')}</section>`;
   };
+  function reqSection(){
+    const r=snap.beta_requests; if(!r) return '';
+    const its=r.items||[], pend=its.filter(x=>x.status==='pending'), done=its.filter(x=>x.status!=='pending').slice(0,10);
+    const mc={queued:'info',sent:'good',failed:'bad'};
+    return `<section><div class="sechead"><h2>Invite requests</h2><span class="count">${n0(r.pending)}</span><span class="note">From the homepage form</span></div>
+    <div class="fb">${pend.length?pend.map(x=>`<article class="card tester"><div class="trow"><span class="tname mono">${esc(x.email)}</span>${x.name?`<span class="usub">${esc(x.name)}</span>`:''}</div><div class="tsub">Requested ${esc(ago(x.created_at))}</div><div class="cacts"><button class="btn primary" type="button" data-req="approve" data-rid="${esc(x.id)}">Approve</button><button class="btn" type="button" data-req="decline" data-rid="${esc(x.id)}">Decline</button></div></article>`).join(''):'<p class="note">No pending requests.</p>'}</div>
+    ${done.length?table(['Email','Status','Tier','Code','TestFlight','Mail'],done.map(x=>`<tr><td class="mono">${esc(x.email)}</td><td><span class="pill ${x.status==='approved'?'good':'mute'}">${esc(x.status)}</span></td><td>${x.tier?esc(x.tier==='beta_permanent'?'Permanent':'30-day'):'—'}</td><td class="mono">${esc(x.invite_code_masked||'—')}</td><td>${esc(x.testflight_status||'—')}</td><td>${x.status==='approved'?`<span class="pill ${mc[x.mail_status]||'mute'}"${x.mail_error?` title="${esc(x.mail_error)}"`:''}>${esc(x.mail_status||'none')}</span>`:'—'}</td></tr>`),''):''}</section>`;
+  }
   P.beta=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
     const used=ts.filter(x=>x.src).length, unused=n0(b.unused), full=used+unused>=BETA_CEILING;
     const active7=(snap.users?.items||[]).filter(u=>ts.some(x=>x.u===u)&&dOf(u.last_active_at)&&Date.now()-dOf(u.last_active_at)<7*864e5).length;
-    return `<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
+    return `${reqSection()}<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
     <div class="kpis">${[kpi('Testers used',`${used} / ${BETA_CEILING}`,'beta access granted'),kpi('Active in 7 days',active7,'testers who opened the app'),kpi('Invites unused',unused,`${n0(b.redeemed)} redeemed`)].join('')}</div>
     ${tfSection()}
     <section><div class="sechead"><h2>Testers</h2><span class="note">${ts.length} total</span></div>
@@ -1044,6 +1052,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   let invMail={to:'',name:''};
   // mailto only: the owner's mail app sends it; Apple's TestFlight email cannot carry our text.
   const inviteMailto=code=>{const body=`Hi${invMail.name?' '+invMail.name:''},\n\nYou're invited to the BLO VAULT beta.\n\n1. Open the TestFlight invitation Apple emailed you and install BLO VAULT from TestFlight.\n2. Open the app and sign in with Apple.\n3. Go to More > Settings, tap "Have a beta invite code?" and enter:\n\n${code}\n\nThe code works once.`;return `mailto:${encodeURIComponent(invMail.to)}?subject=${encodeURIComponent('Your BLO VAULT beta invite')}&body=${encodeURIComponent(body)}`};
+  function actReq(x,k,btn){
+    if(k==='decline') return openModal({title:'Decline request',danger:true,intro:`<p>Decline this request? No email is sent.</p><p class="mono">${esc(x.email)}</p>`,submit:'Decline',toast:'Request declined',run:()=>api('beta_request_decline',{id:x.id})},btn);
+    openModal({title:'Approve request',intro:`<p class="mono">${esc(x.email)}</p><p>Adds ${esc(x.email)} to TestFlight (Apple emails the TestFlight invite) and emails an invite code from dev@blovault.com within about 10 minutes.</p>`,
+      fields:[{name:'tier',label:'Tier',type:'select',value:'beta_limited',options:[['beta_limited','30-day'],['beta_permanent','Permanent']]}],
+      submit:'Approve and invite',
+      toast:r=>r&&r.testflight&&r.testflight!=='invited'&&r.testflight!=='exists'&&r.testflight!=='already_in_group'?'TestFlight: '+(r.testflight_error||r.testflight):'Approved \u00b7 TestFlight invited \u00b7 invite mail '+((r&&r.mail_status)||'queued'),
+      run:v=>api('beta_request_approve',{id:x.id,tier:v.tier})},btn);
+  }
   function actRevokeInvite(x,btn){
     openModal({title:'Revoke invite',intro:`<p>Invalidates the unused code <b class="mono">${esc(x.code_masked)}</b>${x.note?' for '+esc(x.note):''}. Nobody will be able to redeem it.</p>`,
       danger:true,submit:'Revoke invite',toast:'Invite revoked',
@@ -1156,7 +1172,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   function renderTabs(){
     const open=(snap.feedback?.items||[]).filter(isOpen).length, attn=attentionRows().length;
     const nav=$('tabs'), prev=nav.scrollLeft;
-    nav.innerHTML=TABS.map(([k,l])=>{const c=k==='inbox'&&open?open:k==='overview'&&attn?attn:'';return `<button type="button" role="tab" id="tab-${k}" aria-controls="panel" aria-selected="${tab===k}" tabindex="${tab===k?0:-1}" data-tab="${k}">${esc(l)}${c?` <span class="count">${c}</span>`:''}</button>`}).join('');
+    nav.innerHTML=TABS.map(([k,l])=>{const c=k==='inbox'&&open?open:k==='overview'&&attn?attn:k==='beta'&&snap.beta_requests?.pending?snap.beta_requests.pending:'';return `<button type="button" role="tab" id="tab-${k}" aria-controls="panel" aria-selected="${tab===k}" tabindex="${tab===k?0:-1}" data-tab="${k}">${esc(l)}${c?` <span class="count">${c}</span>`:''}</button>`}).join('');
     nav.scrollLeft=prev;
     const sel=$('tab-'+tab);
     if(sel){const l=sel.offsetLeft, r=l+sel.offsetWidth; if(l<nav.scrollLeft+16) nav.scrollLeft=Math.max(0,l-16); else if(r>nav.scrollLeft+nav.clientWidth-16) nav.scrollLeft=r-nav.clientWidth+16;}
@@ -1254,6 +1270,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
     const fg=e.target.closest('[data-flag]'); if(fg){ if(!fg.disabled) toggleFlag(fg.dataset.flag,fg); return; }
+    const rq=e.target.closest('[data-req]'); if(rq){ const x=(snap.beta_requests?.items||[]).find(r=>r.id===rq.dataset.rid); if(x) actReq(x,rq.dataset.req,rq); return; }
     const iv=e.target.closest('[data-inv]');
     if(iv){ const x=(snap.beta_invites?.items||[])[+iv.dataset.inv]; if(x) actRevokeInvite(x,iv); return; }
     const dt=e.target.closest('[data-detail]'); if(dt){ if(!dt.disabled) actDetail(dt.dataset.detail,dt); return; }
