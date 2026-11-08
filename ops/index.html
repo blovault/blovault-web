@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-IVT9EGcMHc5lWAkr3zmmLxNMwE/gOTi5hKa86DeDx3U='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-A1looapNQ8P6s+HkFSy8PnRO75lpqqdexO7qXvaOCy4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -504,18 +504,24 @@ body.mopen{overflow:hidden}
   const MONTHS_L=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthName=s=>{const p=String(s||'').slice(0,7).split('-'); const i=+p[1]-1; return i>=0&&i<12?MONTHS_L[i]+' '+p[0]:(s||'—');};
   const invMap=()=>snap.settings?.plaid_invoices||{};
+  const taxRate=()=>n0(snap.plaid?.tax_rate);
+  const inclTax=v=>v*(1+taxRate());
+  const taxNote=()=>taxRate()?`incl. ~${(taxRate()*100).toFixed(1)}% sales tax (from the ${monthName(snap.plaid.tax_rate_month)} invoice)`:'before sales tax (no invoice recorded yet)';
+  const taxShort=()=>taxRate()?`incl. ~${(taxRate()*100).toFixed(1)}% tax`:'before tax';
+  const estM=m=>typeof m.est_cost_incl_tax_usd==='number'?m.est_cost_incl_tax_usd:inclTax(n0(m.est_cost_usd));
+  const estMo=p=>typeof p.est_monthly_cost_incl_tax_usd==='number'?p.est_monthly_cost_incl_tax_usd:inclTax(n0(p.est_monthly_cost_usd));
   const planChart=p=>{
     const inv=invMap(), m=new Map();
-    (p.by_month||[]).filter(x=>n0(x.billed_items)>0).forEach(x=>m.set(String(x.billing_month).slice(0,7),{tx:x.cost_by_product?x.cost_by_product.transactions:x.est_cost_usd,inv:x.cost_by_product?.investments}));
+    (p.by_month||[]).filter(x=>n0(x.billed_items)>0).forEach(x=>m.set(String(x.billing_month).slice(0,7),{tx:inclTax(n0(x.cost_by_product?x.cost_by_product.transactions:x.est_cost_usd)),inv:inclTax(n0(x.cost_by_product?.investments))}));
     Object.keys(inv).forEach(k=>{if(!m.has(k))m.set(k,{tx:0,inv:0});});
     return [...m.keys()].sort().map(k=>({label:monthName(k+'-01').slice(0,3)+' '+k.slice(2,4),...m.get(k),inv_usd:inv[k]?inv[k].amount_usd:0}));
   };
   const monthRows=p=>{
     const inv=invMap(), have=new Set((p.by_month||[]).map(m=>String(m.billing_month).slice(0,7)));
     const rows=[...(p.by_month||[]),...Object.keys(inv).filter(k=>!have.has(k)).map(k=>({billing_month:k+'-01',state:'closed',none:1}))].sort((a,b)=>String(b.billing_month).localeCompare(String(a.billing_month)));
-    return table(['Month','>Items','>Est. cost','>Invoiced','>Diff','Status'],rows.map(m=>{
-      const iv=inv[String(m.billing_month).slice(0,7)], a=iv?iv.amount_usd:null, e=m.none?null:m.est_cost_usd, d=typeof a==='number'&&typeof e==='number'?Math.round((a-e)*100)/100:null;
-      return `<tr><td>${esc(monthName(m.billing_month))}</td><td class="r num">${m.none?'—':n0(m.billed_items)}</td><td class="r num">${m.none?'—':usd(m.est_cost_usd)}</td><td class="r num">${usd(a)}</td><td class="r num">${d==null?'—':(d<0?'\u2212':'+')+usd(Math.abs(d))}</td><td>${m.state==='open'?'<span class="pill info">open</span>':'<span class="pill mute">closed</span>'}</td></tr>`;}),'No billing months recorded yet.');
+    return table(['Month','>Items','>Est. incl. tax','>Invoiced','>Diff','Status'],rows.map(m=>{
+      const iv=inv[String(m.billing_month).slice(0,7)], a=iv?iv.amount_usd:null, e=m.none?null:estM(m), d=typeof a==='number'&&typeof e==='number'?Math.round((a-e)*100)/100:null;
+      return `<tr><td>${esc(monthName(m.billing_month))}</td><td class="r num">${m.none?'—':n0(m.billed_items)}</td><td class="r num">${m.none?'—':usd(estM(m))}</td><td class="r num">${usd(a)}${iv&&(iv.invoice_no||typeof iv.tax_usd==='number')?`<span class="usub">${esc([iv.invoice_no?String(iv.invoice_no).slice(0,6)+'\u2026':'',typeof iv.tax_usd==='number'?(typeof iv.subtotal_usd==='number'?usd(iv.subtotal_usd)+' + ':'')+usd(iv.tax_usd)+' tax':''].filter(Boolean).join(' \u00b7 '))}</span>`:''}</td><td class="r num">${d==null?'—':(d<0?'\u2212':'+')+usd(Math.abs(d))}</td><td>${m.state==='open'?'<span class="pill info">open</span>':'<span class="pill mute">closed</span>'}</td></tr>`;}),'No billing months recorded yet.');
   };
 
   /* ---------- helpers ---------- */
@@ -580,7 +586,7 @@ body.mopen{overflow:hidden}
     return `<div class="kpis">${[
       kpi('Users',u.total??'—',`${n0(u.active_last_7d)} active in 7 days`),
       kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),
-      kpi('Est. Plaid cost / mo',usd(p.est_monthly_cost_usd),`${monthName(p.billing_month)} · midnight UTC`),
+      kpi('Est. Plaid cost / mo',usd(estMo(p)),`${taxShort()} · midnight UTC`),
       kpi('Open inbox items',f.items?open.length:'—',`${n0(f.counts?.pending)} new`),
       kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
@@ -595,7 +601,7 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
       <div class="grid2 g22">
         <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})))}</div></div>
-        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:n0(m.est_cost_usd)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
+        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
         <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)'})}</div></div>
         <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)'})}</div></div>
       </div></section>`;
@@ -626,13 +632,13 @@ body.mopen{overflow:hidden}
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
     const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
-    return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(cp.transactions)+' / mo'),kpi('Investments Items',n0(bp.investments),usd(cp.investments)+' / mo'),kpi('Est. total / mo',usd(p.est_monthly_cost_usd),monthName(p.billing_month))].join('')}</div>
+    return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(inclTax(n0(cp.transactions)))+' / mo'),kpi('Investments Items',n0(bp.investments),usd(inclTax(n0(cp.investments)))+' / mo'),kpi('Est. total / mo',usd(estMo(p)),taxShort())].join('')}</div>
     <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p><div class="acts"><button class="btn" type="button" data-act="invoice">Record invoice</button></div></div>
-    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates. Line: Plaid's invoice, when recorded.</p></div>
+    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates, ${esc(taxNote())}. Line: Plaid's invoice total, when recorded.</p></div>
     <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
-      <div class="box"><h3>Est. cost by user</h3>${hbars((p.per_user||[]).map(x=>({label:who(x.user_short),v:n0(x.est_cost)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div>
+      <div class="box"><h3>Est. cost by user (before tax)</h3>${hbars((p.per_user||[]).map(x=>({label:who(x.user_short),v:n0(x.est_cost)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div>
     </div>
     ${table(['Item','User','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td class="mono">${esc(who(i.user_short))}</td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}`;
   };
@@ -1028,13 +1034,21 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       submit:'Save',toast:'Invite-code rule updated',
       run:v=>api('set_link_requires_code',{value:v.value})},btn);
   }
+  function invErr(v){
+    const ok=x=>/^\d+(\.\d+)?$/.test(x)&&+x<=100000, sb=v.subtotal_usd.trim(), tx=v.tax_usd.trim(), no=v.invoice_no.trim();
+    if(sb&&!ok(sb))return 'Subtotal must be a number from 0 to 100000.';
+    if(tx&&!ok(tx))return 'Sales tax must be a number from 0 to 100000.';
+    if(no&&!/^[A-Za-z0-9-]{1,40}$/.test(no))return 'Invoice # may use letters, digits and dashes (max 40).';
+    if(sb&&tx&&v.amount_usd.trim()&&Math.abs(+sb+ +tx-+v.amount_usd)>0.01)return 'Subtotal plus sales tax must equal the total (within $0.01).';
+    return '';
+  }
   function actInvoice(btn){
     const d=new Date(), prev=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1)).toISOString().slice(0,7);
     openModal({title:'Record Plaid invoice',intro:'<p>Plaid\u2019s invoiced amount for one UTC month. Leave the amount empty to clear that month.</p>',
-      fields:[{name:'month',label:'Month',value:prev,placeholder:'YYYY-MM',required:true},{name:'amount_usd',label:'Amount (USD)',placeholder:'0.00'},{name:'note',label:'Note (optional)'}],
-      validate:v=>!/^20\d\d-(0[1-9]|1[0-2])$/.test(v.month.trim())?'Month must look like 2026-10.':(v.amount_usd.trim()&&!(/^\d+(\.\d+)?$/.test(v.amount_usd.trim())&&+v.amount_usd<=100000)?'Amount must be a number from 0 to 100000.':''),
+      fields:[{name:'month',label:'Month',value:prev,placeholder:'YYYY-MM',required:true},{name:'amount_usd',label:'Total charged (USD, incl. tax)',placeholder:'0.00'},{name:'subtotal_usd',label:'Subtotal (USD)',placeholder:'0.00'},{name:'tax_usd',label:'Sales tax (USD)',placeholder:'0.00'},{name:'invoice_no',label:'Invoice # (optional)'},{name:'note',label:'Note (optional)'}],
+      validate:v=>!/^20\d\d-(0[1-9]|1[0-2])$/.test(v.month.trim())?'Month must look like 2026-10.':(v.amount_usd.trim()&&!(/^\d+(\.\d+)?$/.test(v.amount_usd.trim())&&+v.amount_usd<=100000)?'Amount must be a number from 0 to 100000.':invErr(v)),
       submit:'Save invoice',toast:'Invoice saved',
-      run:v=>api('set_plaid_invoice',{month:v.month.trim(),amount_usd:v.amount_usd.trim()?+v.amount_usd:null,note:v.note.trim()||undefined})},btn);
+      run:v=>api('set_plaid_invoice',{month:v.month.trim(),amount_usd:v.amount_usd.trim()?+v.amount_usd:null,subtotal_usd:v.subtotal_usd.trim()?+v.subtotal_usd:undefined,tax_usd:v.tax_usd.trim()?+v.tax_usd:undefined,invoice_no:v.invoice_no.trim()||undefined,note:v.note.trim()||undefined})},btn);
   }
   function actRun(btn){
     const live=reaperMode()==='live';
