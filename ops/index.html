@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-gLLRygSjLpLqwzGR0cqWzxs5fIwYFgQ7+rBsLdedna8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-12OzQAx7MM9Kc/zi2rS39N1Qgg9grDNE3qwsFNbquO4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -201,6 +201,28 @@ td.r,th.r{text-align:right}
 td.num{font-family:var(--mono);font-size:13px}
 td.tempty{text-align:center;padding:28px 14px;color:var(--fg3)}
 td.note{font-size:13px}
+@media (max-width:639px){
+  .tablebox{max-height:none}
+  table,tbody{display:block;min-width:0}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  tbody tr{display:block;padding:12px 14px;border-bottom:1px solid var(--line)}
+  tbody tr:last-child{border-bottom:0}
+  tbody tr:hover{background:var(--hover)} tbody tr:hover td{background:none}
+  td,td.r{display:grid;grid-template-columns:minmax(96px,40%) minmax(0,1fr);gap:8px;padding:4px 0;border:0;text-align:left}
+  td::before{font-family:var(--sans);content:attr(data-label);color:var(--fg3);font-size:12.5px;font-weight:600}
+  td>*{justify-self:start}
+  td.nil{display:none}
+  td:first-child{display:block;font-weight:650;padding-bottom:6px}
+  td:first-child::before{content:none}
+  td.tempty{display:block;text-align:center;padding:28px 14px}
+  td.tempty::before{content:none}
+  .hrow{gap:var(--s2)}
+  .hacts .btn{position:relative;width:44px;min-height:44px;padding:0;justify-content:center}
+  #refreshLbl,.btnlbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .who{display:none}
+  .links{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .links a{line-height:1.25;padding:8px 12px}
+}
 
 /* bug cards */
 .fb{display:flex;flex-direction:column;gap:var(--s3)}
@@ -361,8 +383,8 @@ body.mopen{overflow:hidden}
           <h1 class="word">BLO VAULT</h1><span class="tag">Ops</span>
         </div>
         <div class="hacts">
-          <button class="btn" type="button" id="refreshBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span id="refreshLbl">Refresh</span></button>
-          <button class="btn quiet" type="button" id="signOutBtn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M16 8l4 4-4 4M20 12H9"/></svg>Sign out</button>
+          <button class="btn" type="button" id="refreshBtn" aria-label="Refresh"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg><span id="refreshLbl">Refresh</span></button>
+          <button class="btn quiet" type="button" id="signOutBtn" aria-label="Sign out"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M16 8l4 4-4 4M20 12H9"/></svg><span class="btnlbl">Sign out</span></button>
         </div>
         <div class="hmeta">
           <span class="fresh" id="freshPill" data-state="wait" role="status"><i class="dot"></i><span id="snapAt">Waiting for the first snapshot…</span><span id="staleness"></span></span>
@@ -1077,6 +1099,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(!signedIn) return;
     $('who').textContent=session.user?.email||'';
     $('who').title='Signed in as '+(session.user?.email||'');
+    $('signOutBtn').title='Sign out '+(session.user?.email||'');
     $('refreshBtn').disabled=loading; $('refreshBtn').classList.toggle('spin',loading); $('refreshLbl').textContent=loading?'Refreshing…':'Refresh';
     const g=snap.general||{};
     if(g.generated_at){$('snapAt').textContent='Snapshot '+fmtDT(g.generated_at);const h=(Date.now()-dOf(g.generated_at))/36e5;$('staleness').textContent=ago(g.generated_at);$('freshPill').dataset.state=h>24?'warn':'good';}
@@ -1094,6 +1117,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${P[tab]()}</div>`;
+    document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
   function go(k){tab=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
   function history_replace(k){try{window.history.replaceState(null,'','#'+k)}catch(e){location.hash=k}}
