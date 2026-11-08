@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-cuHjr2RhuAferuiUp9RhFBcbpCN5xAoBUjvbCwNvAA8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Oo8Fu698XkW9zCRtCoeBzCWNqbblOUWgGR70haF/TbY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -415,8 +415,8 @@ body.mopen{overflow:hidden}
   const ago=s=>{const d=dOf(s);if(!d)return'—';const h=(Date.now()-d)/36e5;if(h<1)return Math.max(1,Math.round(h*60))+' min ago';if(h<48)return Math.round(h)+' h ago';return Math.round(h/24)+' days ago'};
   const usd=n=>typeof n==='number'?n.toLocaleString(undefined,{style:'currency',currency:'USD'}):'—';
   const n0=v=>typeof v==='number'?v:0;
-  const INST={ins_130888:'Truist',ins_56:'Chase',ins_10:'American Express',ins_54:'Robinhood',ins_12:'Fidelity',ins_129473:'E*TRADE'};
-  const inst=id=>INST[id]||id||'—';
+  const INST={ins_130888:'Truist',ins_56:'Chase',ins_10:'American Express',ins_54:'Robinhood',ins_12:'Fidelity',ins_129473:'E*TRADE',ins_137835:'X Money'};
+  const inst=id=>INST[id]||snap.plaid?.institution_names?.[id]||id||'—';
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
   const TABS=[['overview','Overview'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta']];
