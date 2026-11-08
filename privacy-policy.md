@@ -1,6 +1,6 @@
 # BLO VAULT Privacy Policy
 
-**Last Updated:** November 6, 2026
+**Last Updated:** November 8, 2026
 
 BLO VAULT ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and safeguard your information when you use our mobile application (the "App"). BLO VAULT is operated by an individual developer (Chan Hong). We designed the App so that sensitive financial details stay on your device whenever possible.
 
@@ -143,6 +143,10 @@ We are based in the United States. Your information may be processed in the U.S.
 ## 14. Beta and test programs
 
 If you install a pre-release or beta build (for example through Apple TestFlight or similar), the platform provider may collect additional diagnostics, crash data, or usage metadata under its beta program terms, in addition to the practices described in this Policy.
+
+### 14.1 Beta invite requests
+
+If you request a beta invite on our website, we store the email address you enter, an optional name, and a salted hash of your IP address (used only to limit abuse). We use them to send your invite and code. We keep them until your request is declined or the beta ends, and delete them sooner if you ask (info@blovault.com).
 
 ## 15. Changes to this policy
 

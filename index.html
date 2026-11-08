@@ -224,10 +224,11 @@ BLO VAULT
 <h2 class="t" id="beta-h">Joining the beta</h2>
 <div class="ask" id="request">
 <h3>Request a beta invite</h3>
-<p>Use the email address you use with Apple (TestFlight sends the invite there). Your email app opens with the request ready to send to <a href="mailto:dev@blovault.com">dev@blovault.com</a>.</p>
+<p>Use the email address you use with Apple (TestFlight sends the invite there). We'll email your invite code; no mail app needed. Questions? <a href="mailto:dev@blovault.com">dev@blovault.com</a>.</p>
 <form id="askForm" novalidate>
 <div class="fld"><label for="askEmail">Email address</label><input id="askEmail" name="email" type="email" autocomplete="email" inputmode="email" required></div>
 <div class="fld"><label for="askName">Name <span>(optional)</span></label><input id="askName" name="name" type="text" autocomplete="name"></div>
+<div class="fld" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><input name="website" type="text" tabindex="-1" autocomplete="off"></div>
 <div class="row"><button class="btn" type="submit">Request an invite</button><p class="msg" id="askMsg" role="status" aria-live="polite"></p></div>
 </form>
 </div>
@@ -274,9 +275,20 @@ BLO VAULT
     var email=f.email.value.trim(), name=f.name.value.trim();
     msg.className='msg';
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.className='msg err';msg.textContent='Enter a valid email address.';f.email.focus();return;}
-    var body='Hi,\n\nI would like to join the BLO VAULT beta on TestFlight.\n\nEmail: '+email+'\nName: '+(name||'(not given)')+'\n';
-    location.href='mailto:dev@blovault.com?subject='+encodeURIComponent('BLO VAULT beta request')+'&body='+encodeURIComponent(body);
-    msg.textContent='Your email app should open with the request. If nothing opens, email dev@blovault.com.';
+    var btn=f.querySelector('button');
+    function mail(){
+      var body='Hi,\n\nI would like to join the BLO VAULT beta on TestFlight.\n\nEmail: '+email+'\nName: '+(name||'(not given)')+'\n';
+      location.href='mailto:dev@blovault.com?subject='+encodeURIComponent('BLO VAULT beta request')+'&body='+encodeURIComponent(body);
+      msg.textContent="Couldn't reach the server, so your email app should open with the request. If nothing opens, email dev@blovault.com.";
+    }
+    btn.disabled=true; btn.textContent='Sending\u2026';
+    fetch('https://nagsivpurrsrkwfdojdj.supabase.co/functions/v1/beta-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,name:name,website:f.website.value})})
+    .then(function(r){
+      if(r.status===200){msg.className='msg';msg.textContent='Thanks \u2014 we got your request. We\'ll email your invite to '+email+' soon.';f.reset();}
+      else if(r.status===400){msg.className='msg err';msg.textContent='Enter a valid email address.';}
+      else if(r.status===429){msg.className='msg err';msg.textContent='Too many requests from here. Try again in an hour, or email dev@blovault.com.';}
+      else mail();
+    }).catch(mail).then(function(){btn.disabled=false;btn.textContent='Request an invite';});
   });
 })();
 </script>
