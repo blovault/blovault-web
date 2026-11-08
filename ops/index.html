@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-4iImDf8/ZSoPqW1kEXG/hS5QsSCenpwQsmilduUxgz4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-vfEsFoY/0FYqSmXCKOCH+mS7xMgqrHShgSg72nRNgRk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -485,14 +485,14 @@ body.mopen{overflow:hidden}
     const ev=`<text class="ev" x="${lx}" y="${Math.max(12,ly-11)}" text-anchor="${pts.length===1?'middle':'end'}">${esc(fmtV(last.v))}</text>`;
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trend, latest ${esc(fmtV(last.v))}">${defs}${g}${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>${one}<circle cx="${lx}" cy="${ly}" r="7" fill="${color}" opacity=".18"/><circle cx="${lx}" cy="${ly}" r="3.75" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>${ev}${xl}</svg>${cap}`;
   }
-  function stackedBars(rows,keys,{h=160,fmt,totals}={}){
+  function stackedBars(rows,keys,{h=160,fmt,totals,mark}={}){
     if(!rows.length) return '<div class="note">No data in this window.</div>';
-    const W=400,H=h,L=30,R=8,T=12,B=24, tot=rows.map(r=>keys.reduce((s,k)=>s+n0(r[k[0]]),0)), max=niceMax(Math.max(1,...tot));
+    const W=400,H=h,L=30,R=8,T=12,B=24, tot=rows.map(r=>keys.reduce((s,k)=>s+n0(r[k[0]]),0)), max=niceMax(Math.max(1,...tot,...(mark?rows.map(r=>n0(r[mark[0]])):[])));
     const bw=(W-L-R)/rows.length, y=v=>T+(H-T-B)*(1-v/max);
     const g=ticksSvg(tickVals(max,!fmt),max,y,L,R,W,fmt||tickTxt);
-    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});if(totals&&acc)bars+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${(y(acc)-3).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--fg2)">${esc(fmt?fmt(acc):acc)}</text>`;});
+    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});if(totals&&acc)bars+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${(y(acc)-3).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--fg2)">${esc(fmt?fmt(acc):acc)}</text>`;if(mark&&n0(r[mark[0]])){const my=y(n0(r[mark[0]])).toFixed(1);bars+=`<line x1="${(L+i*bw+bw*.05).toFixed(1)}" x2="${(L+i*bw+bw*.95).toFixed(1)}" y1="${my}" y2="${my}" stroke="var(--fg)" stroke-width="2"/>`;}});
     const lab=[0,Math.floor(rows.length/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i).map((i,j,a)=>`<text x="${L+i*bw+bw/2}" y="${H-6}" text-anchor="${j===0&&a.length>1?'start':j===a.length-1&&a.length>1?'end':'middle'}">${esc(rows[i].label)}</text>`).join('');
-    const legend='<div class="legend">'+keys.map(([,l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')+'</div>';
+    const legend='<div class="legend">'+keys.map(([,l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')+(mark?`<span><i style="background:none;border-top:2px solid var(--fg);height:0;border-radius:0"></i>${esc(mark[1])}</span>`:'')+'</div>';
     return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stacked counts by period">${g}${bars}${lab}</svg>${legend}`;
   }
   function hbars(items,{fmt=v=>v,color='var(--accent)'}={}){
@@ -503,9 +503,19 @@ body.mopen{overflow:hidden}
   const wk=s=>{const d=dOf(s);return d?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):s};
   const MONTHS_L=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthName=s=>{const p=String(s||'').slice(0,7).split('-'); const i=+p[1]-1; return i>=0&&i<12?MONTHS_L[i]+' '+p[0]:(s||'—');};
+  const invMap=()=>snap.settings?.plaid_invoices||{};
+  const planChart=p=>{
+    const inv=invMap(), m=new Map();
+    (p.by_month||[]).filter(x=>n0(x.billed_items)>0).forEach(x=>m.set(String(x.billing_month).slice(0,7),{tx:x.cost_by_product?x.cost_by_product.transactions:x.est_cost_usd,inv:x.cost_by_product?.investments}));
+    Object.keys(inv).forEach(k=>{if(!m.has(k))m.set(k,{tx:0,inv:0});});
+    return [...m.keys()].sort().map(k=>({label:monthName(k+'-01').slice(0,3)+' '+k.slice(2,4),...m.get(k),inv_usd:inv[k]?inv[k].amount_usd:0}));
+  };
   const monthRows=p=>{
-    const rows=[...(p.by_month||[])].reverse();
-    return table(['Month','>Items','>Est. cost','Status'],rows.map(m=>`<tr><td>${esc(monthName(m.billing_month))}</td><td class="r num">${n0(m.billed_items)}</td><td class="r num">${usd(m.est_cost_usd)}</td><td>${m.state==='open'?'<span class="pill info">open</span>':'<span class="pill mute">closed</span>'}</td></tr>`),'No billing months recorded yet.');
+    const inv=invMap(), have=new Set((p.by_month||[]).map(m=>String(m.billing_month).slice(0,7)));
+    const rows=[...(p.by_month||[]),...Object.keys(inv).filter(k=>!have.has(k)).map(k=>({billing_month:k+'-01',state:'closed',none:1}))].sort((a,b)=>String(b.billing_month).localeCompare(String(a.billing_month)));
+    return table(['Month','>Items','>Est. cost','>Invoiced','>Diff','Status'],rows.map(m=>{
+      const iv=inv[String(m.billing_month).slice(0,7)], a=iv?iv.amount_usd:null, e=m.none?null:m.est_cost_usd, d=typeof a==='number'&&typeof e==='number'?Math.round((a-e)*100)/100:null;
+      return `<tr><td>${esc(monthName(m.billing_month))}</td><td class="r num">${m.none?'—':n0(m.billed_items)}</td><td class="r num">${m.none?'—':usd(m.est_cost_usd)}</td><td class="r num">${usd(a)}</td><td class="r num">${d==null?'—':(d<0?'\u2212':'+')+usd(Math.abs(d))}</td><td>${m.state==='open'?'<span class="pill info">open</span>':'<span class="pill mute">closed</span>'}</td></tr>`;}),'No billing months recorded yet.');
   };
 
   /* ---------- helpers ---------- */
@@ -617,8 +627,8 @@ body.mopen{overflow:hidden}
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
     const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
     return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(cp.transactions)+' / mo'),kpi('Investments Items',n0(bp.investments),usd(cp.investments)+' / mo'),kpi('Est. total / mo',usd(p.est_monthly_cost_usd),monthName(p.billing_month))].join('')}</div>
-    <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p></div>
-    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month).slice(0,3)+' '+String(m.billing_month).slice(2,4),tx:m.cost_by_product?m.cost_by_product.transactions:m.est_cost_usd,inv:m.cost_by_product?.investments})),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true})}</div><p class="note">Estimated from the billing ledger at contract rates; Plaid's invoice is the source of truth.</p></div>
+    <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p><div class="acts"><button class="btn" type="button" data-act="invoice">Record invoice</button></div></div>
+    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates. Line: Plaid's invoice, when recorded.</p></div>
     <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
@@ -751,7 +761,7 @@ body.mopen{overflow:hidden}
     let ctl;
     if(f.type==='select') ctl=`<select id="${id}" data-mf="${f.name}">${f.options.map(([val,l])=>`<option value="${esc(val)}"${val===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
     else if(f.type==='textarea') ctl=`<textarea id="${id}" data-mf="${f.name}" rows="4"${f.max?` maxlength="${f.max}"`:''} spellcheck="true">${esc(v)}</textarea>`;
-    else ctl=`<input id="${id}" data-mf="${f.name}" type="${f.type||'text'}" value="${esc(v)}"${f.min!=null?` min="${f.min}" max="${f.max}" inputmode="numeric"`:''} autocomplete="off" autocapitalize="off" spellcheck="false">`;
+    else ctl=`<input id="${id}" data-mf="${f.name}" type="${f.type||'text'}" value="${esc(v)}"${f.min!=null?` min="${f.min}" max="${f.max}" inputmode="numeric"`:''}${f.placeholder?` placeholder="${esc(f.placeholder)}"`:''} autocomplete="off" autocapitalize="off" spellcheck="false">`;
     return `<div class="field" data-fw="${f.name}"${isVis(f,M.vals)?'':' hidden'}><label for="${id}">${esc(f.label)}</label>${ctl}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`;
   }
   function drawModal(focusSel){
@@ -1018,6 +1028,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       submit:'Save',toast:'Invite-code rule updated',
       run:v=>api('set_link_requires_code',{value:v.value})},btn);
   }
+  function actInvoice(btn){
+    const d=new Date(), prev=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1)).toISOString().slice(0,7);
+    openModal({title:'Record Plaid invoice',intro:'<p>Plaid\u2019s invoiced amount for one UTC month. Leave the amount empty to clear that month.</p>',
+      fields:[{name:'month',label:'Month',value:prev,placeholder:'YYYY-MM',required:true},{name:'amount_usd',label:'Amount (USD)',placeholder:'0.00'},{name:'note',label:'Note (optional)'}],
+      validate:v=>!/^20\d\d-(0[1-9]|1[0-2])$/.test(v.month.trim())?'Month must look like 2026-10.':(v.amount_usd.trim()&&!(/^\d+(\.\d+)?$/.test(v.amount_usd.trim())&&+v.amount_usd<=100000)?'Amount must be a number from 0 to 100000.':''),
+      submit:'Save invoice',toast:'Invoice saved',
+      run:v=>api('set_plaid_invoice',{month:v.month.trim(),amount_usd:v.amount_usd.trim()?+v.amount_usd:null,note:v.note.trim()||undefined})},btn);
+  }
   function actRun(btn){
     const live=reaperMode()==='live';
     openModal({title:'Run cleanup job now',
@@ -1179,7 +1197,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(um){ if(menu&&menu.btn===um) closeMenu(true); else openMenu(um); return; }
     if(menu&&!menu.el.contains(e.target)) closeMenu();
     const ac=e.target.closest('[data-act]');
-    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); return; }
+    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); return; }
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const uo=e.target.closest('[data-uopen]');
