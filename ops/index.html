@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-A1looapNQ8P6s+HkFSy8PnRO75lpqqdexO7qXvaOCy4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-p+XcuTVkA3Pnnj/Pi4P+oUitVQMEE+DIQt511axp7EY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -718,12 +718,42 @@ body.mopen{overflow:hidden}
       delete flagBusy[key]; await load();
     }catch(err){ delete flagBusy[key]; toast('Could not save: '+(err instanceof TypeError?'network error':err.message)); render(); }
   }
+  const tf={loading:false,at:0,builds:null,err:''};
+  async function loadTf(){
+    if(tf.loading) return; tf.loading=true; tf.err=''; render();
+    try{ const r=await api('testflight_builds',{}); if(!r||r.ok===false) throw new Error((r&&r.error)||'Could not load builds'); tf.builds=r.builds||[]; tf.at=Date.now(); }
+    catch(err){ tf.err=err instanceof TypeError?'Network error':err.message; }
+    tf.loading=false; render();
+  }
+  const tfStatus=b=>{const e=b.external_state, r=b.review_state;
+    if(b.expired||e==='EXPIRED') return ['mute','Expired'];
+    if(b.processing==='PROCESSING') return ['info','Processing'];
+    if(b.processing==='FAILED'||b.processing==='INVALID') return ['bad',human(b.processing.toLowerCase())];
+    if(e==='IN_BETA_TESTING') return ['good','Testing'];
+    if(e==='BETA_APPROVED'||r==='APPROVED') return ['good','Approved'];
+    if(e==='BETA_REJECTED'||r==='REJECTED') return ['bad','Rejected'];
+    if(e==='IN_BETA_REVIEW'||r==='IN_REVIEW') return ['info','In review'];
+    if(e==='WAITING_FOR_BETA_REVIEW'||r==='WAITING_FOR_REVIEW') return ['warn','Waiting for review'];
+    if(e==='READY_FOR_BETA_SUBMISSION') return ['mute','Not submitted'];
+    if(e==='MISSING_EXPORT_COMPLIANCE') return ['warn','Needs export compliance'];
+    return ['mute',human(String(e||b.processing||'unknown').toLowerCase())||'Unknown'];
+  };
+  // Only builds newer than the newest one already in Friends, so an old build is never pushed to testers.
+  const tfNewest=()=>Math.max(0,...(tf.builds||[]).filter(b=>b.in_group).map(b=>dOf(b.uploaded)||0));
+  const tfCan=b=>b.processing==='VALID'&&!b.expired&&(!b.in_group||b.external_state==='READY_FOR_BETA_SUBMISSION')&&(dOf(b.uploaded)||0)>tfNewest();
+  const tfSection=()=>{
+    if(tf.builds===null&&!tf.loading) setTimeout(loadTf,0);
+    const head=`<div class="sechead"><h2>TestFlight builds</h2><span class="note">Latest 8 from App Store Connect</span><button class="btn" type="button" data-tfrefresh="1"${tf.loading?' disabled':''}>Refresh</button></div>`;
+    if(tf.builds===null) return `<section>${head}${tf.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(tf.err)}</span><button class="btn" type="button" data-tfrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading builds…</p>'}</section>`;
+    return `<section>${head}${tf.err?`<p class="note">Could not refresh: ${esc(tf.err)}</p>`:''}${table(['Build','Uploaded','Status','Friends','Actions'],tf.builds.map(b=>{const st=tfStatus(b);return `<tr><td class="mono">${esc(b.version)} (${esc(b.build)})</td><td>${esc(fmtDate(b.uploaded))}</td><td><span class="pill ${st[0]}">${esc(st[1])}</span></td><td>${b.in_group?'Yes':'—'}</td><td>${tfCan(b)?`<button class="btn" type="button" data-act="tfsubmit" data-tf="${esc(b.id)}">Add to Friends + submit</button>`:''}</td></tr>`}),'No builds found.')}</section>`;
+  };
   P.beta=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
     const used=ts.filter(x=>x.src).length, unused=n0(b.unused), full=used+unused>=BETA_CEILING;
     const active7=(snap.users?.items||[]).filter(u=>ts.some(x=>x.u===u)&&dOf(u.last_active_at)&&Date.now()-dOf(u.last_active_at)<7*864e5).length;
     return `<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
     <div class="kpis">${[kpi('Testers used',`${used} / ${BETA_CEILING}`,'beta access granted'),kpi('Active in 7 days',active7,'testers who opened the app'),kpi('Invites unused',unused,`${n0(b.redeemed)} redeemed`)].join('')}</div>
+    ${tfSection()}
     <section><div class="sechead"><h2>Testers</h2><span class="note">${ts.length} total</span></div>
     <div class="fb">${ts.length?ts.map((x,i)=>{const u=x.u, perm=x.src==='beta_permanent', ended=!x.src||(x.days!=null&&x.days<0);
       const exp=!x.src?'Access ended':perm?'Permanent':x.exp?(x.days<0?'Ended '+fmtDate(x.exp):'Ends '+fmtDate(x.exp)+' · '+x.days+' day'+(x.days===1?'':'s')+' left'):'No expiry';
@@ -947,6 +977,13 @@ body.mopen{overflow:hidden}
       validate:v=>v.email.trim()?'':'Email is required.',submit:'Remove tester',
       toast:r=>r&&r.testflight==='removed'?'Tester removed from the group':r&&r.testflight==='not_found'?'No tester with that email':'TestFlight: '+((r&&r.testflight_error)||'failed'),
       run:v=>api('testflight_remove',{email:v.email.trim()})},btn);
+  }
+  function actTfSubmit(btn){
+    const b=(tf.builds||[]).find(x=>x.id===btn.dataset.tf); if(!b) return;
+    openModal({title:'Add to Friends + submit',intro:`<p>Adds build ${esc(b.version)} (${esc(b.build)}) to the Friends beta group and submits it to Apple\u2019s Beta App Review. Testers get it after Apple approves.</p>`,
+      submit:'Submit to review',
+      toast:r=>r&&r.group==='error'||r&&r.review==='error'?'TestFlight: '+((r&&r.error)||'failed'):(r.group==='added'?'Added to Friends':'Already in Friends')+' \u00b7 '+(r.review==='submitted'?'submitted for review':'already submitted'),
+      run:async()=>{const r=await api('testflight_submit',{build_id:b.id}); loadTf(); return r;}},btn);
   }
   function actRevoke(x,btn){
     openModal({title:'Revoke access',intro:userLine(x)+'<p>Removes the beta or owner access. The user keeps the account and any paid App Store subscription.</p><div class="callout bad">The cleanup job is LIVE: once access ends, the user\u2019s bank connections are removed automatically.</div>',
@@ -1211,7 +1248,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(um){ if(menu&&menu.btn===um) closeMenu(true); else openMenu(um); return; }
     if(menu&&!menu.el.contains(e.target)) closeMenu();
     const ac=e.target.closest('[data-act]');
-    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); return; }
+    if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); else if(k==='tfsubmit') actTfSubmit(ac); return; }
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const uo=e.target.closest('[data-uopen]');
@@ -1229,6 +1266,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const sr=e.target.closest('[data-source]'); if(sr){fbSource=sr.dataset.source;render();const ns=document.querySelector('[data-source="'+fbSource+'"]'); if(ns) ns.focus({preventScroll:true});return;}
     const f=e.target.closest('[data-filter]'); if(f){fbFilter=f.dataset.filter;render();const nf=document.querySelector('[data-filter="'+fbFilter+'"]'); if(nf) nf.focus({preventScroll:true});return;}
     if(e.target.closest('[data-retry]')){load();return;}
+    if(e.target.closest('[data-tfrefresh]')){loadTf();return;}
     if(e.target.closest('[data-signout]')){sb.auth.signOut();return;}
     const b=e.target.closest('[data-status]'); if(b&&!b.disabled) setStatus(b.dataset.id,b.dataset.status);
   });
