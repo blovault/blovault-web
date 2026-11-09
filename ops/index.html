@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-PY/pC2CrLkiOwUQGKU6oeIbGeDzpIbbJl35/+qsr2sg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-ZU7eVV77R+grMNyFTKBwkBRqf2ahPErRD7vlESHTY1Y='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -655,7 +655,9 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Pending sync signals</h2><span class="note">${flags.length} pending</span></div>
     ${table(['Item','Institution','Signal','Needs','Received'],flags.map(w=>{const it=(p.items||[]).find(i=>i.item_id_short===w.item_id_short)||{};const old=w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48;return `<tr><td class="mono">${esc(w.item_id_short)}</td><td>${esc(inst(it.institution_id))}</td><td>${esc(w.webhook_type)}</td><td>${[w.needs_tx?'transactions':'',w.needs_holdings?'holdings':''].filter(Boolean).join(', ')||'—'}</td><td>${old?'<span class="pill warn">'+esc(ago(w.last_webhook_at))+'</span>':esc(ago(w.last_webhook_at))}</td></tr>`}),'No pending signals — every Item is caught up.')}</section>
     <section><div class="sechead"><h2>Connection alerts</h2></div>
-    ${table(['Item','Institution','Alert','Since'],statusItems.map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${itemState(i)}</td><td>${esc(ago(i.item_status_at))}</td></tr>`),'No connection alerts from Plaid.')}</section>`;
+    ${table(['Item','Institution','Alert','Since'],statusItems.map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${itemState(i)}</td><td>${esc(ago(i.item_status_at))}</td></tr>`),'No connection alerts from Plaid.')}</section>
+    <section><div class="sechead"><h2>Link exits and errors</h2><span class="note">${(snap.link_events_counts_30d||[]).map(c=>esc(c.error_code)+' '+n0(c.count)).join(' \u00b7 ')||'none in 30 days'}</span></div>
+    ${table(['Time','Institution','Code / status','Mode'],(snap.link_events_recent||[]).map(e=>`<tr><td>${esc(ago(e.at))}</td><td>${esc(e.institution||inst(e.institution_id))}</td><td class="mono">${esc(e.error_code||e.exit_status||e.outcome||'\u2014')}</td><td>${e.mode==='update'?'update':'new'}</td></tr>`),'No Link exits or errors reported yet.')}</section>`;
   };
   P.cleanup=()=>{
     const r=snap.reaper||{};
