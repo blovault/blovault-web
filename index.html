@@ -19,8 +19,8 @@ a:focus-visible,summary:focus-visible{outline:3px solid var(--primary);outline-o
 header .wrap{display:flex;align-items:center;gap:12px;padding-top:20px;padding-bottom:20px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em;color:var(--text);text-decoration:none}
 .brand img{border-radius:8px}
-.hero{display:grid;gap:40px;align-items:center;padding:16px 0 64px;justify-items:start}
-@media (min-width:860px){.hero{grid-template-columns:1fr auto;gap:72px;padding:40px 0 88px}}
+.hero{display:grid;gap:40px;align-items:center;padding:16px 0 24px;justify-items:start}
+@media (min-width:860px){.hero{grid-template-columns:1fr auto;gap:72px;padding:40px 0 32px}}
 h1{font-size:clamp(2.125rem,6.4vw,3.5rem);line-height:1.08;letter-spacing:-.025em;margin:0 0 18px}
 .sub{font-size:1.125rem;color:var(--text2);margin:0 0 20px;max-width:34em}
 .status{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:1rem;margin:0 0 28px}
@@ -54,6 +54,7 @@ h2.t{font-size:clamp(1.75rem,4.5vw,2rem);letter-spacing:-.015em;line-height:1.2;
 .priv{background:var(--panel);border-radius:24px;padding:36px 32px;border:0}
 @media (max-width:420px){.priv{padding:28px 20px}}
 .priv .lead{font-size:1.1875rem;margin:0 0 22px;max-width:68ch}
+.about{max-width:68ch}.about .lead{font-size:1.1875rem;margin:0 0 14px}.about p{color:var(--text2);line-height:1.6;margin:0 0 12px}
 ul.checks{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:14px;max-width:68ch}
 ul.checks li{display:flex;gap:12px;color:var(--text2)}
 ul.checks svg{flex:none;width:20px;height:20px;margin-top:4px;color:var(--ok)}
@@ -132,21 +133,51 @@ BLO VAULT
 <div class="wrap">
 <div class="hero">
 <div>
-<h1>See every bill coming — and which account it will hit.</h1>
-<p class="sub">BLO VAULT connects your bank accounts, cards and investments and projects your cash forward to each payday. Your financial data stays encrypted on your iPhone.</p>
+<h1>Your money data lives on your iPhone. Not on our servers.</h1>
+<p class="sub">BLO VAULT reads your accounts through Plaid, passes the data straight to your phone and locks it there. We can't see your balances or transactions, and we can't move money. Then it projects your cash to each payday and shows which account each bill will hit.</p>
 <p class="status"><span aria-hidden="true"></span>Invite-only beta on TestFlight for iPhone</p>
 <div class="cta">
 <a class="btn" href="#beta">How to join the beta</a>
 </div>
 </div>
-<figure class="shot">
-<div class="phone"><img src="img/cashflow.jpg" width="506" height="1100" alt="Cash Flow screen: cash balance split by account and the runway for the next three pay periods"></div>
-<figcaption class="cap">Screens show sample data.</figcaption>
-</figure>
 </div>
 </div>
 
 <div class="wrap">
+<section id="privacy" aria-labelledby="priv-h" style="border-top:0">
+<div class="priv">
+<h2 class="t" id="priv-h">Where your data goes</h2>
+<p class="lead">We built BLO VAULT so that we never hold a readable copy of your finances. Here is the whole path your data takes.</p>
+<ol class="flow" aria-label="How your financial data moves">
+<li><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-6 9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/></svg><span class="st">Step 1</span><h3>Your bank, through Plaid</h3><p>You sign in inside Plaid's secure window, or on your bank's own page. Your bank password goes to Plaid or your bank. BLO VAULT never sees it.</p></div><span class="cn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>Encrypted in transit (HTTPS)</span></li>
+<li class="hol"><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg><span class="st">Step 2</span><h3>Our server relays, it doesn't store</h3><p>Balances and transactions pass through to your phone without being saved. The bank-link token is stored only as ciphertext that needs a key kept on your phone.</p></div><span class="cn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>Encrypted in transit (HTTPS)</span></li>
+<li class="me"><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><rect x="9.5" y="11" width="5" height="4.5" rx="1"/><path d="M10.5 11V9.8a1.5 1.5 0 0 1 3 0V11"/></svg><span class="st">Step 3</span><h3>Your iPhone is the vault</h3><p>Your ledger is saved in an AES-256 encrypted database. The key sits in the iOS Keychain, and Face ID or your passcode opens the app. All calculations run here.</p></div></li>
+</ol>
+<div class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.8 4.8 0 0 1-.5 9.5z"/></svg><div><h3>Backup: locked before it leaves</h3><p>Backups are encrypted on your phone (AES-256-GCM) with a recovery key only you hold, then stored in your own iCloud. Apple Card and Apple Cash data, read through Apple's FinanceKit, stays on your phone.</p></div></div>
+<div class="cmp">
+<div><h3>What we can see</h3><ul class="see">
+<li>The sign-in address from Sign in with Apple (it can be a private relay address)</li>
+<li>Which institutions you've linked and how many accounts, for billing</li>
+<li>Your subscription or beta status</li>
+</ul></div>
+<div><h3>What we can't see</h3><ul class="nosee">
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Your bank or card passwords</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Balances, transactions, account names or numbers</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Your backups</span></li>
+</ul></div>
+</div>
+<ul class="checks">
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>Read-only: BLO VAULT can't move money or make payments.</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>Automated security checks run every week.</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>Panic Delete wipes everything on the device in one step and removes your bank connections.</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>The optional assistant runs on-device; your ledger is not sent to cloud AI services.</span></li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>We don't sell your data or use it for advertising.</span></li>
+</ul>
+<a href="/privacy-policy.html">Read the full Privacy Policy</a><br>
+<a href="/information-security-policy.pdf">Information Security Policy (PDF)</a>
+</div>
+</section>
+
 <section aria-labelledby="what">
 <h2 class="t" id="what">What it does</h2>
 <div class="feat">
@@ -154,7 +185,7 @@ BLO VAULT
 <h3>Cash Flow runway</h3>
 <p>Your balance today, then every bill, card payment and paycheck ahead, period by period. With more than one account, BLO VAULT shows each account on its own line and tells you which one runs short, and when.</p>
 </div>
-<div class="pics"><div class="phone "><img src="img/home.jpg" width="506" height="1100" loading="lazy" alt="Home screen: projected cash balance and the next bill due"></div></div>
+<div class="pics"><div class="phone "><img src="img/cashflow.jpg" width="506" height="1100" loading="lazy" alt="Cash Flow screen: cash balance split by account and the runway for the next three pay periods"></div></div>
 </div>
 <div class="feat rev">
 <div>
@@ -179,37 +210,7 @@ BLO VAULT
 </div>
 </section>
 
-<section id="privacy" aria-labelledby="priv-h" style="border-top:0">
-<div class="priv">
-<h2 class="t" id="priv-h">Where your data goes</h2>
-<p class="lead">We built BLO VAULT so that we never hold a readable copy of your finances. Here is the whole path your data takes.</p>
-<ol class="flow" aria-label="How your financial data moves">
-<li><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-6 9 6M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/></svg><span class="st">Step 1</span><h3>Your bank, through Plaid</h3><p>You sign in inside Plaid's secure window, or on your bank's own page. Your bank password goes to Plaid or your bank. BLO VAULT never sees it.</p></div><span class="cn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>Encrypted in transit (HTTPS)</span></li>
-<li class="hol"><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg><span class="st">Step 2</span><h3>Our server relays, it doesn't store</h3><p>Balances and transactions pass through to your phone without being saved. The bank-link token is stored only as ciphertext that needs a key kept on your phone.</p></div><span class="cn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>Encrypted in transit (HTTPS)</span></li>
-<li class="me"><div class="card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><rect x="9.5" y="11" width="5" height="4.5" rx="1"/><path d="M10.5 11V9.8a1.5 1.5 0 0 1 3 0V11"/></svg><span class="st">Step 3</span><h3>Your iPhone is the vault</h3><p>Your ledger is saved in an AES-256 encrypted database. The key sits in the iOS Keychain, and Face ID or your passcode opens the app. All calculations run here.</p></div></li>
-</ol>
-<div class="bk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.8 4.8 0 0 1-.5 9.5z"/></svg><div><h3>Backup: locked before it leaves</h3><p>Backups are encrypted on your phone (AES-256-GCM) with a recovery key only you hold, then stored in your own iCloud. Apple Card and Apple Cash data, read through Apple's FinanceKit, stays on your phone.</p></div></div>
-<div class="cmp">
-<div><h3>What we can see</h3><ul class="see">
-<li>The sign-in address from Sign in with Apple (it can be a private relay address)</li>
-<li>Which institutions you've linked and how many accounts, for billing</li>
-<li>Your subscription or beta status</li>
-</ul></div>
-<div><h3>What we can't see</h3><ul class="nosee">
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Your bank or card passwords</span></li>
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Balances, transactions, account names or numbers</span></li>
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Your backups</span></li>
-</ul></div>
-</div>
-<ul class="checks">
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>Panic Delete wipes everything on the device in one step and removes your bank connections.</span></li>
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>The optional assistant runs on-device; your ledger is not sent to cloud AI services.</span></li>
-<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span>We don't sell your data or use it for advertising.</span></li>
-</ul>
-<a href="/privacy-policy.html">Read the full Privacy Policy</a><br>
-<a href="/information-security-policy.pdf">Information Security Policy (PDF)</a>
-</div>
-</section>
+
 
 <section aria-labelledby="how">
 <h2 class="t" id="how">How it works</h2>
@@ -218,6 +219,15 @@ BLO VAULT
 <li>Connect accounts — through Plaid or Apple Card</li>
 <li>Everything is calculated on your phone</li>
 </ol>
+</section>
+
+<section id="about" aria-labelledby="about-h">
+<h2 class="t" id="about-h">Who builds BLO VAULT</h2>
+<div class="about">
+<p class="lead">BLO VAULT Team. It started with one working engineer who uses AI every day at work and wanted the same freedom with personal finances, without handing them to someone else's server.</p>
+<p>So we flipped the usual design. Instead of a cloud service that stores your money data, BLO VAULT only fetches your financial data through Plaid and does every calculation on your iPhone. Modern iPhones are powerful enough to run it all on the device, and their built-in hardware security, the Keychain and Face ID, guards the encrypted ledger.</p>
+<p>Your balances and transactions are never stored outside your phone.</p>
+</div>
 </section>
 
 <section id="beta" aria-labelledby="beta-h">
