@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-hrvLRtXyVfxq5y7SFI4sElnEsQa8oCfvI+gTUuRF7DU='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-PY/pC2CrLkiOwUQGKU6oeIbGeDzpIbbJl35/+qsr2sg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -616,6 +616,10 @@ body.mopen{overflow:hidden}
       ${table(['Item','Institution','Product','State','Removal','Liabilities'],its.map(it=>`<tr><td class="mono">${esc(it.item_id_short)}</td><td>${esc(inst(it.institution_id))}</td><td>${esc(it.product_assumed||'—')}${it.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(it)}</td><td>${it.removal_scheduled_at?'<span class="pill warn">'+esc(fmtDate(it.removal_scheduled_at))+'</span>':'—'}</td><td>${it.liabilities_at?esc(fmtDate(it.liabilities_at)):'—'}</td></tr>`),'No bank connections for this user.')}
       <div class="acts"><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false">Actions${svg('chev')}</button>${canSched?'<button class="btn" type="button" data-uact="sched">Schedule Item removal</button>':''}${canCancel?'<button class="btn" type="button" data-uact="cancel">Cancel Item removal</button>':''}<button class="btn" type="button" data-uact="close">Close</button></div></section>`;
   };
+  const funnelBox=(title,steps)=>{
+    const base=Math.max(1,steps?.[0]?.count||0);
+    return `<div class="box"><h3>${esc(title)}</h3>${hbars((steps||[]).map(s=>({label:s.label,v:n0(s.count)})),{fmt:v=>`${v} \u00b7 ${Math.round(v/base*100)}%`,color:'var(--teal)'})}</div>`;
+  };
   P.users=()=>{
     const u=snap.users||{}, pc=u.plan_counts||{}, ec=u.entitlement_counts||{};
     const weeks=(u.signups_by_week||[]).map(w=>({label:wk(w.week_start),n:w.count}));
@@ -623,11 +627,13 @@ body.mopen{overflow:hidden}
     <div class="grid2">
       <div class="box"><h3>Plans</h3>${hbars([['pro','Pro','var(--good)'],['trial','Trial','var(--accent)'],['expired','Expired','var(--bad)'],['free','Free','var(--fg3)'],['unknown','Unknown','var(--fg3)']].map(([k,l,c])=>({label:l,v:n0(pc[k]),color:c})))}</div>
       <div class="box"><h3>Access source</h3>${hbars([['owner','Owner'],['beta_permanent','Beta · permanent'],['beta_limited','Beta · 30 days'],['revenuecat','Paid (App Store)'],['none','None']].map(([k,l])=>({label:l,v:n0(ec[k])})),{color:'var(--violet)'})}</div>
+      ${funnelBox('Link funnel · all users',u.link_funnel?.all)}
+      ${funnelBox('Link funnel · signed up in last 30 days',u.link_funnel?.last_30d)}
       <div class="box wide"><h3>Sign-ups per week</h3><div class="chart">${stackedBars(weeks,[['n','New accounts','var(--accent)']])}</div></div>
     </div>
     ${u.trial_ends_note?`<p class="note">${esc(u.trial_ends_note)}</p>`:''}
     ${userPanel()}
-    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> ${(x.display_name||x.invite_note)?`<span class="unote">${esc(x.display_name||x.invite_note)}</span><span class="mono usub">${esc(x.short)}</span>`:`<span class="mono">${esc(x.short)}</span>`}${x.feature_preview?' <span class="pill info">Preview</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' · until '+fmtDate(x.entitlement.expires_at):''):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
+    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> ${(x.display_name||x.invite_note)?`<span class="unote">${esc(x.display_name||x.invite_note)}</span><span class="mono usub">${esc(x.short)}</span>`:`<span class="mono">${esc(x.short)}</span>`}${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' · until '+fmtDate(x.entitlement.expires_at):''):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
   };
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
