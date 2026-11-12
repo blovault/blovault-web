@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-1nWIHF6lo2xjynkRHYbrfe1+09hfGzlnDCkxksrhtSY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-5sNUcOmDZOLV8HLflzi9lnms6yiOZzebZgYKQRGCw6k='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -613,7 +613,8 @@ body.mopen{overflow:hidden}
         <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
         <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)'})}</div></div>
         <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)'})}</div></div>
-      </div></section>`;
+      </div></section>
+    <section><div class="sechead"><h2>Phone alerts</h2></div>${pushHtml()}</section>`;
   };
   let selUser=null;
   const userPanel=()=>{
@@ -1277,6 +1278,64 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     lsSet(HIST_KEY,JSON.stringify(history));
   }
 
+  // Phone alerts (Web Push). pushSub: current PushSubscription or null; pushBusy: request running; pushDead: worker registration failed.
+  let pushSub=null, pushBusy=false, pushDead=false;
+  const pushOk=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+  const isIos=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  function pushHtml(){
+    let msg, btns='';
+    const b=(k,l,cls)=>`<button class="btn${cls||''}" type="button" data-push="${k}"${pushBusy?' disabled':''}>${pushBusy?'Working…':l}</button>`;
+    if(!pushOk()) msg=isIos()&&navigator.standalone!==true?'To get alerts on this iPhone, add this page to the Home Screen (Share, then Add to Home Screen) and open it from there.':'This browser does not support push alerts.';
+    else if(pushDead) msg='Alerts are unavailable right now. Reload the page to try again.';
+    else if(Notification.permission==='denied') msg='Alerts are blocked for this app. Allow notifications for it in Settings, then reopen it.';
+    else if(!pushSub){msg='Get an alert on this device when a beta request, an invite code use or new feedback comes in.'; btns=b('on','Turn on alerts',' primary');}
+    else{msg='Alerts are on for this device.'; btns=b('test','Send a test alert')+b('off','Turn off alerts');}
+    return `<div class="box"><div class="modebox"><div class="note" style="color:var(--fg2)">${esc(msg)}</div>${btns?`<div class="acts"${pushBusy?' aria-busy="true"':''}>${btns}</div>`:''}</div></div>`;
+  }
+  async function pushRefresh(){
+    try{const reg=await navigator.serviceWorker.getRegistration('/ops/'); pushSub=reg?await reg.pushManager.getSubscription():null;}catch(e){pushSub=null;}
+    render();
+  }
+  function pushInit(){
+    if(!pushOk()) return;
+    navigator.serviceWorker.register('/ops/sw.js',{scope:'/ops/'}).then(()=>navigator.serviceWorker.ready).then(pushRefresh).catch(()=>{pushDead=true;render();});
+  }
+  const keyBytes=k=>{const raw=atob(k.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-k.length%4)%4));return Uint8Array.from(raw,c=>c.charCodeAt(0));};
+  async function actPush(kind){
+    if(pushBusy) return;
+    let sub=null;
+    try{
+      if(kind==='on'){
+        const perm=await Notification.requestPermission(); // must be the first await (iOS user-gesture rule)
+        if(perm!=='granted'){render();return;}
+        pushBusy=true; render();
+        const cfg=await api('push_config',{});
+        if(!cfg||!cfg.vapid_public_key) throw new Error('alerts are not set up on the server yet.');
+        const reg=await navigator.serviceWorker.ready, opts={userVisibleOnly:true,applicationServerKey:keyBytes(cfg.vapid_public_key)};
+        try{sub=await reg.pushManager.subscribe(opts);}
+        catch(err){
+          if(err&&err.name==='InvalidStateError'){const old=await reg.pushManager.getSubscription(); if(old) await old.unsubscribe(); sub=await reg.pushManager.subscribe(opts);}
+          else throw err;
+        }
+        try{await api('push_subscribe',{subscription:sub.toJSON()});}
+        catch(err){try{await sub.unsubscribe();}catch(e){} throw err;}
+        toast('Alerts are on for this device');
+      }else if(kind==='off'){
+        pushBusy=true; render();
+        if(pushSub){await api('push_unsubscribe',{endpoint:pushSub.endpoint}); await pushSub.unsubscribe();}
+        toast('Alerts are off for this device');
+      }else if(kind==='test'){
+        pushBusy=true; render();
+        await api('push_test',{});
+        toast('Test alert sent. It should arrive within a few seconds.');
+      }
+    }catch(err){
+      toast((kind==='on'?'Could not turn on alerts: ':kind==='off'?'Could not turn off alerts: ':'Could not send the test alert: ')+errMsg(err));
+    }
+    pushBusy=false; await pushRefresh();
+    const nb=document.querySelector('[data-push]'); if(nb) nb.focus({preventScroll:true});
+  }
+
   async function api(action,body){
     const { data:{ session:s } }=await sb.auth.getSession();
     if(!s) throw Object.assign(new Error('Signed out'),{status:401});
@@ -1319,6 +1378,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const um=e.target.closest('[data-umenu]');
     if(um){ if(menu&&menu.btn===um) closeMenu(true); else openMenu(um); return; }
     if(menu&&!menu.el.contains(e.target)) closeMenu();
+    const pu=e.target.closest('[data-push]'); if(pu){ if(!pu.disabled) actPush(pu.dataset.push); return; }
     const ac=e.target.closest('[data-act]');
     if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); else if(k==='tfsubmit') actTfSubmit(ac); return; }
     const ua=e.target.closest('[data-uact]');
@@ -1376,6 +1436,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     render();
   });
   render();
+  pushInit();
 })();
 </script>
 </body>
