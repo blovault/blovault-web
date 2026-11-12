@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-ZU7eVV77R+grMNyFTKBwkBRqf2ahPErRD7vlESHTY1Y='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="/img/app-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BLO Ops">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-1nWIHF6lo2xjynkRHYbrfe1+09hfGzlnDCkxksrhtSY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -419,11 +427,12 @@ body.mopen{overflow:hidden}
   const inst=id=>INST[id]||snap.plaid?.institution_names?.[id]||id||'—';
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
-  const TABS=[['overview','Overview'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta']];
+  const TABS=[['overview','Overview'],['dev','Dev'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta']];
   const HIST_KEY='ops_history_v1', HIST_MAX=365;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
   let snap={}, history=[], fbFilter='open', fbSource='all', session=null, loadErr='', denied=false, loading=false, lastLoadAt=0, cardErr={}, busy={};
+  let dev=null, devErr='', devLoading=false, devAt=0, devWho='owner';
   const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
   const tabAlias=k=>k==='bugs'?'inbox':k;
@@ -620,6 +629,44 @@ body.mopen{overflow:hidden}
     const base=Math.max(1,steps?.[0]?.count||0);
     return `<div class="box"><h3>${esc(title)}</h3>${hbars((steps||[]).map(s=>({label:s.label,v:n0(s.count)})),{fmt:v=>`${v} \u00b7 ${Math.round(v/base*100)}%`,color:'var(--teal)'})}</div>`;
   };
+  const arr=v=>Array.isArray(v)?v:[];
+  const devSt={ok:['good','OK'],warn:['warn','Check'],bad:['bad','Problem']};
+  const devPri={high:['warn','High'],medium:['mute','Medium'],low:['mute','Low']};
+  const devRank={high:0,medium:1,low:2};
+  const devCI=c=>c==='success'?['good','Passed']:['failure','timed_out','startup_failure'].includes(c)?['bad','Failed']:!c?['info','Running']:['mute',String(c)];
+  const DEV_SEC=[['now','Now'],['owner','For you'],['today','Done today'],['waiting','Waiting on others']];
+  const DEV_WHO=[['owner','Owner'],['claude','Claude'],['external','External'],['later','Later'],['all','All']];
+  P.dev=()=>{
+    if(devLoading&&!dev&&!devErr) return skeleton();
+    const err=devErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(devErr)}</span><button class="btn" type="button" data-devretry="1">Retry</button></div>`:'';
+    if(!dev) return err||skeleton();
+    const d=dev.data;
+    if(!d||typeof d!=='object') return err+`<div class="empty"><span class="eico neutral">${svg('check')}</span><p>No dev data yet.</p><p>Run make dev-dash-push on the Mac.</p></div>`;
+    const sum=arr(d.summary_ko).filter(r=>r&&typeof r==='object'), by=k=>sum.filter(r=>r.section===k).sort((a,b)=>n0(a.order)-n0(b.order));
+    const up=by('updated')[0], stale=dev.updated_at&&dOf(dev.updated_at)&&(Date.now()-dOf(dev.updated_at))/36e5>24;
+    const top=`<p>${up?`<span lang="ko" style="overflow-wrap:anywhere">${esc(up.text)}</span> · `:''}<span class="note">Pushed ${esc(ago(dev.updated_at))}</span>${stale?' <span class="pill warn">Stale</span>':''}</p>`;
+    const secs=DEV_SEC.map(([k,h])=>{const r=by(k);return r.length?`<section><div class="sechead"><h2>${h}</h2></div><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${r.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></section>`:''}).join('');
+    const rank={bad:0,warn:1,ok:2};
+    const checks=arr(d.status).filter(r=>r&&typeof r==='object').sort((a,b)=>(rank[a.state]??3)-(rank[b.state]??3)).map(r=>{const m=devSt[r.state]||['mute',String(r.state??'—')];return `<tr><td>${esc(r.check)}</td><td>${esc(r.value)}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="note" style="overflow-wrap:anywhere">${esc(r.detail||'')}</td></tr>`});
+    const items=arr(d.open_items).filter(r=>r&&typeof r==='object');
+    const cnt=k=>k==='all'?items.length:items.filter(x=>x.who===k).length;
+    const shown=items.filter(x=>devWho==='all'||x.who===devWho).sort((a,b)=>(devRank[a.priority]??3)-(devRank[b.priority]??3));
+    const rows=shown.map(x=>{const m=devPri[x.priority]||['mute',String(x.priority??'—')];return `<tr><td>${esc(x.title)}<div class="note"><span class="mono">${esc(x.id||'')}</span></div></td><td><span class="pill cat">${esc(x.area||'—')}</span></td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="note" style="overflow-wrap:anywhere">${esc(x.status||'')}</td></tr>`});
+    const commits=arr(d.commits).filter(r=>r&&typeof r==='object').map(c=>`<tr><td>${esc(fmtDT(c.date))}</td><td><span class="mono">${esc(c.short||'')}</span></td><td style="overflow-wrap:anywhere">${esc(c.subject||'')}</td><td>${c.shipped===true?'<span class="pill good">On main</span>':'<span class="pill mute">Not shipped</span>'}</td></tr>`);
+    const ci=arr(d.ci_runs).filter(r=>r&&typeof r==='object').slice(0,10).map(c=>{const m=devCI(c.conclusion);return `<tr><td>${esc(fmtDT(c.created))}</td><td>${esc(c.workflow||'')}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="r num">${typeof c.minutes==='number'?esc(c.minutes.toFixed(1)):'—'}</td></tr>`});
+    return err+top+secs+`
+    <section><div class="sechead"><h2>Checks</h2></div>${table(['Check','Value','State','Detail'],checks,'No checks reported.')}</section>
+    <section><div class="sechead"><h2>Open items</h2><div class="filters" role="group" aria-label="Filter by owner">${DEV_WHO.map(([k,l])=>`<button class="btn" type="button" data-devwho="${k}" aria-pressed="${devWho===k}">${l} ${cnt(k)}</button>`).join('')}</div></div>${table(['Item','Area','Priority','Status'],rows,'Nothing here.')}</section>
+    <section><div class="sechead"><h2>Recent commits</h2></div>${table(['When','Commit','Subject','Shipped'],commits,'No commits.')}</section>
+    <section><div class="sechead"><h2>CI</h2></div>${table(['When','Workflow','Result','>Minutes'],ci,'No CI runs.')}</section>`;
+  };
+  async function loadDev(){
+    if(!session||devLoading) return;
+    devLoading=true; render();
+    try{ dev=await api('dev_snapshot',{}); devErr=''; }
+    catch(err){ devErr=(err instanceof TypeError)?'Network error.':'Could not load dev data: '+err.message; }
+    devAt=Date.now(); devLoading=false; render();
+  }
   P.users=()=>{
     const u=snap.users||{}, pc=u.plan_counts||{}, ec=u.entitlement_counts||{};
     const weeks=(u.signups_by_week||[]).map(w=>({label:wk(w.week_start),n:w.count}));
@@ -1204,7 +1251,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       return;
     }
     const banner=loadErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(loadErr)}</span><button class="btn" type="button" data-retry="1">Retry</button></div>`:'';
-    if(!g.generated_at){
+    if(!g.generated_at&&tab!=='dev'){
       $('main').innerHTML=banner+(loadErr?'':skeleton());
       return;
     }
@@ -1212,6 +1259,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${P[tab]()}</div>`;
+    if(tab==='dev'&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
   function go(k){tab=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
@@ -1290,6 +1338,8 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const g=e.target.closest('[data-goto]'); if(g){go(g.dataset.goto);return;}
     const sr=e.target.closest('[data-source]'); if(sr){fbSource=sr.dataset.source;render();const ns=document.querySelector('[data-source="'+fbSource+'"]'); if(ns) ns.focus({preventScroll:true});return;}
     const f=e.target.closest('[data-filter]'); if(f){fbFilter=f.dataset.filter;render();const nf=document.querySelector('[data-filter="'+fbFilter+'"]'); if(nf) nf.focus({preventScroll:true});return;}
+    const dw=e.target.closest('[data-devwho]'); if(dw){devWho=dw.dataset.devwho;render();const nd=document.querySelector('[data-devwho="'+devWho+'"]'); if(nd) nd.focus({preventScroll:true});return;}
+    if(e.target.closest('[data-devretry]')){devAt=0;loadDev();return;}
     if(e.target.closest('[data-retry]')){load();return;}
     if(e.target.closest('[data-tfrefresh]')){loadTf();return;}
     if(e.target.closest('[data-signout]')){sb.auth.signOut();return;}
@@ -1304,7 +1354,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',load);
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
@@ -1317,11 +1367,11 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     btn.disabled=false; btn.textContent='Sign in';
   });
   window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lsSet('ops_tab',k);render();}});
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000) load(); });
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev') loadDev(); } });
 
   sb.auth.onAuthStateChange((event,s)=>{
     const was=session&&session.user?.id; session=s;
-    if(!s){snap={};denied=false;loadErr='';lastLoadAt=0;render();return;}
+    if(!s){snap={};dev=null;devErr='';devAt=0;denied=false;loadErr='';lastLoadAt=0;render();return;}
     if(was!==s.user.id){ setTimeout(load,0); }
     render();
   });

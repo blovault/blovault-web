@@ -1,0 +1,13 @@
+{
+  "name": "BLO VAULT Ops",
+  "short_name": "BLO Ops",
+  "start_url": "/ops/",
+  "scope": "/ops/",
+  "display": "standalone",
+  "background_color": "#FBFCFE",
+  "theme_color": "#FBFCFE",
+  "icons": [
+    {"src": "/img/app-icon-180.png", "sizes": "180x180", "type": "image/png"},
+    {"src": "/img/app-icon.png", "sizes": "128x128", "type": "image/png"}
+  ]
+}
