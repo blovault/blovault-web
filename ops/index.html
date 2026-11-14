@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-HAQU/HHR8Yes75ZTdKI4u2lH8FRKaZBeVOezlXJ5LnQ='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-BaCnDGIpYz/7xoXrDYCWlCZM7X3rUSZfrmt+mwGzZzg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -553,7 +553,8 @@ body.mopen{overflow:hidden}
   const BETA_CEILING=10;
   const srcOf=x=>x.source==='email'?'email':'app';
   const addrOf=x=>{const raw=String(srcOf(x)==='email'?(x.email_from||x.contact_email||''):(x.contact_email||'')).trim();const m=raw.match(/<([^>]+)>/);return (m?m[1]:raw).trim();};
-  const isOpen=x=>!['implemented','rejected'].includes(x.status);
+  // A case still open (or waiting on the user) is open whatever its fix status; closed is closed.
+  const isOpen=x=>x.case_state?x.case_state!=='closed':!['implemented','rejected'].includes(x.status);
 
   const noteOf=sh=>{const u=(snap.users?.items||[]).find(x=>x.short===sh);return u&&(u.display_name||u.invite_note)?String(u.display_name||u.invite_note):''};
   const who=sh=>{const n=noteOf(sh);if(!n) return sh;return (n.length>24?n.slice(0,23)+'…':n)+' ('+sh+')'};
