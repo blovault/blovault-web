@@ -757,7 +757,7 @@ body.mopen{overflow:hidden}
     <div class="filters" role="group" aria-label="Filter by source">${[['all','All sources'],['app','App'],['email','Email']].map(([k,l])=>`<button class="btn" type="button" data-source="${k}" aria-pressed="${fbSource===k}">${esc(l)}</button>`).join('')}</div>
     <div class="filters" role="group" aria-label="Filter by status">${[['open','Open'],['all','All'],...STATUS.map(s=>[s[0],s[1]])].map(([k,l])=>`<button class="btn" type="button" data-filter="${k}" aria-pressed="${fbFilter===k}">${esc(l)}</button>`).join('')}</div>
     <div class="fb">${list.length?list.map(x=>{const st=statusMeta(x.status), em=srcOf(x)==='email', mt=metaLine(x);
-      return `<article class="card"><div class="ctop">${srcBadge(x)}<span class="pill ${st[2]}">${esc(st[1])}</span><span class="pill cat">${esc(x.category||'Other')}</span><span class="note">${fmtDT(x.created_at)}${x.user_short?' · user '+esc(x.user_short):''}${x.has_screenshot?' · screenshot attached':''}</span></div>${em?`<div class="ctitle">${esc(x.email_subject||'(no subject)')}</div>${x.email_from?`<div class="note">From ${esc(x.email_from)}</div>`:''}<div class="msg clamp">${esc(x.message)}</div>`:`<div class="msg">${esc(x.message)}</div>`}${mt?`<div class="meta">${esc(mt)}${x.has_diagnostics?' · diagnostics attached':''}</div>`:''}${x.admin_note?`<div class="anote" title="${esc(x.admin_note)}">Note: ${esc(String(x.admin_note).split('\n')[0])}</div>`:''}${replyHtml(x)}${/^https:\/\//.test(x.screenshot_url||'')?`<button class="shot" type="button" data-shot="${esc(x.id)}" aria-label="Open screenshot full size"><img src="${esc(x.screenshot_url)}" alt="Screenshot attached to this report" loading="lazy"></button><span class="note">Screenshot link expires after about 10 minutes; refresh to renew it.</span>`:''}<div class="cacts"><button class="btn" type="button" data-detail="${esc(x.id)}"${busy['d'+x.id]?' disabled':''}>Details</button></div><div class="seg" role="group" aria-label="Set status">${STATUS.map(s=>`<button class="btn" type="button" data-id="${esc(x.id)}" data-status="${s[0]}" aria-pressed="${x.status===s[0]}"${busy[x.id]?' disabled':''}>${esc(s[1])}</button>`).join('')}</div>${cardErr[x.id]?`<div class="err" role="alert">${esc(cardErr[x.id])}</div>`:''}</article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No items match these filters.</p><p>Reports from the app and mail to info@blovault.com land here. Import mail with <span class="mono">make support-mail-import APPLY=1</span>.</p></div>`}</div></section>`;
+      return `<article class="card"><div class="ctop">${srcBadge(x)}<span class="pill ${st[2]}">${esc(st[1])}</span><span class="pill cat">${esc(x.category||'Other')}</span><span class="note">${fmtDT(x.created_at)}${x.user_short?' · user '+esc(x.user_short):''}${x.has_screenshot?' · screenshot attached':''}</span></div>${em?`<div class="ctitle">${esc(x.email_subject||'(no subject)')}</div>${x.email_from?`<div class="note">From ${esc(x.email_from)}</div>`:''}<div class="msg clamp">${esc(x.message)}</div>`:`<div class="msg">${esc(x.message)}</div>`}${mt?`<div class="meta">${esc(mt)}${x.has_diagnostics?' · diagnostics attached':''}</div>`:''}${x.admin_note?`<div class="anote" title="${esc(x.admin_note)}">Note: ${esc(String(x.admin_note).split('\n')[0])}</div>`:''}${x.reply?`<div class="anote">Replied ${fmtDT(x.replied_at)} \u00b7 ${x.reply_read_at?'read':'unread'}</div>`:x.reply_draft?'<div class="anote">Draft ready</div>':''}${replyHtml(x)}${/^https:\/\//.test(x.screenshot_url||'')?`<button class="shot" type="button" data-shot="${esc(x.id)}" aria-label="Open screenshot full size"><img src="${esc(x.screenshot_url)}" alt="Screenshot attached to this report" loading="lazy"></button><span class="note">Screenshot link expires after about 10 minutes; refresh to renew it.</span>`:''}<div class="cacts"><button class="btn" type="button" data-detail="${esc(x.id)}"${busy['d'+x.id]?' disabled':''}>Details</button></div><div class="seg" role="group" aria-label="Set status">${STATUS.map(s=>`<button class="btn" type="button" data-id="${esc(x.id)}" data-status="${s[0]}" aria-pressed="${x.status===s[0]}"${busy[x.id]?' disabled':''}>${esc(s[1])}</button>`).join('')}</div>${cardErr[x.id]?`<div class="err" role="alert">${esc(cardErr[x.id])}</div>`:''}</article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No items match these filters.</p><p>Reports from the app and mail to info@blovault.com land here. Import mail with <span class="mono">make support-mail-import APPLY=1</span>.</p></div>`}</div></section>`;
   };
   const flagBusy={};
   const flagsCard=()=>{
@@ -880,7 +880,7 @@ body.mopen{overflow:hidden}
       if(M.notice) body+=M.notice;
       body+='<div class="err" id="mErr" role="alert"></div>';
       const sub=M.subLabel||(c.preview&&ph==='input'?(c.previewLabel||'Preview'):c.submit);
-      foot=`${c.preview&&ph==='confirm'?'<button class="btn" type="button" data-mback>Back</button>':''}<button class="btn" type="button" data-mclose>Cancel</button>${M.altLabel?`<button class="btn danger" type="button" data-malt>${esc(M.altLabel)}</button>`:''}<button class="btn ${c.danger&&!(c.preview&&ph==='input')?'danger':'primary'}" type="submit" id="mSubmit">${esc(sub)}</button>`;
+      foot=`${c.preview&&ph==='confirm'?'<button class="btn" type="button" data-mback>Back</button>':''}<button class="btn" type="button" data-mclose>Cancel</button>${M.altLabel?`<button class="btn danger" type="button" data-malt>${esc(M.altLabel)}</button>`:''}${c.ext?`<button class="btn primary" type="button" data-mext>${esc(c.ext.label)}</button>`:''}<button class="btn ${c.danger&&!(c.preview&&ph==='input')?'danger':'primary'}" type="submit" id="mSubmit">${esc(sub)}</button>`;
     }
     mroot.innerHTML=`<form class="mdlg${c.wide?' wide':''}" id="mForm" role="dialog" aria-modal="true" aria-labelledby="mTitle" tabindex="-1" novalidate><h2 id="mTitle">${esc(c.title)}</h2><div class="mbody">${body}</div><div class="mfoot">${foot}</div></form>`;
     refreshModalState();
@@ -951,6 +951,12 @@ body.mopen{overflow:hidden}
     if(e.target===mroot&&!M.pending){closeModal();return;}
     if(e.target.closest('[data-mclose]')&&!M.pending){closeModal();return;}
     if(e.target.closest('[data-malt]')&&!M.pending){M.extra={force_unassociated:true};submitModal();return;}
+    if(e.target.closest('[data-mext]')&&!M.pending){
+      const c=M.cfg; setErr(''); M.pending=true; refreshModalState();
+      try{ const msg=await c.ext.run(M.vals); toast(msg); render(); closeModal(); }
+      catch(err){ if(!M) return; M.pending=false; refreshModalState(); setErr(errMsg(err)); }
+      return;
+    }
     if(e.target.closest('[data-mback]')&&!M.pending){M.phase='input';M.typed='';drawModal();return;}
     if(e.target.closest('[data-copy]')){
       const inp=$('mCode'), msg=$('mCopyMsg'); if(!inp) return;
@@ -1184,8 +1190,15 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
         +(x.diagnostics?`<h3>Diagnostics</h3><pre class="diag" tabindex="0">${esc(x.diagnostics)}</pre>`:'')
         +(shot?`<a class="shot" href="${esc(shot)}" target="_blank" rel="noopener" aria-label="Open screenshot in a new tab"><img src="${esc(shot)}" alt="Screenshot attached to this report"></a>`:'');
       const cats=['Problem','Improvement','Other']; if(x.category&&!cats.includes(x.category)) cats.push(x.category);
+      const canReply=srcOf(x)==='app'&&!!x.user_short, fromDraft=!x.reply&&!!x.reply_draft;
       openModal({title:'Inbox item',wide:true,intro,
-        fields:[{name:'category',label:'Category',type:'select',value:x.category||'Other',options:cats.map(c=>[c,c])},{name:'note',label:'Admin note (only you can see this)',type:'textarea',max:4000,value:x.admin_note||''}],
+        ext:canReply?{label:'Send reply',run:async v=>{
+          const reply=String(v.reply||'').trim(); if(!reply) throw new Error('Write a reply first.');
+          let r; try{ r=await api('reply_feedback',{id,reply}); }
+          catch(err){ throw /no_app_user/.test((err&&err.message)||'')?new Error('This report has no app user; reply by email.'):err; }
+          Object.assign(li,{reply,replied_at:new Date().toISOString(),reply_read_at:null,reply_draft:null});
+          const push=r&&r.push; return 'Reply saved'+(push&&push!=='not_configured'?' \u00b7 push: '+push:'');}}:null,
+        fields:[{name:'category',label:'Category',type:'select',value:x.category||'Other',options:cats.map(c=>[c,c])},{name:'note',label:'Admin note (only you can see this)',type:'textarea',max:4000,value:x.admin_note||''}].concat(canReply?[{name:'reply',label:'Reply in the app (the user sees it in Message Center)',type:'textarea',max:4000,value:x.reply||x.reply_draft||'',hint:fromDraft?'Suggested reply \u2014 edit or send as is':''}]:[]),
         submit:'Save',toast:'Saved',
         run:async v=>{
           if(v.category!==(x.category||'Other')){await api('set_feedback_category',{id,category:v.category}); if(li) li.category=v.category;}
