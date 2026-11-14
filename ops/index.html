@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-BaCnDGIpYz/7xoXrDYCWlCZM7X3rUSZfrmt+mwGzZzg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-5oUPLmZwV73gixbCRpAPKJ1AKZjjwM2LJc7Z4n4Df+c='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -1216,6 +1216,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
         ext2:{label:closed?'Reopen case':'Close case',run:async()=>{
           const r=await api(closed?'reopen_case':'close_case',{id});
           Object.assign(li,{case_state:r.case_state,closed_at:closed?null:new Date().toISOString(),closed_by:closed?null:'ops',awaiting_since:null,due_at:null});
+          if(r.status) li.status=r.status;
           return closed?'Case reopened':'Case closed';}},
         fields:[{name:'category',label:'Category',type:'select',value:x.category||'Other',options:cats.map(c=>[c,c])},{name:'note',label:'Admin note (only you can see this)',type:'textarea',max:4000,value:x.admin_note||''}].concat(canReply?[{name:'reply',label:'Reply in the app (the user sees it in Message Center)',type:'textarea',max:4000,value:hasOps?'':x.reply_draft||'',hint:fromDraft?'Suggested reply \u2014 edit or send as is':''},{name:'ask_confirm',type:'checkbox',label:'Ask the user to confirm it is fixed (auto-closes after 7 days without a reply)',value:false}]:[]),
         submit:'Save',toast:'Saved',
@@ -1397,8 +1398,8 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   async function setStatus(id,status){
     busy[id]=true; delete cardErr[id]; render();
     try{
-      await api('set_feedback_status',{id,status});
-      const it=(snap.feedback?.items||[]).find(x=>x.id===id); if(it) it.status=status;
+      const r=await api('set_feedback_status',{id,status});
+      const it=(snap.feedback?.items||[]).find(x=>x.id===id); if(it){ it.status=status; if(r&&r.case_state==='closed'&&it.case_state!=='closed') Object.assign(it,{case_state:'closed',closed_at:new Date().toISOString(),closed_by:'ops',awaiting_since:null,due_at:null}); }
     }catch(err){cardErr[id]='Could not save: '+(err instanceof TypeError?'network error':err.message);}
     delete busy[id]; render();
     const nb=Array.from(document.querySelectorAll('[data-status]')).find(b=>b.dataset.id===id&&b.dataset.status===status); if(nb) nb.focus({preventScroll:true});
