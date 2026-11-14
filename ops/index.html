@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-5oUPLmZwV73gixbCRpAPKJ1AKZjjwM2LJc7Z4n4Df+c='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-O3FABtjZLDOrc8FP9xiNZO7KFnyNjtn2AO7uZYVc1rg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -431,7 +431,7 @@ body.mopen{overflow:hidden}
   const HIST_KEY='ops_history_v1', HIST_MAX=365;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-  let snap={}, history=[], fbFilter='open', fbSource='all', fbCase='active', session=null, loadErr='', denied=false, loading=false, lastLoadAt=0, cardErr={}, busy={};
+  let snap={}, history=[], fbSource='all', fbCase='active', session=null, loadErr='', denied=false, loading=false, lastLoadAt=0, cardErr={}, busy={};
   let dev=null, devErr='', devLoading=false, devAt=0, devWho='owner';
   const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -744,7 +744,7 @@ body.mopen{overflow:hidden}
   const srcBadge=x=>{const s=srcOf(x);return `<span class="srcb ${s}"><svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC_SRC[s]}</svg>${s==='email'?'Email':'App'}</span>`};
   const metaLine=x=>[x.app_version,x.os_version,x.device_model].filter(Boolean).join(' · ');
   const caseMeta=x=>{const s=x.case_state||'open';
-    if(s==='closed') return ['mute','Closed'+({ops:' by you',user:' by user',auto:' (auto)'}[x.closed_by]||'')];
+    if(s==='closed') return ['mute',x.closed_by==='user'?'Closed by user':x.closed_by==='auto'?'Closed (auto)':x.status==='implemented'?'Closed \u00b7 Fixed':x.status==='rejected'?'Closed \u00b7 Won\u2019t fix':'Closed by you'];
     return s==='awaiting_user'?['info','Waiting for user']:['warn','Open'];};
   const dueMeta=x=>{if(!x.due_at) return null;const h=Math.ceil((dOf(x.due_at)-Date.now())/36e5);return h<=0?['bad','Overdue']:['warn','Reply due in '+h+'h'];};
   // A follow-up, not the original report: last_user_at moves past created_at only when the user replies.
@@ -756,7 +756,7 @@ body.mopen{overflow:hidden}
   P.inbox=()=>{
     const f=snap.feedback||{}, items=f.items||[];
     const weeks=(f.by_week||[]).map(w=>({label:wk(w.week_start),n:w.count}));
-    const list=items.filter(x=>(fbFilter==='all'?true:fbFilter==='open'?isOpen(x):x.status===fbFilter)&&(fbSource==='all'||srcOf(x)===fbSource)&&(fbCase==='all'||(fbCase==='active'?(x.case_state||'open')!=='closed':(x.case_state||'open')===fbCase)));
+    const list=items.filter(x=>(fbSource==='all'||srcOf(x)===fbSource)&&(fbCase==='all'||(fbCase==='active'?(x.case_state||'open')!=='closed':(x.case_state||'open')===fbCase)));
     const counts={};items.forEach(x=>{counts[x.status]=(counts[x.status]||0)+1});
     return `<div class="kpis">${[kpi('Open',items.filter(isOpen).length),kpi('New',n0(counts.pending)),kpi('Fixed',n0(counts.implemented)),kpi('Median age (open)',f.median_age_open_days!=null?f.median_age_open_days+' d':'—')].join('')}</div>
     <div class="grid2">
@@ -766,9 +766,8 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Inbox</h2></div>
     <div class="filters" role="group" aria-label="Filter by source">${[['all','All sources'],['app','App'],['email','Email']].map(([k,l])=>`<button class="btn" type="button" data-source="${k}" aria-pressed="${fbSource===k}">${esc(l)}</button>`).join('')}</div>
     <div class="filters" role="group" aria-label="Filter by case state">${[['active','Open + waiting'],['open','Open'],['awaiting_user','Waiting for user'],['closed','Closed'],['all','All cases']].map(([k,l])=>`<button class="btn" type="button" data-case="${k}" aria-pressed="${fbCase===k}">${esc(l)}</button>`).join('')}</div>
-    <div class="filters" role="group" aria-label="Filter by status">${[['open','Open'],['all','All'],...STATUS.map(s=>[s[0],s[1]])].map(([k,l])=>`<button class="btn" type="button" data-filter="${k}" aria-pressed="${fbFilter===k}">${esc(l)}</button>`).join('')}</div>
-    <div class="fb">${list.length?list.map(x=>{const st=statusMeta(x.status), em=srcOf(x)==='email', mt=caseMetaLine(x,metaLine(x)), cm=caseMeta(x), du=dueMeta(x);
-      return `<article class="card"><div class="ctop">${srcBadge(x)}<span class="pill ${st[2]}">${esc(st[1])}</span><span class="pill ${cm[0]}">${esc(cm[1])}</span>${du?`<span class="pill ${du[0]}">${esc(du[1])}</span>`:''}${newUserReply(x)?'<span class="pill info">New user reply</span>':''}<span class="pill cat">${esc(x.category||'Other')}</span><span class="note">${fmtDT(x.created_at)}${x.user_short?' · user '+esc(x.user_short):''}${x.has_screenshot?' · screenshot attached':''}</span></div>${em?`<div class="ctitle">${esc(x.email_subject||'(no subject)')}</div>${x.email_from?`<div class="note">From ${esc(x.email_from)}</div>`:''}<div class="msg clamp">${esc(x.message)}</div>`:`<div class="msg">${esc(x.message)}</div>`}${mt?`<div class="meta">${esc(mt)}${x.has_diagnostics?' · diagnostics attached':''}</div>`:''}${x.admin_note?`<div class="anote" title="${esc(x.admin_note)}">Note: ${esc(String(x.admin_note).split('\n')[0])}</div>`:''}${x.last_ops_at?`<div class="anote">Replied ${fmtDT(x.last_ops_at)}</div>`:x.reply_draft?'<div class="anote">Draft ready</div>':''}${replyHtml(x)}${/^https:\/\//.test(x.screenshot_url||'')?`<button class="shot" type="button" data-shot="${esc(x.id)}" aria-label="Open screenshot full size"><img src="${esc(x.screenshot_url)}" alt="Screenshot attached to this report" loading="lazy"></button><span class="note">Screenshot link expires after about 10 minutes; refresh to renew it.</span>`:''}<div class="cacts"><button class="btn" type="button" data-detail="${esc(x.id)}"${busy['d'+x.id]?' disabled':''}>Details</button></div><div class="seg" role="group" aria-label="Set status">${STATUS.map(s=>`<button class="btn" type="button" data-id="${esc(x.id)}" data-status="${s[0]}" aria-pressed="${x.status===s[0]}"${busy[x.id]?' disabled':''}>${esc(s[1])}</button>`).join('')}</div>${cardErr[x.id]?`<div class="err" role="alert">${esc(cardErr[x.id])}</div>`:''}</article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No items match these filters.</p><p>Reports from the app and mail to info@blovault.com land here. Import mail with <span class="mono">make support-mail-import APPLY=1</span>.</p></div>`}</div></section>`;
+    <div class="fb">${list.length?list.map(x=>{const em=srcOf(x)==='email', mt=caseMetaLine(x,metaLine(x)), cm=caseMeta(x), du=dueMeta(x);
+      return `<article class="card"><div class="ctop">${srcBadge(x)}<span class="pill ${cm[0]}">${esc(cm[1])}</span>${du?`<span class="pill ${du[0]}">${esc(du[1])}</span>`:''}${newUserReply(x)?'<span class="pill info">New user reply</span>':''}<span class="pill cat">${esc(x.category||'Other')}</span><span class="note">${fmtDT(x.created_at)}${x.user_short?' · user '+esc(x.user_short):''}${x.has_screenshot?' · screenshot attached':''}</span></div>${em?`<div class="ctitle">${esc(x.email_subject||'(no subject)')}</div>${x.email_from?`<div class="note">From ${esc(x.email_from)}</div>`:''}<div class="msg clamp">${esc(x.message)}</div>`:`<div class="msg">${esc(x.message)}</div>`}${mt?`<div class="meta">${esc(mt)}${x.has_diagnostics?' · diagnostics attached':''}</div>`:''}${x.admin_note?`<div class="anote" title="${esc(x.admin_note)}">Note: ${esc(String(x.admin_note).split('\n')[0])}</div>`:''}${x.last_ops_at?`<div class="anote">Replied ${fmtDT(x.last_ops_at)}</div>`:x.reply_draft?'<div class="anote">Draft ready</div>':''}${replyHtml(x)}${/^https:\/\//.test(x.screenshot_url||'')?`<button class="shot" type="button" data-shot="${esc(x.id)}" aria-label="Open screenshot full size"><img src="${esc(x.screenshot_url)}" alt="Screenshot attached to this report" loading="lazy"></button><span class="note">Screenshot link expires after about 10 minutes; refresh to renew it.</span>`:''}<div class="cacts"><button class="btn" type="button" data-detail="${esc(x.id)}"${busy['d'+x.id]?' disabled':''}>Details</button></div><div class="seg" role="group" aria-label="Set status">${STATUS.map(s=>`<button class="btn" type="button" data-id="${esc(x.id)}" data-status="${s[0]}" aria-pressed="${x.status===s[0]}"${busy[x.id]?' disabled':''}>${esc(s[1])}</button>`).join('')}</div>${cardErr[x.id]?`<div class="err" role="alert">${esc(cardErr[x.id])}</div>`:''}</article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No items match these filters.</p><p>Reports from the app and mail to info@blovault.com land here. Import mail with <span class="mono">make support-mail-import APPLY=1</span>.</p></div>`}</div></section>`;
   };
   const flagBusy={};
   const flagsCard=()=>{
@@ -1431,7 +1430,6 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const g=e.target.closest('[data-goto]'); if(g){go(g.dataset.goto);return;}
     const sr=e.target.closest('[data-source]'); if(sr){fbSource=sr.dataset.source;render();const ns=document.querySelector('[data-source="'+fbSource+'"]'); if(ns) ns.focus({preventScroll:true});return;}
     const cf=e.target.closest('[data-case]'); if(cf){fbCase=cf.dataset.case;render();const nc=document.querySelector('[data-case="'+fbCase+'"]'); if(nc) nc.focus({preventScroll:true});return;}
-    const f=e.target.closest('[data-filter]'); if(f){fbFilter=f.dataset.filter;render();const nf=document.querySelector('[data-filter="'+fbFilter+'"]'); if(nf) nf.focus({preventScroll:true});return;}
     const dw=e.target.closest('[data-devwho]'); if(dw){devWho=dw.dataset.devwho;render();const nd=document.querySelector('[data-devwho="'+devWho+'"]'); if(nd) nd.focus({preventScroll:true});return;}
     if(e.target.closest('[data-devretry]')){devAt=0;loadDev();return;}
     if(e.target.closest('[data-retry]')){load();return;}
