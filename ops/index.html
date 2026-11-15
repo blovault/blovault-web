@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-O3FABtjZLDOrc8FP9xiNZO7KFnyNjtn2AO7uZYVc1rg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-0vbIX51s2kCS2APKFyLpnI/wRNd4+Z2dUAVygNPGWvM='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -582,6 +582,9 @@ body.mopen{overflow:hidden}
     if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'beta']);
     const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
     if(stale.length) rows.push(['warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', '),'sync']);
+    const sn=snap.sentry||{};
+    (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
+    if(sn.error) rows.push(['warn','Sentry read failed',sn.error,'dev']);
     return rows;
   }
   const attnHtml=rows=>rows.length?'<div class="attn">'+rows.map(r=>`<div class="row"><span class="pill ${r[0]}">${r[0]==='bad'?'Error':r[0]==='warn'?'Check':'New'}</span><div class="txt"><div>${esc(r[1])}</div><div class="note">${esc(r[2])}</div></div><button class="btn" type="button" data-goto="${r[3]}">Open</button></div>`).join('')+'</div>':`<div class="empty"><span class="eico">${svg('check')}</span><p>All clear in this snapshot.</p></div>`;
@@ -598,7 +601,8 @@ body.mopen{overflow:hidden}
       kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),
       kpi('Est. Plaid cost / mo',usd(estMo(p)),`${taxShort()} · midnight UTC`),
       kpi('Open inbox items',f.items?open.length:'—',`${n0(f.counts?.pending)} new`),
-      kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet')].join('')}</div>
+      kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet'),
+      kpi('App errors (24h)',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
     <section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
       <div class="links">${['plaidLogs','plaidDebugger','plaidSupport','plaidBilling','supabase','supabaseFns','ghReaper'].map(k=>`<a href="${LINKS[k][1]}" target="_blank" rel="noopener">${svg('ext')}<span>${esc(LINKS[k][0])}</span></a>`).join('')}</div></section>
@@ -656,7 +660,10 @@ body.mopen{overflow:hidden}
     const rows=shown.map(x=>{const m=devPri[x.priority]||['mute',String(x.priority??'—')];return `<tr><td>${esc(x.title)}<div class="note"><span class="mono">${esc(x.id||'')}</span></div></td><td><span class="pill cat">${esc(x.area||'—')}</span></td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="note" style="overflow-wrap:anywhere">${esc(x.status||'')}</td></tr>`});
     const commits=arr(d.commits).filter(r=>r&&typeof r==='object').map(c=>`<tr><td>${esc(fmtDT(c.date))}</td><td><span class="mono">${esc(c.short||'')}</span></td><td style="overflow-wrap:anywhere">${esc(c.subject||'')}</td><td>${c.shipped===true?'<span class="pill good">On main</span>':'<span class="pill mute">Not shipped</span>'}</td></tr>`);
     const ci=arr(d.ci_runs).filter(r=>r&&typeof r==='object').slice(0,10).map(c=>{const m=devCI(c.conclusion);return `<tr><td>${esc(fmtDT(c.created))}</td><td>${esc(c.workflow||'')}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="r num">${typeof c.minutes==='number'?esc(c.minutes.toFixed(1)):'—'}</td></tr>`});
-    return err+top+secs+`
+    const sn=snap.sentry||{};
+    const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}</td><td><span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span></td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
+    const senNote=sn.configured===false?'<p class="note">Sentry not connected.</p>':sn.error?`<p class="note" style="overflow-wrap:anywhere">${esc(sn.error)}</p>`:'';
+    return err+`<section><div class="sechead"><h2>App errors</h2><a class="note" href="https://blo-vault-05.sentry.io/issues/" target="_blank" rel="noopener">Open Sentry</a></div>${senNote}${table(['Issue','Title','Level','>Events','>Users','Last seen'],sen,'No open app errors in 24 hours.')}</section>`+top+secs+`
     <section><div class="sechead"><h2>Checks</h2></div>${table(['Check','Value','State','Detail'],checks,'No checks reported.')}</section>
     <section><div class="sechead"><h2>Open items</h2><div class="filters" role="group" aria-label="Filter by owner">${DEV_WHO.map(([k,l])=>`<button class="btn" type="button" data-devwho="${k}" aria-pressed="${devWho===k}">${l} ${cnt(k)}</button>`).join('')}</div></div>${table(['Item','Area','Priority','Status'],rows,'Nothing here.')}</section>
     <section><div class="sechead"><h2>Recent commits</h2></div>${table(['When','Commit','Subject','Shipped'],commits,'No commits.')}</section>
