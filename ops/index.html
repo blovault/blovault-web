@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-0vbIX51s2kCS2APKFyLpnI/wRNd4+Z2dUAVygNPGWvM='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-rbWMwtur7m5uDnNEK1qbdgTtSAZUd6KfeF6N4EW7as8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -556,8 +556,6 @@ body.mopen{overflow:hidden}
   // A case still open (or waiting on the user) is open whatever its fix status; closed is closed.
   const isOpen=x=>x.case_state?x.case_state!=='closed':!['implemented','rejected'].includes(x.status);
 
-  const noteOf=sh=>{const u=(snap.users?.items||[]).find(x=>x.short===sh);return u&&(u.display_name||u.invite_note)?String(u.display_name||u.invite_note):''};
-  const who=sh=>{const n=noteOf(sh);if(!n) return sh;return (n.length>24?n.slice(0,23)+'…':n)+' ('+sh+')'};
   function testerList(){
     const inv=(snap.beta_invites?.items||[]).filter(i=>i.redeemed_at);
     const out=[];
@@ -567,15 +565,15 @@ body.mopen{overflow:hidden}
       if(!isBeta&&!iv) return;
       const exp=isBeta&&src==='beta_limited'?dOf(e.expires_at):null;
       const days=exp?Math.ceil((exp-Date.now())/864e5):null;
-      out.push({u,src:isBeta?src:null,exp,days,name:u.display_name||u.invite_note||(iv&&iv.note)||u.short,active:isBeta&&!(exp&&days<0)});
+      out.push({u,src:isBeta?src:null,exp,days,name:(iv&&iv.note)||u.short,active:isBeta&&!(exp&&days<0)});
     });
     return out;
   }
   function attentionRows(){
     const rows=[];
-    (snap.plaid?.items||[]).forEach(i=>{ if(i.is_active&&i.item_status&&i.item_status!=='login_repaired') rows.push(['warn',`${inst(i.institution_id)} connection: ${i.item_status.replace(/_/g,' ')}`,`Item ${i.item_id_short} · user ${who(i.user_short)} · ${ago(i.item_status_at)}`,'sync']);});
+    (snap.plaid?.items||[]).forEach(i=>{ if(i.is_active&&i.item_status&&i.item_status!=='login_repaired') rows.push(['warn',`${inst(i.institution_id)} connection: ${i.item_status.replace(/_/g,' ')}`,`Item ${i.item_id_short} · ${ago(i.item_status_at)}`,'sync']);});
     (snap.reaper?.recent_rows||[]).filter(x=>x.decision==='error'||x.error).slice(0,5).forEach(x=>rows.push(['bad','Cleanup job problem: '+(human(x.decision)||''),`${fmtDT(x.run_at)} · user ${x.user_short||'—'} · ${x.error||x.reason||''}`,'cleanup']));
-    (snap.users?.items||[]).forEach(x=>{ if(x.plan==='trial'&&x.trial_days_remaining!=null&&x.trial_days_remaining<=3) rows.push(['warn',`Trial ends in ${x.trial_days_remaining} day(s)`,`User ${who(x.short)} · ${x.items_active??x.institution_count??0} bank link(s)`,'users']);});
+    (snap.users?.items||[]).forEach(x=>{ if(x.plan==='trial'&&x.trial_days_remaining!=null&&x.trial_days_remaining<=3) rows.push(['warn',`Trial ends in ${x.trial_days_remaining} day(s)`,`User ${x.short} · ${x.items_active??x.institution_count??0} bank link(s)`,'users']);});
     const fresh=(snap.feedback?.items||[]).filter(x=>x.status==='pending');
     if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox tab','inbox']);
     const soon=testerList().filter(t=>t.days!=null&&t.days<=7);
@@ -624,12 +622,10 @@ body.mopen{overflow:hidden}
   let selUser=null;
   const userPanel=()=>{
     const us=snap.users?.items||[], i=us.findIndex(x=>x.id===selUser); if(i<0) return '';
-    const x=us[i], its=(snap.plaid?.items||[]).filter(it=>it.user_short===x.short&&it.billing_state!=='billed');
-    const canSched=its.some(it=>it.is_active&&!it.removal_scheduled_at), canCancel=its.some(it=>it.removal_scheduled_at);
-    return `<section class="box" style="margin:12px 0"><div class="sechead"><h2>User ${esc(x.short)}${(x.display_name||x.invite_note)?' · '+esc(x.display_name||x.invite_note):''}</h2></div>
+    const x=us[i];
+    return `<section class="box" style="margin:12px 0"><div class="sechead"><h2>User ${esc(x.short)}</h2></div>
       <dl class="kv"><dt>Access</dt><dd>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' until '+fmtDate(x.entitlement.expires_at):''):'None'}</dd><dt>Trial ends</dt><dd>${x.entitlement?'—':esc(fmtDate(x.trial_ends_at))}</dd><dt>App version</dt><dd>${esc(x.app_version||'—')}</dd><dt>Last opened</dt><dd>${esc(ago(x.last_active_at))}</dd></dl>
-      ${table(['Item','Institution','Product','State','Removal','Liabilities'],its.map(it=>`<tr><td class="mono">${esc(it.item_id_short)}</td><td>${esc(inst(it.institution_id))}</td><td>${esc(it.product_assumed||'—')}${it.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(it)}</td><td>${it.removal_scheduled_at?'<span class="pill warn">'+esc(fmtDate(it.removal_scheduled_at))+'</span>':'—'}</td><td>${it.liabilities_at?esc(fmtDate(it.liabilities_at)):'—'}</td></tr>`),'No bank connections for this user.')}
-      <div class="acts"><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false">Actions${svg('chev')}</button>${canSched?'<button class="btn" type="button" data-uact="sched">Schedule Item removal</button>':''}${canCancel?'<button class="btn" type="button" data-uact="cancel">Cancel Item removal</button>':''}<button class="btn" type="button" data-uact="close">Close</button></div></section>`;
+      <div class="acts"><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false">Actions${svg('chev')}</button><button class="btn" type="button" data-uact="sched">Schedule Item removal</button><button class="btn" type="button" data-uact="cancel">Cancel Item removal</button><button class="btn" type="button" data-uact="close">Close</button></div></section>`;
   };
   const funnelBox=(title,steps)=>{
     const base=Math.max(1,steps?.[0]?.count||0);
@@ -689,7 +685,7 @@ body.mopen{overflow:hidden}
     </div>
     ${u.trial_ends_note?`<p class="note">${esc(u.trial_ends_note)}</p>`:''}
     ${userPanel()}
-    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> ${(x.display_name||x.invite_note)?`<span class="unote">${esc(x.display_name||x.invite_note)}</span><span class="mono usub">${esc(x.short)}</span>`:`<span class="mono">${esc(x.short)}</span>`}${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' · until '+fmtDate(x.entitlement.expires_at):''):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
+    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> <span class="mono">${esc(x.short)}</span>${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source))+(x.entitlement.expires_at?' · until '+fmtDate(x.entitlement.expires_at):''):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
   };
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
@@ -700,9 +696,8 @@ body.mopen{overflow:hidden}
     <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
-      <div class="box"><h3>Est. cost by user (before tax)</h3>${hbars((p.per_user||[]).map(x=>({label:who(x.user_short),v:n0(x.est_cost)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div>
     </div>
-    ${table(['Item','User','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td class="mono">${esc(who(i.user_short))}</td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}`;
+    ${table(['Item','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}`;
   };
   P.sync=()=>{
     const p=snap.plaid||{}, flags=flagsOf();
@@ -839,13 +834,13 @@ body.mopen{overflow:hidden}
     <div class="fb">${ts.length?ts.map((x,i)=>{const u=x.u, perm=x.src==='beta_permanent', ended=!x.src||(x.days!=null&&x.days<0);
       const exp=!x.src?'Access ended':perm?'Permanent':x.exp?(x.days<0?'Ended '+fmtDate(x.exp):'Ends '+fmtDate(x.exp)+' · '+x.days+' day'+(x.days===1?'':'s')+' left'):'No expiry';
       const cls=ended?'bad':x.days!=null&&x.days<=7?'warn':'';
-      return `<article class="card tester"><div class="trow"><span class="tname">${esc(x.name)}</span><span class="pill ${perm?'good':x.src?'info':'mute'}">${esc(x.src?(perm?'Permanent':'30-day'):'No access')}</span><span class="mono usub">${esc(u.short)}</span></div><div class="tsub ${cls}">${esc(exp)}</div><div class="tsub">Last opened ${esc(ago(u.last_active_at))} · ${u.items_active??u.institution_count??0} bank link(s)</div><div class="cacts">${perm?'':`<button class="btn" type="button" data-tx="ext" data-ti="${i}">+30 days</button>`}${perm?'':`<button class="btn" type="button" data-tx="perm" data-ti="${i}">Make permanent</button>`}${x.src?`<button class="btn" type="button" data-tx="end" data-ti="${i}">End access</button>`:''}</div></article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('users')}</span><p>No beta testers yet.</p><p>Create an invite to add the first one.</p></div>`}</div></section>
+      return `<article class="card tester"><div class="trow"><span class="tname">${esc(x.name)}</span><span class="pill ${perm?'good':x.src?'info':'mute'}">${esc(x.src?(perm?'Permanent':'30-day'):'No access')}</span></div><div class="tsub ${cls}">${esc(exp)}</div><div class="tsub">Last opened ${esc(ago(u.last_active_at))}</div><div class="cacts">${perm?'':`<button class="btn" type="button" data-tx="ext" data-ti="${i}">+30 days</button>`}${perm?'':`<button class="btn" type="button" data-tx="perm" data-ti="${i}">Make permanent</button>`}${x.src?`<button class="btn" type="button" data-tx="end" data-ti="${i}">End access</button>`:''}</div></article>`}).join(''):`<div class="empty"><span class="eico neutral">${svg('users')}</span><p>No beta testers yet.</p><p>Create an invite to add the first one.</p></div>`}</div></section>
     <section><div class="sechead"><h2>Review access codes</h2><span class="note">Demo vault for App Review</span></div>
     ${table(['Code','Note','Created','Status'],(snap.review_codes?.items||[]).map(x=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.note||'')}</td><td>${fmtDate(x.created_at)}</td><td>${x.revoked_at?'<span class="pill mute">revoked '+esc(fmtDate(x.revoked_at))+'</span>':'<span class="pill good">active</span>'}</td></tr>`),snap.review_codes?.error?'Could not load: '+snap.review_codes.error:'No review codes.')}</section>
     <section><div class="sechead"><h2>Invites</h2></div>
     <div class="kpis">${[kpi('Unused codes',unused),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed_at?fmtDate(x.redeemed_at)+' · <span class="mono">'+esc(x.redeemed_by_short)+'</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed_at?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed_at?fmtDate(x.redeemed_at):'<span class="pill mute">unused</span>'}</td><td>${x.redeemed_at?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>
     ${flagsCard()}`;
   };
 
@@ -1035,7 +1030,7 @@ body.mopen{overflow:hidden}
   const uidCheck=(x,v)=>{const id=uidOf(x,v); if(!id) return 'Enter the full user id.'; if(/^[0-9a-f]{8}$/i.test(x.short||'')&&!id.toLowerCase().startsWith(x.short.toLowerCase())) return 'That id does not match user '+x.short+'.'; return '';};
   const daysOf=v=>{const n=Number(v);return Number.isInteger(n)&&n>=1&&n<=365?n:0;};
   const daysField={name:'days',label:'Number of days (1–365)',type:'number',min:1,max:365,value:'30',required:true,showIf:v=>v.pick==='custom'};
-  const userLine=x=>`<p>User <b class="mono">${esc(x.short)}</b>${(x.display_name||x.invite_note)?' ('+esc(x.display_name||x.invite_note)+')':''}</p>`;
+  const userLine=x=>`<p>User <b class="mono">${esc(x.short)}</b></p>`;
 
   function actGrant(x,btn){
     openModal({title:'Grant access',intro:userLine(x)+'<p>Gives this user full access without a paid subscription.</p>',
@@ -1240,14 +1235,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   }
   function actPermanent(x,btn){
     const u=x.u;
-    openModal({title:'Make permanent',intro:userLine(u)+'<p>Replaces the current beta access with permanent beta access (no expiry).</p>',
-      fields:idFields(u),validate:v=>uidCheck(u,v),submit:'Make permanent',toast:'Access is now permanent',
+    openModal({title:'Make permanent',intro:`<p>Tester <b>${esc(x.name)}</b></p>`+'<p>Replaces the current beta access with permanent beta access (no expiry).</p>',
+      fields:idFields(u),confirmText:'PERMANENT',validate:v=>uidCheck(u,v),submit:'Make permanent',toast:'Access is now permanent',
       run:v=>api('grant_entitlement',{user_id:uidOf(u,v),source:'beta_permanent'})},btn);
   }
   function actEnd(x,btn){
     const u=x.u;
-    openModal({title:'End access',danger:true,intro:userLine(u)+'<p>Removes the beta access now. The user keeps the account and any paid App Store subscription.</p><div class="callout bad">The cleanup job is LIVE: once access ends, the user\u2019s bank connections are removed automatically.</div>',
-      fields:idFields(u),confirmText:v=>(uidOf(u,v)||u.short||'').slice(0,8),validate:v=>uidCheck(u,v),submit:'End access',toast:'Access ended',
+    openModal({title:'End access',danger:true,intro:`<p>Tester <b>${esc(x.name)}</b></p>`+'<p>Removes the beta access now. The user keeps the account and any paid App Store subscription.</p><div class="callout bad">The cleanup job is LIVE: once access ends, the user\u2019s bank connections are removed automatically.</div>',
+      fields:idFields(u),confirmText:'END',validate:v=>uidCheck(u,v),submit:'End access',toast:'Access ended',
       run:v=>api('revoke_entitlement',{user_id:uidOf(u,v)})},btn);
   }
   async function quickExtend(x,btn){
