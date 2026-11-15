@@ -18,7 +18,7 @@ BLO VAULT ("we," "us," "our") is committed to protecting your privacy. This Priv
 - AI: optional assistant features run an on-device language model (Cactus SDK). We do not send your financial ledger to cloud LLM providers for inference.
 - Subscriptions: Apple, Google, and/or RevenueCat process payments under their policies.
 - Free trial: 14 days from when your pseudonymous account is created. When the trial, a subscription, or beta access ends, we remove your bank connections at Plaid; data already on your device stays until you delete it.
-- Diagnostics: crash and performance reports go to Sentry with an anonymous user id, amounts, email addresses and tokens scrubbed on the device, and IP address storage turned off. You can turn this off in Settings → Send crash reports.
+- Diagnostics: crash and performance reports go to Sentry with an anonymous user id, amounts, email addresses and tokens scrubbed on the device, and IP address storage turned off — only if you allow it. The App asks once; nothing is sent until you choose, and you can change it in Settings → Send crash reports.
 - Support: reports you send, automatic reports when a bank connection fails, and our replies are stored on Supabase so we can help you. If you allow notifications, we store your device's Apple push token to tell you when we reply.
 - Sign in with Apple: on iOS, Sign in with Apple is the primary sign-in, so the same account follows you across devices and reinstalls. We receive your Apple user identifier and, if you choose to share it, your email address or an Apple Hide My Email relay address.
 - Apple Card and Apple Cash (iOS, optional): if you choose "Add Apple Card", the App reads the Apple Card and Apple Cash accounts you allow, with their balances and transactions, through Apple's FinanceKit on your iPhone. This data stays in your encrypted vault on the device and is never sent to our servers.
@@ -67,7 +67,7 @@ We do not sell your personal information. We use service providers (subprocessor
 - RevenueCat — subscription entitlements and paywall infrastructure.
 - Apple / Google — in-app purchases, platform services, and (if you use optional speech-to-text) operating-system speech processing under their respective privacy policies.
 - Apple Push Notification service — delivers notifications when we reply to a support case, if you allow notifications.
-- Sentry (Functional Software, Inc., United States) — crash and performance diagnostics: the error and stack trace, a scrubbed message, device model, OS version and App version, sent with an anonymous user id and without storing your IP address. On by default; you can turn it off in Settings → Send crash reports. Governed by Sentry’s privacy notice.
+- Sentry (Functional Software, Inc., United States) — crash and performance diagnostics: the error and stack trace, a scrubbed message, device model, OS version and App version, sent with an anonymous user id and without storing your IP address. Sent only if you allow it when the App asks; you can change this in Settings → Send crash reports. Governed by Sentry’s privacy notice.
 - Google ML Kit (or similar) — on-device text recognition when you use receipt scanning, where applicable.
 - Market data — Yahoo Finance and Stooq receive the ticker symbols and date ranges the App asks for (no account or user identifiers) to show prices and index information.
 
@@ -99,7 +99,7 @@ Purchases are processed by Apple, Google, and/or RevenueCat. They may collect bi
 
 ## 7. How we use information
 
-We use information to operate and improve the App; link and refresh accounts; enforce tiers; process feedback and support cases and notify you of replies; fix crashes (unless you turn crash reports off); understand how the App is used in aggregate; comply with law; and respond when you contact us.
+We use information to operate and improve the App; link and refresh accounts; enforce tiers; process feedback and support cases and notify you of replies; fix crashes (if you allow crash reports); understand how the App is used in aggregate; comply with law; and respond when you contact us.
 
 ## 8. Legal bases (where applicable)
 
