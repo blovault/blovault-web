@@ -1,6 +1,6 @@
 # BLO VAULT Privacy Policy
 
-**Last Updated:** November 8, 2026
+**Last Updated:** November 15, 2026
 
 BLO VAULT ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and safeguard your information when you use our mobile application (the "App"). BLO VAULT is operated by an individual developer (Chan Hong). We designed the App so that sensitive financial details stay on your device whenever possible.
 
@@ -18,7 +18,8 @@ BLO VAULT ("we," "us," "our") is committed to protecting your privacy. This Priv
 - AI: optional assistant features run an on-device language model (Cactus SDK). We do not send your financial ledger to cloud LLM providers for inference.
 - Subscriptions: Apple, Google, and/or RevenueCat process payments under their policies.
 - Free trial: 14 days from when your pseudonymous account is created. When the trial, a subscription, or beta access ends, we remove your bank connections at Plaid; data already on your device stays until you delete it.
-- Diagnostics: if enabled, Sentry may receive crash/performance data with client-side scrubbing of identifiable user fields.
+- Diagnostics: crash and performance reports go to Sentry with an anonymous user id, amounts, email addresses and tokens scrubbed on the device, and IP address storage turned off. You can turn this off in Settings → Send crash reports.
+- Support: reports you send, automatic reports when a bank connection fails, and our replies are stored on Supabase so we can help you. If you allow notifications, we store your device's Apple push token to tell you when we reply.
 - Sign in with Apple: on iOS, Sign in with Apple is the primary sign-in, so the same account follows you across devices and reinstalls. We receive your Apple user identifier and, if you choose to share it, your email address or an Apple Hide My Email relay address.
 - Apple Card and Apple Cash (iOS, optional): if you choose "Add Apple Card", the App reads the Apple Card and Apple Cash accounts you allow, with their balances and transactions, through Apple's FinanceKit on your iPhone. This data stays in your encrypted vault on the device and is never sent to our servers.
 - iCloud backup (iOS, on by default, can be turned off in Settings): an encrypted copy of your vault is kept in the App's private iCloud storage under your Apple ID. We cannot read it. Anyone who controls your Apple ID and a trusted device can restore it (see 5.1).
@@ -43,7 +44,13 @@ Categories Plaid may share with the App can include institution and account iden
 
 If you use the feedback feature (for example, Settings → Send feedback), you may submit a text message and optionally attach a screenshot. We store that content on our backend (Supabase, including file storage for images) to triage bugs, improve the App, and respond when needed. It may be associated with your pseudonymous Supabase user identifier. Do not include passwords, full account numbers, card numbers, or other secrets in feedback text. Screenshots may unintentionally show sensitive information — crop or avoid sensitive screens if you prefer not to share them. Each report also includes the App version, iOS version, and device model. You may optionally add an email address for a reply and, for problem reports, sync diagnostics (bank connection status and recent sync times, without balances, amounts, or merchant names). We use this only to respond to your report and fix problems, and it is deleted when you delete your account.
 
-### 2.2 Apple Card and Apple Cash (FinanceKit, iOS)
+### 2.2 Automatic support reports, message center and notifications
+
+If connecting a bank through Plaid fails, or a bank connection stops syncing, our server opens a support case for you automatically so we can follow up. The case contains the error code and type, the institution name, where in the App it happened, the App version and the time. It never contains account numbers, balances, transactions or passwords. You can see exactly what was recorded in the App ("See what was sent") and add a note. Your reports, automatic cases and our replies are shown in More → Message Center and stored on Supabase with your pseudonymous user identifier. The developer can read support cases (message text, screenshots, contact email and diagnostics) in order to answer them.
+
+If you allow notifications, the App stores your device's Apple push notification token with your account so we can tell you when we reply. You can turn notifications off in iOS Settings at any time; the token is deleted when you delete your account.
+
+### 2.3 Apple Card and Apple Cash (FinanceKit, iOS)
 
 If you tap "Add Apple Card", iOS asks for your permission and lets you choose which accounts to share. With that permission the App reads those accounts, their balances and their transactions through Apple's FinanceKit framework, on your device only. The data is stored in your encrypted on-device vault and in your encrypted backups (5.1, 5.2), is used only to show your balances, spending, statement cycles and cash flow in the App, and is never sent to our servers or to third parties, including AI services. You can stop sharing at any time in iOS settings or by removing the account in the App, which deletes its data from this device.
 
@@ -56,12 +63,13 @@ All financial analysis and AI inference for the on-device features are performed
 We do not sell your personal information. We use service providers (subprocessors) as needed:
 
 - Plaid Technologies, Inc. — linking and financial data access. See https://plaid.com/legal/
-- Supabase — authentication; Edge Functions that proxy Plaid API calls; storage of encrypted Plaid tokens and opaque link ids (not readable account names or balances); operational usage counts (number of linked institutions and accounts, plan tier, number of sync requests, last time the App was opened); plan and beta-access records (type and expiry date); a log of automatic connection removals; and optional user feedback and attachments as described in Section 2.1.
+- Supabase — authentication; Edge Functions that proxy Plaid API calls; storage of encrypted Plaid tokens and opaque link ids (not readable account names or balances); operational usage counts (number of linked institutions and accounts, plan tier, number of sync requests, last time the App was opened); plan and beta-access records (type and expiry date); a log of automatic connection removals; a log of bank-linking attempts (outcome, error code, institution id); your Apple push token if you allow notifications; and feedback, attachments, automatic support cases and Message Center replies as described in Sections 2.1 and 2.2. We use these counts and logs to run the service and to understand how the App is used (for example, how often bank linking fails).
 - RevenueCat — subscription entitlements and paywall infrastructure.
 - Apple / Google — in-app purchases, platform services, and (if you use optional speech-to-text) operating-system speech processing under their respective privacy policies.
-- Sentry — optional crash and performance diagnostics if a DSN is configured; governed by Sentry’s privacy notice.
+- Apple Push Notification service — delivers notifications when we reply to a support case, if you allow notifications.
+- Sentry (Functional Software, Inc., United States) — crash and performance diagnostics: the error and stack trace, a scrubbed message, device model, OS version and App version, sent with an anonymous user id and without storing your IP address. On by default; you can turn it off in Settings → Send crash reports. Governed by Sentry’s privacy notice.
 - Google ML Kit (or similar) — on-device text recognition when you use receipt scanning, where applicable.
-- Reference data — some features may request non-identifying reference or market data over HTTPS from third-party hosts (for example, public ticker or index information) solely to power in-App calculations or illustrations.
+- Market data — Yahoo Finance and Stooq receive the ticker symbols and date ranges the App asks for (no account or user identifiers) to show prices and index information.
 
 Each provider processes data under its own terms and privacy notices.
 
@@ -91,7 +99,7 @@ Purchases are processed by Apple, Google, and/or RevenueCat. They may collect bi
 
 ## 7. How we use information
 
-We use information to operate and improve the App; link and refresh accounts; enforce tiers; process optional feedback you submit; fix crashes (if Sentry is on); comply with law; and respond when you contact us.
+We use information to operate and improve the App; link and refresh accounts; enforce tiers; process feedback and support cases and notify you of replies; fix crashes (unless you turn crash reports off); understand how the App is used in aggregate; comply with law; and respond when you contact us.
 
 ## 8. Legal bases (where applicable)
 
@@ -107,8 +115,10 @@ Where the GDPR, UK GDPR, or similar laws apply, we rely on contract performance,
 - Sign in with Apple data (Apple user identifier, email or relay address) is kept by Supabase Auth while your account exists and is deleted with it.
 - Encrypted tokens and related opaque link metadata on Supabase remain until you remove linked items, revoke access through Plaid or the App where available, or we delete them in connection with support or closure processes. We do not retain readable account names or balances on our servers.
 - Feedback records and attachments on Supabase are deleted when you use "Delete account & data" or "Delete account permanently" in the App. Otherwise they are retained for as long as needed to operate support and improve the App unless we delete them earlier or you ask us to delete them where applicable law requires.
-- Sentry data is retained per Sentry project settings.
+- Sentry keeps crash and performance reports for up to 90 days. They carry an anonymous user id and are not linked to your account.
+- Your Apple push token is deleted when you delete your account.
 - Plan and beta-access records and connection-removal logs are kept while your account exists and for as long as needed to operate billing and support.
+- Operational logs (bank-linking attempts, automatic connection removals, Plaid billing records and our admin audit log) keep your pseudonymous user identifier after your account is deleted, for security, billing and dispute purposes. They contain no name, email, balances or transactions.
 
 ## 10. Data security
 
