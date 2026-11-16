@@ -35,6 +35,9 @@ h1{font-size:clamp(2.125rem,6.4vw,3.5rem);line-height:1.08;letter-spacing:-.025e
 .shot{margin:0;justify-self:center;text-align:center}
 .shot .cap{margin:16px auto 0;max-width:260px}
 .cap{font-size:.875rem;color:var(--text3)}
+.tour{margin:0 auto;max-width:540px;text-align:center}
+.tour video{display:block;width:100%;height:auto;aspect-ratio:1080/1350;border-radius:24px;border:1px solid var(--border);background:#FBFCFE}
+.tour .cap{margin-top:12px}
 @media (max-width:700px){.phone{width:220px}}
 @media (min-width:860px){.hero .phone{animation:rise .6s ease-out both}}
 @keyframes rise{from{opacity:0;transform:translateY(12px)}}
@@ -146,7 +149,14 @@ BLO VAULT
 </div>
 
 <div class="wrap">
-<section aria-labelledby="what" style="border-top:0">
+<section aria-labelledby="tour-h" style="border-top:0">
+<h2 class="t" id="tour-h">See it in under a minute</h2>
+<figure class="tour"><video controls playsinline muted preload="none" poster="video/tour-poster.jpg" width="1080" height="1350"><source src="video/tour.mp4" type="video/mp4">Your browser cannot play this video.</video><figcaption class="cap">Sample data. What you'll have on payday, each pay period ahead, card payments, budget pace, categories and net worth.</figcaption></figure>
+</section>
+</div>
+
+<div class="wrap">
+<section aria-labelledby="what">
 <h2 class="t" id="what">What it does</h2>
 <div class="feat">
 <div>
