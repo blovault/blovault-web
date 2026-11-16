@@ -46,7 +46,7 @@ If you use the feedback feature (for example, Settings → Send feedback), you m
 
 ### 2.2 Automatic support reports, message center and notifications
 
-If connecting a bank through Plaid fails, or a bank connection stops syncing, our server opens a support case for you automatically so we can follow up. The case contains the error code and type, the institution name, where in the App it happened, the App version and the time. It never contains account numbers, balances, transactions or passwords. You can see exactly what was recorded in the App ("See what was sent") and add a note. Your reports, automatic cases and our replies are shown in More → Message Center and stored on Supabase with your pseudonymous user identifier. The developer can read support cases (message text, screenshots, contact email and diagnostics) in order to answer them.
+If connecting a bank through Plaid fails, or a bank connection stops syncing, our server opens a support case for you automatically so we can follow up. The case contains the error code and type, the institution name, where in the App it happened, the App version and the time. It never contains account numbers, balances, transactions or passwords. You can see exactly what was recorded in the App ("See what was sent") and add a note. Your reports, automatic cases and our replies are shown in More → Message Center and stored on Supabase with your pseudonymous user identifier. When an automatic case opens, we post a short notice in your Message Center right away and, if you allow notifications, send a push notification to your device only. The developer sees the institution name in an automatic case only after you reply in it. The developer can read support cases (message text, screenshots, contact email and diagnostics) in order to answer them. Outside support cases, our operations tools show institutions only as totals, group institutions with fewer than three connections as "Other", and never show your name next to your account or connection status.
 
 If you allow notifications, the App stores your device's Apple push notification token with your account so we can tell you when we reply. You can turn notifications off in iOS Settings at any time; the token is deleted when you delete your account.
 
@@ -118,7 +118,7 @@ Where the GDPR, UK GDPR, or similar laws apply, we rely on contract performance,
 - Sentry keeps crash and performance reports for up to 90 days. They carry an anonymous user id and are not linked to your account.
 - Your Apple push token is deleted when you delete your account.
 - Plan and beta-access records and connection-removal logs are kept while your account exists and for as long as needed to operate billing and support.
-- Operational logs (bank-linking attempts, automatic connection removals, Plaid billing records and our admin audit log) keep your pseudonymous user identifier after your account is deleted, for security, billing and dispute purposes. They contain no name, email, balances or transactions.
+- Operational logs keep your pseudonymous user identifier, including after your account is deleted, for security, billing and dispute purposes, and are then deleted automatically: bank-linking attempts after 90 days; automatic connection removals, Plaid billing records and our admin audit log after 13 months. They contain no name, email, balances or transactions.
 
 ## 10. Data security
 
@@ -156,7 +156,7 @@ If you install a pre-release or beta build (for example through Apple TestFlight
 
 ### 14.1 Beta invite requests
 
-If you request a beta invite on our website, we store the email address you enter, an optional name, and a salted hash of your IP address (used only to limit abuse). We use them to send your invite and code. We keep them until your request is declined or the beta ends, and delete them sooner if you ask (info@blovault.com).
+If you request a beta invite on our website, we store the email address you enter, an optional name, and a salted hash of your IP address (used only to limit abuse). We use them to send your invite and code. Declined requests are deleted automatically within two days. Other requests are kept until the beta ends, and deleted sooner if you ask (info@blovault.com). Your name is used only to manage your beta access and is never shown next to your account, linked institutions or connection status in our tools.
 
 ## 15. Changes to this policy
 
