@@ -11,7 +11,7 @@
 
 This Information Security Policy (“Policy”) defines how **BLO VAULT** identifies, mitigates, and monitors information security risks for the **BLO VAULT** mobile application, its supporting backend services used as a **Plaid proxy**, and related operational processes.
 
-**Scope includes:** iOS, Android, and macOS client builds distributed to end users; Supabase-backed Edge Functions and data stores used for Plaid token proxying, authentication, and encrypted backup storage; development, build, and release workflows; subprocessors listed in the public Privacy Policy.
+**Scope includes:** the iOS client build distributed to end users (Android and macOS builds exist but are not distributed); Supabase-backed Edge Functions and data stores used for Plaid token proxying, authentication, and encrypted backup storage; development, build, and release workflows; subprocessors listed in the public Privacy Policy.
 
 **Out of scope:** Security programs of financial institutions, Plaid, Inc., Apple, Google, or other third parties (governed by their own policies).
 
@@ -78,14 +78,13 @@ The program includes:
 - **Data in transit:** **HTTPS (TLS)** for all application traffic to BLO VAULT-controlled and configured services, using the platform's standard certificate validation. Certificate pinning is **not** used.
 - **Backups:** Vault backups are encrypted on the device with **AES-256-GCM** using a key derived from a random recovery key. The recovery key is also kept in iCloud Keychain (end-to-end encrypted by Apple) for iCloud backups; the server backup does not contain the recovery key.
 - **Tokens:** Plaid access tokens are **encrypted** before persistence in Supabase.
-- **On-device assistant:** The optional assistant runs an on-device language model through the **Cactus SDK**; financial ledger content is not sent to cloud LLM providers for inference.
 
 ---
 
 ## 8. Secure development and change management
 
 - **Secure development:** Every change is made on a branch, reviewed before commit, and merged only after tests pass; security-relevant design (authentication, local storage, Plaid integration) follows the OWASP Mobile Top 10 categories as a checklist.
-- **Automated checks:** **GitHub Actions** CI runs on every push to `main`: static analysis (`flutter analyze`), the full automated test suite (`flutter test`), and type checks and tests for the Plaid Edge Functions (Deno). Dependency vulnerability scanning is not automated; dependencies are reviewed manually (see Section 9).
+- **Automated checks:** **GitHub Actions** CI runs on every push to `main`: static analysis (`flutter analyze`), the full automated test suite (`flutter test`), and type checks and tests for the Plaid Edge Functions (Deno). A weekly GitHub Actions job runs osv-scanner over the pub and Deno lockfiles and gitleaks over the tree and recent history, and Dependabot opens weekly dependency update pull requests; findings are reviewed manually (see Section 9).
 - **Code review:** Security-sensitive changes reviewed before merge where practicable for solo-operator workflow.
 - **Not currently implemented:** jailbreak/root detection and tamper detection. If they are added, this Policy and the Privacy Policy will be updated first.
 
@@ -141,7 +140,7 @@ Aligned with the **Data Retention and Disposal** practices supplied with the Pla
 ## 13. Monitoring and logging
 
 - **Application stability:** Optional **Sentry** for crashes/performance, only if a DSN is configured; configuration minimizes PII in events.
-- **Backend:** Supabase and Edge Function logs are used for abuse detection and incident investigation, within the platform's log retention. BLO VAULT does not run its own per-user rate limiting; Plaid and Supabase enforce their own limits, and Plaid linking can be paused for all users from the operations dashboard.
+- **Backend:** Supabase and Edge Function logs are used for abuse detection and incident investigation, within the platform's log retention. The Plaid proxy rate-limits each user (30 Plaid calls per minute) in addition to Plaid's and Supabase's own limits, and Plaid linking can be paused for all users from the operations dashboard.
 
 ---
 

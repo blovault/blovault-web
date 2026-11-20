@@ -25,31 +25,18 @@ Mirrors the shipping **blo-vault** app at a high level (not legal advice). The s
 
 | Area | Implementation |
 |------|----------------|
-| **Client** | Flutter (iOS, Android, macOS) |
+| **Client** | Flutter; iOS is the only distributed build (Android and macOS targets exist, not shipped) |
 | **Local data** | SQLite via **SQLCipher** (AES-256); keys in **iOS Keychain / Android Keystore** |
 | **Sign-in** | **Sign in with Apple** on iOS (primary); pseudonymous Supabase user otherwise |
 | **App unlock** | **Face ID / Touch ID** and device PIN/passcode; idle session auto-lock |
 | **Bank linking** | **Plaid**; **Supabase** Edge Functions as Plaid proxy; encrypted tokens and opaque link ids only |
 | **Apple Card / Apple Cash** | **FinanceKit** on the iPhone; stays in the on-device vault |
 | **Backup** | Encrypted (AES-256-GCM) iCloud backup on by default with a recovery key; server backup only as fallback |
-| **AI** | Optional **on-device** assistant via **Cactus SDK**; ledger not sent to cloud LLMs |
-| **Monetization** | **RevenueCat**; 14-day free trial |
+| **AI** | No AI feature is shipped to users; the chat code stays behind a server flag that is off |
+| **Monetization** | **RevenueCat**; 14-day free trial (up to 3 institutions), then **BLO Pro** $5.99/month (up to 10 institutions); no annual plan |
 | **User wipe** | **Panic Delete** and "Delete account permanently" (Settings) |
 | **Crash reporting** | **Sentry**, optional (only if a DSN is configured; not configured today) |
 | **Data in transit** | **HTTPS (TLS)**; certificate pinning is **not** used ([Privacy Policy §10](privacy-policy.md)) |
-
-------|----------------|
-| **Client** | Flutter (iOS, Android, macOS) |
-| **Local data** | SQLite via **SQLCipher** (AES-256); keys in **iOS Keychain / Android Keystore** (`flutter_secure_storage`) |
-| **Auth to app** | **Face ID / Touch ID** and device PIN/passcode via `local_auth`; **15-minute** idle session auto-lock |
-| **Bank linking** | **Plaid**; **Supabase** Edge Functions as **Plaid proxy only** |
-| **Server-stored secrets** | **Encrypted** Plaid access tokens only — not raw transaction payloads |
-| **AI** | **On-device** — Gemma 3 via **Cactus SDK**; financial content not sent to model hosts |
-| **History window** | Up to **24 months** of transactions analyzed on-device (app constant) |
-| **Monetization** | **RevenueCat**; free tier **3** linked Plaid accounts |
-| **User wipe** | **Panic Delete** (Settings): clears local DB, secure storage, and local cache boxes |
-| **Crash reporting** | **Sentry** (configurable via env); PII scrubbing in client |
-| **Data in transit** | **HTTPS (TLS)**; **certificate public-key pinning** for critical endpoints (Supabase and client-configured domains), per [Privacy Policy §10](privacy-policy.md) and Plaid security questionnaire |
 
 **Not claimed here as shipped:** jailbreak/root gating, automated subscription-based server purge schedules — see main app roadmap in the private **blo-vault** repo.
 
