@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="BLO VAULT connects your bank accounts, cards and investments, projects your cash forward to each payday, and keeps your financial data encrypted on your iPhone. Invite-only beta on TestFlight.">
+<meta name="description" content="BLO VAULT connects your bank accounts, cards and investments, projects your cash forward to each payday, and keeps your financial data encrypted on your iPhone. On the App Store for iPhone.">
 <meta name="color-scheme" content="light dark">
 <title>BLO VAULT — Private cash flow and net worth on your iPhone</title>
 <style>
@@ -86,13 +86,6 @@ ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:20px;counter-reset:
 ol.steps li{counter-increment:s;font-weight:600}
 ol.steps li span{display:block;font-weight:400;color:var(--text2);margin-top:4px;max-width:60ch}
 ol.steps li::before{content:counter(s);display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--panel);color:var(--primary);font-weight:700;margin-bottom:10px}
-ol.steps.line{gap:0;max-width:68ch}
-ol.steps.line li{position:relative;padding:0 0 28px 52px;min-height:32px}
-ol.steps.line li:last-child{padding-bottom:0}
-ol.steps.line li::before{position:absolute;left:0;top:0;margin:0;background:var(--primary);color:var(--on-primary)}
-ol.steps.line li::after{content:"";position:absolute;left:15px;top:36px;bottom:4px;width:2px;background:var(--border)}
-ol.steps.line li:last-child::after{display:none}
-.look{color:var(--text2);margin:28px 0 0;max-width:68ch}
 .avail p{color:var(--text2);max-width:68ch;margin:0 0 24px}
 details{border-bottom:1px solid var(--border);max-width:68ch}
 summary{cursor:pointer;font-weight:600;padding:16px 0;list-style:none;display:flex;justify-content:space-between;gap:12px;min-height:44px}
@@ -106,20 +99,6 @@ footer p{margin:4px 0}
 footer a{color:var(--text2)}
 .skip{position:absolute;left:-999px}
 .skip:focus{left:16px;top:8px;background:var(--surface);padding:8px 12px;z-index:9}
-.ask{background:var(--panel);border-radius:20px;padding:24px;margin:0 0 32px;max-width:640px}
-.ask h3{font-size:1.1875rem;margin:0 0 6px;letter-spacing:-.01em}
-.ask>p{margin:0 0 18px;color:var(--text2)}
-.ask form{display:grid;gap:14px}
-.ask .fld{display:grid;gap:6px}
-.ask label{font-weight:600;font-size:.9375rem}
-.ask label span{font-weight:400;color:var(--text3)}
-.ask input{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;min-height:44px;width:100%}
-.ask input:focus-visible{outline:3px solid var(--primary);outline-offset:1px}
-.ask .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
-.ask button.btn{border:0;cursor:pointer;font:inherit;font-weight:600}
-.ask .msg{margin:0;font-size:.9375rem;color:var(--text2);min-height:1.4em}
-.ask .msg.err{color:#C42B1C}
-@media (prefers-color-scheme:dark){.ask .msg.err{color:#FF8A80}}
 </style>
 </head>
 <body>
@@ -139,9 +118,9 @@ BLO VAULT
 <div>
 <h1>See your cash to every payday.</h1>
 <p class="sub">BLO VAULT puts your bank accounts, cards and investments in one place, projects your cash forward to each payday and shows which account each bill will hit. Your balances and transactions are stored on your iPhone in an encrypted database; backups are encrypted before they leave the phone.</p>
-<p class="status"><span aria-hidden="true"></span>Invite-only beta on TestFlight for iPhone</p>
+<p class="status"><span aria-hidden="true"></span>Now on the App Store for iPhone</p>
 <div class="cta">
-<a class="btn" href="#beta">How to join the beta</a>
+<a class="btn" href="https://apps.apple.com/us/app/id6828700052">Download on the App Store</a>
 </div>
 </div>
 <figure class="shot"><div class="phone"><img src="img/home.jpg" width="506" height="1100" alt="Home screen: balance projected to the end of the pay period, next bill, spending and net worth"></div><figcaption class="cap">Sample data</figcaption></figure>
@@ -244,38 +223,17 @@ BLO VAULT
 </div>
 </section>
 
-<section id="beta" aria-labelledby="beta-h">
-<h2 class="t" id="beta-h">Joining the beta</h2>
-<div class="ask" id="request">
-<h3>Request a beta invite</h3>
-<p>Use the email address you use with Apple (TestFlight sends the invite there). We'll email your invite code; no mail app needed. Questions? <a href="mailto:dev@blovault.com">dev@blovault.com</a>.</p>
-<form id="askForm" novalidate>
-<div class="fld"><label for="askEmail">Email address</label><input id="askEmail" name="email" type="email" autocomplete="email" inputmode="email" required></div>
-<div class="fld"><label for="askName">Name <span>(optional)</span></label><input id="askName" name="name" type="text" autocomplete="name"></div>
-<div class="fld" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><input name="website" type="text" tabindex="-1" autocomplete="off"></div>
-<div class="row"><button class="btn" type="submit">Request an invite</button><p class="msg" id="askMsg" role="status" aria-live="polite"></p></div>
-</form>
-</div>
-<ol class="steps line">
-<li>Ask for an invite<span>Send the request above. We reply with your invite code and a TestFlight invite, sent to the email address you give us.</span></li>
-<li>Install TestFlight<span>Apple's free beta app from the App Store; the invite opens BLO VAULT in it.</span></li>
-<li>Sign in with Apple and enter your code<span>Then connect the accounts you want to try.</span></li>
-<li>Tell us what feels wrong<span>Use Send feedback in More, or reply to the invite email. Screenshots help.</span></li>
-</ol>
-<p class="look">What we're looking for: anything that looks wrong — a balance that doesn't match your bank, a bill on the wrong day, a confusing screen.</p>
-</section>
-
 <section class="avail" aria-labelledby="avail-h">
 <h2 class="t" id="avail-h">Availability</h2>
-<p>BLO VAULT is in an invite-only beta on TestFlight for iPhone. New accounts include a 14-day free trial. When a trial or beta access ends, we remove your bank connections at Plaid; what is already on your phone stays until you delete it.</p>
+<p>BLO VAULT is on the App Store for iPhone. New accounts include a 14-day free trial with up to 3 linked institutions. After the trial, bank syncing needs BLO Pro at $5.99/month (up to 10 institutions). When a trial or subscription ends, we remove your bank connections at Plaid; what is already on your phone stays until you delete it.</p>
 </section>
 
 <section aria-labelledby="faq">
 <h2 class="t" id="faq">Questions</h2>
 <details><summary>Can you see my transactions?</summary><p>We don't keep them. Transactions travel from Plaid through our server to your phone without being saved on the way, and are stored on your phone, encrypted.</p></details>
 <details><summary>Which banks work?</summary><p>Many U.S. banks, card issuers and brokerages available through Plaid (some institutions aren't available), plus Apple Card and Apple Cash on iPhone (iOS 17.4 or later).</p></details>
-<details><summary>Is there an Android version?</summary><p>Not yet. The beta is iPhone only.</p></details>
-<details><summary>What happens if I stop using it?</summary><p>Your bank connections are removed when your trial, subscription or beta access ends. Data on your phone stays until you delete it, and Erase this phone (Panic Delete) in Settings erases it immediately.</p></details>
+<details><summary>Is there an Android version?</summary><p>Not yet. BLO VAULT is iPhone only.</p></details>
+<details><summary>What happens if I stop using it?</summary><p>Your bank connections are removed when your trial or subscription ends. Data on your phone stays until you delete it, and Erase this phone (Panic Delete) in Settings erases it immediately.</p></details>
 </section>
 </div>
 </main>
@@ -291,31 +249,5 @@ BLO VAULT
 <p>© 2026 BLO VAULT. All rights reserved. Patent pending.</p>
 </div>
 </footer>
-<script>
-(function(){
-  var f=document.getElementById('askForm'); if(!f) return;
-  var msg=document.getElementById('askMsg');
-  f.addEventListener('submit',function(e){
-    e.preventDefault();
-    var email=f.email.value.trim(), name=f.name.value.trim();
-    msg.className='msg';
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg.className='msg err';msg.textContent='Enter a valid email address.';f.email.focus();return;}
-    var btn=f.querySelector('button');
-    function mail(){
-      var body='Hi,\n\nI would like to join the BLO VAULT beta on TestFlight.\n\nEmail: '+email+'\nName: '+(name||'(not given)')+'\n';
-      location.href='mailto:dev@blovault.com?subject='+encodeURIComponent('BLO VAULT beta request')+'&body='+encodeURIComponent(body);
-      msg.textContent="Couldn't reach the server, so your email app should open with the request. If nothing opens, email dev@blovault.com.";
-    }
-    btn.disabled=true; btn.textContent='Sending\u2026';
-    fetch('https://nagsivpurrsrkwfdojdj.supabase.co/functions/v1/beta-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,name:name,website:f.website.value})})
-    .then(function(r){
-      if(r.status===200){msg.className='msg';msg.textContent='Thanks \u2014 we got your request. We\'ll email your invite to '+email+' soon.';f.reset();}
-      else if(r.status===400){msg.className='msg err';msg.textContent='Enter a valid email address.';}
-      else if(r.status===429){msg.className='msg err';msg.textContent='Too many requests from here. Try again in an hour, or email dev@blovault.com.';}
-      else mail();
-    }).catch(mail).then(function(){btn.disabled=false;btn.textContent='Request an invite';});
-  });
-})();
-</script>
 </body>
 </html>
