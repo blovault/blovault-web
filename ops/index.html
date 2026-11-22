@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-vSAxUtJZkxm6VYffdo/2gSancS4Vg8clpIhYYbs2X7s='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-E+ig32dAX5PPLPXH4jDAJugfrqtdZd2OoobUlfwy+J0='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -427,7 +427,7 @@ body.mopen{overflow:hidden}
   const inst=id=>INST[id]||snap.plaid?.institution_names?.[id]||id||'—';
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
-  const TABS=[['overview','Overview'],['dev','Dev'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta']];
+  const TABS=[['overview','Overview'],['dev','Dev'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta'],['briefs','Briefs']];
   const HIST_KEY='ops_history_v1', HIST_MAX=365;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
@@ -786,6 +786,13 @@ body.mopen{overflow:hidden}
     catch(err){ tf.err=err instanceof TypeError?'Network error':err.message; }
     tf.loading=false; render();
   }
+  const br={loading:false,at:0,items:null,err:''};
+  async function loadBriefs(){
+    if(br.loading) return; br.loading=true; br.err=''; render();
+    try{ const r=await api('owner_briefs',{}); if(!r||r.ok===false) throw new Error((r&&r.error)||'Could not load briefs'); br.items=r.briefs||[]; br.at=Date.now(); }
+    catch(err){ br.err=err instanceof TypeError?'Network error':err.message; }
+    br.loading=false; render();
+  }
   const tfStatus=b=>{const e=b.external_state, r=b.review_state;
     if(b.expired||e==='EXPIRED') return ['mute','Expired'];
     if(b.processing==='PROCESSING') return ['info','Processing'];
@@ -816,6 +823,12 @@ body.mopen{overflow:hidden}
     <div class="fb">${pend.length?pend.map(x=>`<article class="card tester"><div class="trow"><span class="tname mono">${esc(x.email)}</span>${x.name?`<span class="usub">${esc(x.name)}</span>`:''}</div><div class="tsub">Requested ${esc(ago(x.created_at))}</div><div class="cacts"><button class="btn primary" type="button" data-req="approve" data-rid="${esc(x.id)}">Approve</button><button class="btn" type="button" data-req="decline" data-rid="${esc(x.id)}">Decline</button></div></article>`).join(''):'<p class="note">No pending requests.</p>'}</div>
     ${done.length?table(['Email','Status','Tier','Code','TestFlight','Mail'],done.map(x=>`<tr><td class="mono">${esc(x.email)}</td><td><span class="pill ${x.status==='approved'?'good':'mute'}">${esc(x.status)}</span></td><td>${x.tier?esc(x.tier==='beta_permanent'?'Permanent':'30-day'):'—'}</td><td class="mono">${esc(x.invite_code_masked||'—')}</td><td>${esc(x.testflight_status||'—')}</td><td>${x.status==='approved'?`<span class="pill ${mc[x.mail_status]||'mute'}"${x.mail_error?` title="${esc(x.mail_error)}"`:''}>${esc(x.mail_status||'none')}</span>`:'—'}</td></tr>`),''):''}</section>`;
   }
+  P.briefs=()=>{
+    if(br.items===null&&!br.loading) setTimeout(loadBriefs,0);
+    const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
+    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
+    return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div><p style="white-space:pre-wrap">${esc(x.body)}</p></article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
+  };
   P.beta=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
     const used=ts.filter(x=>x.src).length, unused=n0(b.unused), full=used+unused>=BETA_CEILING;
@@ -1426,6 +1439,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(e.target.closest('[data-devretry]')){devAt=0;loadDev();return;}
     if(e.target.closest('[data-retry]')){load();return;}
     if(e.target.closest('[data-tfrefresh]')){loadTf();return;}
+    if(e.target.closest('[data-brrefresh]')){loadBriefs();return;}
     if(e.target.closest('[data-signout]')){sb.auth.signOut();return;}
     const b=e.target.closest('[data-status]'); if(b&&!b.disabled) setStatus(b.dataset.id,b.dataset.status);
   });
@@ -1438,7 +1452,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
