@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-E+ig32dAX5PPLPXH4jDAJugfrqtdZd2OoobUlfwy+J0='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-W9Vy1w7XoUkr4D39o9rDe42CheYlGkiWbozCwx4wSiU='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -237,6 +237,9 @@ td.note{font-size:13px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:var(--s3);min-width:0;box-shadow:var(--sh1)}
 .card .ctop{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
 .card .ctop .note{flex-basis:100%;margin-top:2px}
+.brhead{font-weight:600;margin:12px 0 4px}
+.brlist{margin:0;padding-left:18px}
+.brlist li{margin:2px 0;line-height:1.45}
 @media (min-width:640px){.card .ctop .note{flex-basis:auto;margin:0 0 0 auto}}
 .card .msg{white-space:pre-wrap;overflow-wrap:anywhere;max-width:80ch}
 .seg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;padding:3px;background:var(--sunken);border-radius:var(--r-md);align-self:stretch;max-width:100%}
@@ -823,11 +826,13 @@ body.mopen{overflow:hidden}
     <div class="fb">${pend.length?pend.map(x=>`<article class="card tester"><div class="trow"><span class="tname mono">${esc(x.email)}</span>${x.name?`<span class="usub">${esc(x.name)}</span>`:''}</div><div class="tsub">Requested ${esc(ago(x.created_at))}</div><div class="cacts"><button class="btn primary" type="button" data-req="approve" data-rid="${esc(x.id)}">Approve</button><button class="btn" type="button" data-req="decline" data-rid="${esc(x.id)}">Decline</button></div></article>`).join(''):'<p class="note">No pending requests.</p>'}</div>
     ${done.length?table(['Email','Status','Tier','Code','TestFlight','Mail'],done.map(x=>`<tr><td class="mono">${esc(x.email)}</td><td><span class="pill ${x.status==='approved'?'good':'mute'}">${esc(x.status)}</span></td><td>${x.tier?esc(x.tier==='beta_permanent'?'Permanent':'30-day'):'—'}</td><td class="mono">${esc(x.invite_code_masked||'—')}</td><td>${esc(x.testflight_status||'—')}</td><td>${x.status==='approved'?`<span class="pill ${mc[x.mail_status]||'mute'}"${x.mail_error?` title="${esc(x.mail_error)}"`:''}>${esc(x.mail_status||'none')}</span>`:'—'}</td></tr>`),''):''}</section>`;
   }
+  // First line is the greeting, bullet lines group into one list, other lines are section heads.
+  const brBody=b=>{const L=String(b).split('\n').map(l=>l.trim()).filter(Boolean);let o='',ul=false;L.forEach((l,i)=>{const bl=i>0&&l[0]==='\u2022';if(ul&&!bl){o+='</ul>';ul=false;}if(bl){if(!ul){o+='<ul class="brlist">';ul=true;}o+=`<li>${esc(l.slice(1).trim())}</li>`;}else o+=`<p class="${i?'brhead':'note'}">${esc(l)}</p>`;});return o+(ul?'</ul>':'');};
   P.briefs=()=>{
     if(br.items===null&&!br.loading) setTimeout(loadBriefs,0);
     const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
     if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
-    return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div><p style="white-space:pre-wrap">${esc(x.body)}</p></article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
+    return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
   };
   P.beta=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
