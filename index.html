@@ -114,8 +114,6 @@ details p{margin:0 0 16px;color:var(--text2)}
 .ask .fld{display:grid;gap:6px}
 .ask label{font-weight:600;font-size:.9375rem}
 .ask input[type=email]{font:inherit;font-size:1rem;color:var(--text);background:var(--surface);border:1px solid var(--text3);border-radius:12px;padding:12px 14px;min-height:48px;width:100%}
-.ask .chk{display:flex;align-items:center;gap:12px;min-height:44px;font-weight:400;font-size:1rem;cursor:pointer}
-.ask .chk input{width:24px;height:24px;flex:none;accent-color:var(--primary);margin:0}
 .ask .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
 .ask .msg{margin:0;font-size:.9375rem;color:var(--text2);min-height:1.4em;flex:1 1 200px}
 .ask .msg.err{color:#C42B1C}
@@ -145,13 +143,13 @@ BLO VAULT
 <div>
 <h1>Know what's left until payday.</h1>
 <p class="sub">Your balance, bills and card payments, each on its due date.</p>
-<a class="btn" href="#waitlist">Join the waitlist</a>
+<a class="btn" href="#beta">Join the beta</a>
 <ul class="trustline">
 <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Read-only</li>
 <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>No ads</li>
 <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Encrypted on your iPhone</li>
 </ul>
-<p class="status">iPhone only. App Store launch December 2026.</p>
+<p class="status">iPhone only. On the App Store December 7, 2026.</p>
 </div>
 <figure class="phonefig"><div class="phone"><img src="img/cashflow.jpg" width="506" height="1100" alt="Cash Flow screen: cash balance split by account and the runway for the next three pay periods"></div><figcaption class="cap">Example data</figcaption></figure>
 </div>
@@ -272,16 +270,15 @@ BLO VAULT
 </div>
 </section>
 
-<section id="waitlist" aria-labelledby="final-h">
-<h2 id="final-h">Get it on launch day.</h2>
-<p class="lead">Leave your email and I'll write once when BLO VAULT is on the App Store.</p>
+<section id="beta" aria-labelledby="final-h">
+<h2 id="final-h">Try it before launch.</h2>
+<p class="lead">BLO VAULT comes to the App Store on December 7, 2026. Want to use it now? Ask for a TestFlight beta invite and I'll email it to you.</p>
 <div class="ask">
 <form id="wlForm" novalidate>
 <div class="fld"><label for="wlEmail">Email address</label><input id="wlEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required aria-describedby="wlMsg"></div>
-<label class="chk"><input type="checkbox" name="beta">Also invite me to the TestFlight beta</label>
 <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"><input name="website" type="text" tabindex="-1" autocomplete="off"></div>
-<div class="row"><button class="btn" type="submit">Join the waitlist</button><p class="msg" id="wlMsg" role="status" aria-live="polite"></p></div>
-<p class="small">I'll email you about the launch. Unsubscribe anytime. <a href="/privacy-policy.html">Privacy Policy</a></p>
+<div class="row"><button class="btn" type="submit">Request a beta invite</button><p class="msg" id="wlMsg" role="status" aria-live="polite"></p></div>
+<p class="small">I'll only email you about your beta invite. <a href="/privacy-policy.html">Privacy Policy</a></p>
 </form>
 </div>
 </section>
@@ -309,14 +306,14 @@ BLO VAULT
     var email=f.email.value.trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){say("That email address doesn't look complete. Check it and try again.",1);f.email.focus();return;}
     var btn=f.querySelector('button'), netErr="Couldn't add you just now. Check your connection and try again.";
-    btn.disabled=true; btn.textContent='Joining\u2026';
-    fetch('https://nagsivpurrsrkwfdojdj.supabase.co/functions/v1/beta-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,website:f.website.value,list:f.beta.checked?'beta':'waitlist'})})
+    btn.disabled=true; btn.textContent='Sending\u2026';
+    fetch('https://nagsivpurrsrkwfdojdj.supabase.co/functions/v1/beta-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,website:f.website.value,list:'beta'})})
     .then(function(r){
-      if(r.status===200){say("You're on the list. I'll email you on launch day.");f.reset();}
+      if(r.status===200){say("Thanks. I'll email your TestFlight invite soon.");f.reset();}
       else if(r.status===400)say("That email address doesn't look complete. Check it and try again.",1);
       else if(r.status===429)say("Too many tries from here. Please try again in an hour.",1);
       else say(netErr,1);
-    }).catch(function(){say(netErr,1);}).then(function(){btn.disabled=false;btn.textContent='Join the waitlist';});
+    }).catch(function(){say(netErr,1);}).then(function(){btn.disabled=false;btn.textContent='Request a beta invite';});
   });
 })();
 </script>
