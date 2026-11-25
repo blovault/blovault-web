@@ -1,6 +1,6 @@
 # BLO VAULT Privacy Policy
 
-**Last Updated:** November 20, 2026
+**Last Updated:** November 25, 2026
 
 BLO VAULT ("we," "us," "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, share, and safeguard your information when you use our mobile application (the "App"). BLO VAULT is operated by an individual developer (Chan Hong). We designed the App so that sensitive financial details stay on your device whenever possible.
 
@@ -70,6 +70,7 @@ We do not sell your personal information. We use service providers (subprocessor
 - Sentry (Functional Software, Inc., United States) — crash and performance diagnostics: the error and stack trace, a scrubbed message, device model, OS version and App version, sent with an anonymous user id and without storing your IP address. Sent only if you allow it when the App asks; you can change this in Settings → Send crash reports. Governed by Sentry’s privacy notice.
 - Google ML Kit (or similar) — on-device text recognition when you use receipt scanning, where applicable.
 - Market data — Yahoo Finance and Stooq receive the ticker symbols and date ranges the App asks for (no account or user identifiers) to show prices and index information.
+- Cloudflare Web Analytics — measures visits to our website, blovault.com: page path, referrer, browser, operating system, device type, country and page-load timing. It uses no cookies or local storage and does not log query strings. It is not used in the App.
 
 Each provider processes data under its own terms and privacy notices.
 
