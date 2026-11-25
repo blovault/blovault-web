@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-W9Vy1w7XoUkr4D39o9rDe42CheYlGkiWbozCwx4wSiU='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-/PLjs/VtELZ/voirNCgKpceMvQSBRDLUg96e7xOV9WY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -435,7 +435,7 @@ body.mopen{overflow:hidden}
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
   let snap={}, history=[], fbSource='all', fbCase='active', session=null, loadErr='', denied=false, loading=false, lastLoadAt=0, cardErr={}, busy={};
-  let dev=null, devErr='', devLoading=false, devAt=0, devWho='owner';
+  let dev=null, devTried=false, devErr='', devLoading=false, devAt=0, devWho='owner';
   const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
   const tabAlias=k=>k==='bugs'?'inbox':k;
@@ -565,6 +565,7 @@ body.mopen{overflow:hidden}
       return {ref:t.ref,src,exp,days:exp?Math.ceil((exp-Date.now())/864e5):null,name:t.name||'Unnamed tester'};
     });
   }
+  const devNote=k=>{const n=dev?.data?.notes?.[k];return typeof n==='string'?n:'';};
   function attentionRows(){
     const rows=[];
     (snap.plaid?.items||[]).forEach(i=>{ if(i.is_active&&i.item_status&&i.item_status!=='login_repaired') rows.push(['warn',`${inst(i.institution_id)} connection: ${i.item_status.replace(/_/g,' ')}`,`Item ${i.item_id_short} · ${ago(i.item_status_at)}`,'sync']);});
@@ -575,9 +576,9 @@ body.mopen{overflow:hidden}
     const soon=testerList().filter(t=>t.days!=null&&t.days<=7);
     if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'beta']);
     const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
-    if(stale.length) rows.push(['warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', '),'sync']);
+    if(stale.length){const sn0=devNote('attention:sync_waiting');rows.push([sn0?'info':'warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', ')+(sn0?' · '+sn0:''),'sync']);}
     const sn=snap.sentry||{};
-    (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
+    (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5&&!devNote('sentry:'+x.short_id)).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
     if(sn.error) rows.push(['warn','Sentry read failed',sn.error,'dev']);
     return rows;
   }
@@ -653,7 +654,7 @@ body.mopen{overflow:hidden}
     const commits=arr(d.commits).filter(r=>r&&typeof r==='object').map(c=>`<tr><td>${esc(fmtDT(c.date))}</td><td><span class="mono">${esc(c.short||'')}</span></td><td style="overflow-wrap:anywhere">${esc(c.subject||'')}</td><td>${c.shipped===true?'<span class="pill good">On main</span>':'<span class="pill mute">Not shipped</span>'}</td></tr>`);
     const ci=arr(d.ci_runs).filter(r=>r&&typeof r==='object').slice(0,10).map(c=>{const m=devCI(c.conclusion);return `<tr><td>${esc(fmtDT(c.created))}</td><td>${esc(c.workflow||'')}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="r num">${typeof c.minutes==='number'?esc(c.minutes.toFixed(1)):'—'}</td></tr>`});
     const sn=snap.sentry||{};
-    const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}</td><td><span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span></td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
+    const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}${devNote('sentry:'+x.short_id)?`<div class="note">${esc(devNote('sentry:'+x.short_id))}</div>`:''}</td><td>${devNote('sentry:'+x.short_id)?'<span class="pill good">Handled</span>':`<span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span>`}</td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
     const senNote=sn.configured===false?'<p class="note">Sentry not connected.</p>':sn.error?`<p class="note" style="overflow-wrap:anywhere">${esc(sn.error)}</p>`:'';
     return err+`<section><div class="sechead"><h2>App errors</h2><a class="note" href="https://blo-vault-05.sentry.io/issues/" target="_blank" rel="noopener">Open Sentry</a></div>${senNote}${table(['Issue','Title','Level','>Events','>Users','Last seen'],sen,'No open app errors in 24 hours.')}</section>`+top+secs+`
     <section><div class="sechead"><h2>Checks</h2></div>${table(['Check','Value','State','Detail'],checks,'No checks reported.')}</section>
@@ -1303,6 +1304,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${P[tab]()}</div>`;
     if(tab==='dev'&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
+    if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
   function go(k){tab=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
