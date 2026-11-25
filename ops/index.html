@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-/PLjs/VtELZ/voirNCgKpceMvQSBRDLUg96e7xOV9WY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-SFRIDWX2On1sU7+OWl/Pv8+PFkcxd7sSOtqX/H0xOFw='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -178,7 +178,7 @@ section{display:flex;flex-direction:column;gap:var(--s3);min-width:0}
 .box.wide{grid-column:1/-1}
 .grid2.g22{grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.grid2.g22{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.chart svg{display:block;width:100%;height:auto;max-width:520px;overflow:visible}
+.chart svg{display:block;width:100%;height:auto;max-width:440px;overflow:visible}
 .chart text{fill:var(--fg3);font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
 .chart svg{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .chart .vl{display:none;fill:var(--fg);font-weight:650}
@@ -528,7 +528,7 @@ body.mopen{overflow:hidden}
   function ticksSvg(vals,max,y,L,R,W,lab){let g='',seen=new Set();vals.forEach(v=>{const yy=y(v),t=lab(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"${v?' stroke-dasharray="2 4"':''}/>`;if(!seen.has(t)){seen.add(t);g+=`<text x="${L-6}" y="${yy+4}" text-anchor="end">${esc(t)}</text>`}});return g}
   const ENUM={dry_run:'Dry run',live:'Live',would_remove:'Would remove',unremovable_no_plaid_user:"No Plaid user (can't remove)",beta_permanent:'Beta \u00b7 permanent',beta_limited:'Beta \u00b7 30 days'};
   const human=k=>{if(k==null||k==='')return k;const s=String(k);if(ENUM[s])return ENUM[s];const t=s.replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1)};
-  const CW=()=>innerWidth<640?300:400;
+  const CW=()=>300; // text stays at or above 12px while the SVG is at least 288px wide
   function lineChart(pts,{fmt,color='var(--accent)',h=150,title='Trend',minPts=0}={}){
     const fmtV=fmt||(v=>v);
     if(!pts.length) return '<div class="note">No history yet — each visit adds a point.</div>';
