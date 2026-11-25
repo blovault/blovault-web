@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-SFRIDWX2On1sU7+OWl/Pv8+PFkcxd7sSOtqX/H0xOFw='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-TUbXPCmPOyJWzJbLuY0Z56Oa//oxF2X975art/VNfEk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -637,8 +637,6 @@ body.mopen{overflow:hidden}
     if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox','inbox']);
     const soon=testerList().filter(t=>t.days!=null&&t.days<=7);
     if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'testers']);
-    const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
-    if(stale.length){const sn0=devNote('attention:sync_waiting');rows.push([sn0?'info':'warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', ')+(sn0?' · '+sn0:''),'sync']);}
     if(snap.reaper){const rm=reaperMode(); if(rm!=='live') rows.push(['warn',rm?'Cleanup job is in '+human(rm).toLowerCase()+' mode':'Cleanup job mode unknown',rm?'It records decisions and removes nothing':'The snapshot did not report a mode','cleanup']);}
     const sn=snap.sentry||{};
     (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5&&!devNote('sentry:'+x.short_id)).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
