@@ -131,7 +131,8 @@ nav.tabs .i{width:18px;height:18px}
   .bnav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
   .bnav button:focus-visible{outline-offset:-3px}
   .bnav .count{position:absolute;top:4px;left:calc(50% + 6px);font-size:12px;padding:0 6px;min-width:18px;background:var(--accent);color:var(--on-accent)}
-  main{padding-block:var(--s4) calc(88px + env(safe-area-inset-bottom,0px))}
+  /* #main beats the later base main rule (same specificity would lose to source order) */
+  main#main{padding-block:var(--s4) calc(88px + env(safe-area-inset-bottom,0px))}
   .toast{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
 }
 .count{font-size:12px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
