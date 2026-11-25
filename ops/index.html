@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-W9Vy1w7XoUkr4D39o9rDe42CheYlGkiWbozCwx4wSiU='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-SFRIDWX2On1sU7+OWl/Pv8+PFkcxd7sSOtqX/H0xOFw='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -75,7 +75,7 @@ p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--mono);font-size:12.5px}
 .unote{display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.usub{display:block;font-size:11px;color:var(--fg3)}
+.usub{display:block;font-size:12px;color:var(--fg3)}
 
 /* brand */
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
@@ -117,7 +117,24 @@ nav.tabs button::after{content:"";position:absolute;left:10px;right:10px;bottom:
 nav.tabs button[aria-selected="true"]{color:var(--accent)}
 nav.tabs button[aria-selected="true"]::after{transform:scaleX(1)}
 nav.tabs button:focus-visible{outline-offset:-2px}
-.count{font-size:11.5px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+nav.tabs button[aria-current="page"]::after{transform:scaleX(1)}
+nav.tabs .i{width:18px;height:18px}
+.bnav{display:none}
+.subnav{margin-bottom:calc(var(--s2) * -1)}
+@media (max-width:859px){
+  .tabwrap{display:none}
+  .bnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 16px -8px rgba(14,20,34,.18);padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+  .bnav button{position:relative;font:inherit;font-size:12px;font-weight:600;color:var(--fg3);background:none;border:0;min-height:56px;min-width:44px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+  .bnav button .i{width:22px;height:22px}
+  .bnav button[aria-current="page"]{color:var(--accent)}
+  .bnav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+  .bnav button:focus-visible{outline-offset:-3px}
+  .bnav .count{position:absolute;top:4px;left:calc(50% + 6px);font-size:12px;padding:0 6px;min-width:18px;background:var(--accent);color:var(--on-accent)}
+  main{padding-block:var(--s4) calc(88px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+}
+.count{font-size:12px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
 nav.tabs button[aria-selected="true"] .count{background:var(--accent-bg);color:var(--accent)}
 
 main{max-width:1200px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:var(--s5) 64px}
@@ -147,6 +164,11 @@ section{display:flex;flex-direction:column;gap:var(--s3);min-width:0}
 .kpi .ico{grid-area:ico;width:32px;height:32px;border-radius:var(--r-md);background:var(--sunken);color:var(--fg2);display:grid;place-items:center}
 .kpi .ico .i{width:18px;height:18px}
 .kpi .value{grid-area:value;font-size:26px;line-height:1.15;font-weight:650;letter-spacing:-.015em;overflow-wrap:anywhere}
+.kpi.hasspark{grid-template-areas:"label ico" "value spark" "sub sub"}
+.kpi .spark{grid-area:spark;width:64px;height:22px;color:var(--accent);align-self:center;justify-self:end}
+.kpis.k6{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:639px){.kpis.k6 .kpi{min-height:104px;padding:12px}.kpis.k6 .kpi .value{font-size:24px}.kpis.k6 .kpi .ico{display:none}.kpis.k6 .kpi{grid-template-columns:minmax(0,1fr) auto}}
+@media (min-width:720px){.kpis.k6{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .kpi .sub{grid-area:sub;font-size:13px;color:var(--fg3);min-height:1.5em}
 .kpi .sub:empty::before{content:"\00a0"}
 
@@ -156,8 +178,18 @@ section{display:flex;flex-direction:column;gap:var(--s3);min-width:0}
 .box.wide{grid-column:1/-1}
 .grid2.g22{grid-template-columns:minmax(0,1fr)}
 @media (min-width:720px){.grid2.g22{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.chart svg{display:block;width:100%;height:auto;max-width:520px;overflow:visible}
-.chart text{fill:var(--fg3);font-family:var(--sans);font-size:11px;font-variant-numeric:tabular-nums}
+.chart svg{display:block;width:100%;height:auto;max-width:440px;overflow:visible}
+.chart text{fill:var(--fg3);font-family:var(--sans);font-size:12.5px;font-variant-numeric:tabular-nums}
+.chart svg{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.chart .vl{display:none;fill:var(--fg);font-weight:650}
+.chart.vals .vl{display:inline}
+.chart .hint{font-size:12px;color:var(--fg3)}
+.slist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.slist li{display:flex;align-items:center;gap:8px;min-width:0}
+.slist i{width:12px;height:12px;border-radius:3px;flex:none}
+.slist .sv{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--fg2);white-space:nowrap}
+.sbar{display:flex;height:26px;border-radius:8px;overflow:hidden;gap:2px;background:var(--sunken)}
+.sbar>span{min-width:3px}
 .chart text.ev{fill:var(--fg);font-weight:650}
 .legend{display:flex;gap:var(--s2) var(--s4);flex-wrap:wrap;font-size:13px;color:var(--fg2)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
@@ -232,6 +264,15 @@ td.note{font-size:13px}
   .links a{line-height:1.25;padding:8px 12px}
 }
 
+/* two-line cards for users and Items (phones); the table shows from 640px */
+.only-m{display:none}
+@media (max-width:639px){.only-d{display:none!important}.only-m{display:flex;flex-direction:column;gap:var(--s2)}}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;display:flex;flex-direction:column;gap:var(--s2);min-width:0;box-shadow:var(--sh1)}
+.rcard .l1{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;min-width:0}
+.rcard .l1 .tname{font-weight:650;overflow-wrap:anywhere}
+.rcard .l2{font-size:13px;color:var(--fg3);overflow-wrap:anywhere}
+.rcard .cacts{margin-top:2px}
+
 /* bug cards */
 .fb{display:flex;flex-direction:column;gap:var(--s3)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:var(--s3);min-width:0;box-shadow:var(--sh1)}
@@ -283,15 +324,13 @@ td.note{font-size:13px}
 .sw::after{content:"";position:absolute;left:3px;top:50%;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
 .sw[aria-checked="true"]::before{background:var(--accent)}
 .sw[aria-checked="true"]::after{transform:translateX(34px)}
-.sw .swl{position:absolute;top:50%;margin-top:-8px;font-size:11px;line-height:16px;font-weight:700;color:var(--fg2);right:9px;z-index:1;pointer-events:none}
+.sw .swl{position:absolute;top:50%;margin-top:-8px;font-size:12px;line-height:16px;font-weight:700;color:var(--fg2);right:9px;z-index:1;pointer-events:none}
 .sw[aria-checked="true"] .swl{right:auto;left:9px;color:var(--on-accent)}
 .sw:disabled{opacity:.55;cursor:default}
 .sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:999px}
 
 /* buttons */
-.btn{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line2);background:var(--surface);color:var(--fg);padding:0 14px;border-radius:var(--r-md);cursor:pointer;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh1);white-space:nowrap}
-@media (pointer:coarse){.btn{min-height:44px}}
-@media (max-width:859px){.btn{min-height:44px}}
+.btn{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line2);background:var(--surface);color:var(--fg);padding:0 14px;border-radius:var(--r-md);cursor:pointer;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh1);white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn[aria-pressed="true"]{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
 .btn:active{transform:translateY(1px)}
@@ -402,9 +441,10 @@ body.mopen{overflow:hidden}
           <span class="who"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg><span id="who"></span></span>
         </div>
       </div>
-      <div class="tabwrap" id="tabwrap"><nav class="tabs" role="tablist" aria-label="Dashboard sections" id="tabs"></nav></div>
+      <div class="tabwrap" id="tabwrap"><nav class="tabs" aria-label="Dashboard sections" id="tabs"></nav></div>
     </div>
   </div>
+  <nav class="bnav" id="bnav" aria-label="Dashboard sections"></nav>
   <main id="main"><div class="sr" role="status">Loading the latest snapshot…</div><div class="kpis" aria-hidden="true"><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div></div></main>
 </div>
 
@@ -430,15 +470,21 @@ body.mopen{overflow:hidden}
   const inst=id=>INST[id]||snap.plaid?.institution_names?.[id]||id||'—';
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
-  const TABS=[['overview','Overview'],['dev','Dev'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta'],['briefs','Briefs']];
+  // Sections are the old tab keys (and hashes). GROUPS puts them under the five navigation entries.
+  const TABS=[['overview','Today'],['briefs','Briefs'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
+  const GROUPS=[['home','Home','home',['overview','briefs']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
+  const groupOf=k=>GROUPS.find(g=>g[3].includes(k))||GROUPS[0];
+  // Old hashes and group names land on a section. #beta was the push alert for invite requests.
+  const ALIAS={bugs:'inbox',beta:'requests',home:'overview',money:'plaid',ops:'cleanup',admin:'tools',shortcuts:'tools',activity:'tools',alerts:'tools',testflight:'builds',flags:'features',invites:'testers'};
+  const lastSub={};
   const HIST_KEY='ops_history_v1', HIST_MAX=365;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
   let snap={}, history=[], fbSource='all', fbCase='active', session=null, loadErr='', denied=false, loading=false, lastLoadAt=0, cardErr={}, busy={};
-  let dev=null, devErr='', devLoading=false, devAt=0, devWho='owner';
+  let dev=null, devTried=false, devErr='', devLoading=false, devAt=0, devWho='owner';
   const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-  const tabAlias=k=>k==='bugs'?'inbox':k;
+  const tabAlias=k=>ALIAS[k]||k;
   let tab=tabAlias((location.hash||'').slice(1)); if(!TABS.some(t=>t[0]===tab)) tab=tabAlias(lsGet('ops_tab')||'overview');
   if(!TABS.some(t=>t[0]===tab)) tab='overview';
   try{const h=JSON.parse(lsGet(HIST_KEY)||'[]'); if(Array.isArray(h)) history=h.filter(x=>x&&x.generated_at).slice(-HIST_MAX);}catch(e){history=[];}
@@ -457,6 +503,8 @@ body.mopen{overflow:hidden}
     alert:'<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.1"/>',
     inbox:'<path d="M4 13l2-8h12l2 8v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
     chev:'<path d="M6 9l6 6 6-6"/>',
+    home:'<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    ops:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
     ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'
   };
   const LINKS={
@@ -480,11 +528,13 @@ body.mopen{overflow:hidden}
   function ticksSvg(vals,max,y,L,R,W,lab){let g='',seen=new Set();vals.forEach(v=>{const yy=y(v),t=lab(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--grid)"${v?' stroke-dasharray="2 4"':''}/>`;if(!seen.has(t)){seen.add(t);g+=`<text x="${L-6}" y="${yy+4}" text-anchor="end">${esc(t)}</text>`}});return g}
   const ENUM={dry_run:'Dry run',live:'Live',would_remove:'Would remove',unremovable_no_plaid_user:"No Plaid user (can't remove)",beta_permanent:'Beta \u00b7 permanent',beta_limited:'Beta \u00b7 30 days'};
   const human=k=>{if(k==null||k==='')return k;const s=String(k);if(ENUM[s])return ENUM[s];const t=s.replace(/_/g,' ');return t.charAt(0).toUpperCase()+t.slice(1)};
-  function lineChart(pts,{fmt,color='var(--accent)',h=150}={}){
+  const CW=()=>300; // text stays at or above 12px while the SVG is at least 288px wide
+  function lineChart(pts,{fmt,color='var(--accent)',h=150,title='Trend',minPts=0}={}){
     const fmtV=fmt||(v=>v);
     if(!pts.length) return '<div class="note">No history yet — each visit adds a point.</div>';
     const id='lg'+(++gid);
-    const W=400,H=h,L=40,R=14,T=24,B=24, max=niceMax(Math.max(...pts.map(p=>p.v))), min=0;
+    if(minPts&&pts.length<minPts) return hbars(pts.map(p=>({label:p.label,v:p.v})),{fmt:fmtV,color})+'<div class="note">Only '+pts.length+' month'+(pts.length===1?'':'s')+' recorded; a trend line needs '+minPts+'.</div>';
+    const W=CW(),H=h,L=46,R=14,T=24,B=24, max=niceMax(Math.max(...pts.map(p=>p.v))), min=0;
     const x=i=>pts.length===1?(L+(W-L-R)/2):L+i*(W-L-R)/(pts.length-1), y=v=>T+(H-T-B)*(1-(v-min)/(max-min||1));
     const g=ticksSvg(tickVals(max,pts.every(p=>Number.isInteger(p.v))),max,y,L,R,W,v=>fmt?String(fmt(v)):tickTxt(v));
     const d=pts.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(p.v).toFixed(1)}`).join(' ');
@@ -494,23 +544,32 @@ body.mopen{overflow:hidden}
     const xl=[0,pts.length-1].filter((v,i,a)=>a.indexOf(v)===i).map(i=>`<text x="${x(i)}" y="${H-6}" text-anchor="${i?'end':'start'}">${esc(pts[i].label)}</text>`).join('');
     const one=pts.length===1?`<line x1="${L}" x2="${W-R}" y1="${ly}" y2="${ly}" stroke="${color}" stroke-width="1.25" stroke-dasharray="4 4" opacity=".4"/>`:'';
     const cap=pts.length===1?'<div class="note">First data point \u2014 the line grows with each visit</div>':'';
+ const pv=pts.length<=14?pts.slice(0,-1).map((p,i)=>`<text class="vl" x="${x(i).toFixed(1)}" y="${Math.max(12,y(p.v)-9).toFixed(1)}" text-anchor="middle">${esc(fmtV(p.v))}</text>`).join(''):'';
     const ev=`<text class="ev" x="${lx}" y="${Math.max(12,ly-11)}" text-anchor="${pts.length===1?'middle':'end'}">${esc(fmtV(last.v))}</text>`;
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Trend, latest ${esc(fmtV(last.v))}">${defs}${g}${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>${one}<circle cx="${lx}" cy="${ly}" r="7" fill="${color}" opacity=".18"/><circle cx="${lx}" cy="${ly}" r="3.75" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>${ev}${xl}</svg>${cap}`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}: ${pts.length} point${pts.length===1?'':'s'}, ${esc(pts[0].label)} to ${esc(last.label)}, latest ${esc(fmtV(last.v))}. Tap to show values.">${defs}${g}${area}<path d="${d}" fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>${one}<circle cx="${lx}" cy="${ly}" r="7" fill="${color}" opacity=".18"/><circle cx="${lx}" cy="${ly}" r="3.75" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>${pv}${ev}${xl}</svg>${cap}`;
   }
-  function stackedBars(rows,keys,{h=160,fmt,totals,mark}={}){
+  function stackedBars(rows,keys,{h=160,fmt,totals,mark,title='Counts by period'}={}){
     if(!rows.length) return '<div class="note">No data in this window.</div>';
-    const W=400,H=h,L=30,R=8,T=12,B=24, tot=rows.map(r=>keys.reduce((s,k)=>s+n0(r[k[0]]),0)), max=niceMax(Math.max(1,...tot,...(mark?rows.map(r=>n0(r[mark[0]])):[])));
+    const W=CW(),H=h,L=fmt?48:32,R=8,T=16,B=24, tot=rows.map(r=>keys.reduce((s,k)=>s+n0(r[k[0]]),0)), max=niceMax(Math.max(1,...tot,...(mark?rows.map(r=>n0(r[mark[0]])):[])));
     const bw=(W-L-R)/rows.length, y=v=>T+(H-T-B)*(1-v/max);
     const g=ticksSvg(tickVals(max,!fmt),max,y,L,R,W,fmt||tickTxt);
-    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});if(totals&&acc)bars+=`<text x="${(L+i*bw+bw/2).toFixed(1)}" y="${(y(acc)-3).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--fg2)">${esc(fmt?fmt(acc):acc)}</text>`;if(mark&&n0(r[mark[0]])){const my=y(n0(r[mark[0]])).toFixed(1);bars+=`<line x1="${(L+i*bw+bw*.05).toFixed(1)}" x2="${(L+i*bw+bw*.95).toFixed(1)}" y1="${my}" y2="${my}" stroke="var(--fg)" stroke-width="2"/>`;}});
+    let bars='';rows.forEach((r,i)=>{let acc=0;keys.forEach(([k,,c])=>{const v=n0(r[k]);if(!v)return;const y0=y(acc),y1=y(acc+v);bars+=`<rect x="${(L+i*bw+bw*.15).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw*.7).toFixed(1)}" height="${Math.max(0,y0-y1).toFixed(1)}" fill="${c}" rx="2"/>`;acc+=v;});if(acc&&(totals||rows.length<=14||i===rows.length-1||acc===Math.max(...tot)))bars+=`<text${totals?'':' class="vl"'} x="${(L+i*bw+bw/2).toFixed(1)}" y="${(y(acc)-3).toFixed(1)}" text-anchor="middle">${esc(fmt?fmt(acc):acc)}</text>`;if(mark&&n0(r[mark[0]])){const my=y(n0(r[mark[0]])).toFixed(1);bars+=`<line x1="${(L+i*bw+bw*.05).toFixed(1)}" x2="${(L+i*bw+bw*.95).toFixed(1)}" y1="${my}" y2="${my}" stroke="var(--fg)" stroke-width="2"/>`;}});
     const lab=[0,Math.floor(rows.length/2),rows.length-1].filter((v,i,a)=>a.indexOf(v)===i).map((i,j,a)=>`<text x="${L+i*bw+bw/2}" y="${H-6}" text-anchor="${j===0&&a.length>1?'start':j===a.length-1&&a.length>1?'end':'middle'}">${esc(rows[i].label)}</text>`).join('');
     const legend='<div class="legend">'+keys.map(([,l,c])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')+(mark?`<span><i style="background:none;border-top:2px solid var(--fg);height:0;border-radius:0"></i>${esc(mark[1])}</span>`:'')+'</div>';
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stacked counts by period">${g}${bars}${lab}</svg>${legend}`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}: ${rows.length} period${rows.length===1?'':'s'}, ${esc(rows[0].label)} to ${esc(rows[rows.length-1].label)}, latest ${esc(fmt?fmt(tot[tot.length-1]):tot[tot.length-1])}, highest ${esc(fmt?fmt(Math.max(...tot)):Math.max(...tot))}. Tap to show values.">${g}${bars}${lab}</svg>${legend}`;
   }
   function hbars(items,{fmt=v=>v,color='var(--accent)'}={}){
     if(!items.length) return '<div class="note">Nothing to show.</div>';
     const max=Math.max(1,...items.map(i=>i.v));
     return '<div class="bars">'+items.map(i=>`<div class="bar"><span>${esc(i.label)}</span><div class="track"><div class="fill" style="width:${(i.v/max*100).toFixed(1)}%;background:${i.color||color}"></div></div><span class="num">${esc(fmt(i.v))}</span></div>`).join('')+'</div>';
+  }
+  // 100% stacked bar with every segment named and counted below it, so color is never the only cue.
+  function splitBar(parts,{fmt=v=>v,title='Share'}={}){
+    const ps=parts.filter(p=>p.v>0), tot=ps.reduce((a,p)=>a+p.v,0);
+    if(!tot) return '<div class="note">Nothing to show.</div>';
+    const pct=v=>Math.round(v/tot*100)+'%';
+    return `<div class="sbar" role="img" aria-label="${esc(title)}: ${esc(ps.map(p=>`${p.label} ${fmt(p.v)} (${pct(p.v)})`).join(', '))}">${ps.map(p=>`<span style="flex:${p.v};background:${p.color}"></span>`).join('')}</div>
+    <ul class="slist">${ps.map(p=>`<li><i style="background:${p.color}"></i><span>${esc(p.label)}</span><span class="sv">${esc(fmt(p.v))} · ${pct(p.v)}</span></li>`).join('')}</ul>`;
   }
   const wk=s=>{const d=dOf(s);return d?d.toLocaleDateString(undefined,{month:'short',day:'numeric'}):s};
   const MONTHS_L=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -537,7 +596,10 @@ body.mopen{overflow:hidden}
   };
 
   /* ---------- helpers ---------- */
-  const kpi=(l,v,s)=>`<div class="kpi"><span class="label">${esc(l)}</span><span class="ico">${svg(iconFor(l))}</span><span class="value num">${esc(v)}</span><span class="sub">${esc(s||'')}</span></div>`;
+  // Tiny trend line for a KPI tile; decorative (the value is already in text). Needs two or more points.
+  const spark=vs=>{const a=vs.filter(v=>typeof v==='number'&&isFinite(v)); if(a.length<2) return ''; const mx=Math.max(...a), mn=Math.min(...a), W=64, H=22, y=v=>mx===mn?H/2:H-3-(v-mn)/(mx-mn)*(H-6);
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="${a.map((v,i)=>`${i?'L':'M'}${(i*(W-4)/(a.length-1)+2).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;};
+  const kpi=(l,v,s,sp)=>`<div class="kpi${sp?' hasspark':''}"><span class="label">${esc(l)}</span><span class="ico">${svg(iconFor(l))}</span><span class="value num">${esc(v)}</span>${sp||''}<span class="sub">${esc(s||'')}</span></div>`;
   const table=(head,rows,empty)=>`<div class="tablebox"><table><thead><tr>${head.map(h=>`<th scope="col"${h.startsWith('>')?' class="r"':''}>${esc(h.replace(/^>/,''))}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="${head.length}" class="tempty">${esc(empty)}</td></tr>`}</tbody></table></div>`;
   const skelKpi='<div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div>';
   const skelBox='<div class="box sk"><span class="skl w40"></span><span class="skl block"></span></div>';
@@ -565,19 +627,21 @@ body.mopen{overflow:hidden}
       return {ref:t.ref,src,exp,days:exp?Math.ceil((exp-Date.now())/864e5):null,name:t.name||'Unnamed tester'};
     });
   }
+  const devNote=k=>{const n=dev?.data?.notes?.[k];return typeof n==='string'?n:'';};
   function attentionRows(){
     const rows=[];
     (snap.plaid?.items||[]).forEach(i=>{ if(i.is_active&&i.item_status&&i.item_status!=='login_repaired') rows.push(['warn',`${inst(i.institution_id)} connection: ${i.item_status.replace(/_/g,' ')}`,`Item ${i.item_id_short} · ${ago(i.item_status_at)}`,'sync']);});
     (snap.reaper?.recent_rows||[]).filter(x=>x.decision==='error'||x.error).slice(0,5).forEach(x=>rows.push(['bad','Cleanup job problem: '+(human(x.decision)||''),`${fmtDT(x.run_at)} · user ${x.user_short||'—'} · ${x.error||x.reason||''}`,'cleanup']));
     (snap.users?.items||[]).forEach(x=>{ if(x.plan==='trial'&&x.trial_days_remaining!=null&&x.trial_days_remaining<=3) rows.push(['warn',`Trial ends in ${x.trial_days_remaining} day(s)`,`User ${x.short} · ${x.items_active??x.institution_count??0} bank link(s)`,'users']);});
     const fresh=(snap.feedback?.items||[]).filter(x=>x.status==='pending');
-    if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox tab','inbox']);
+    if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox','inbox']);
     const soon=testerList().filter(t=>t.days!=null&&t.days<=7);
-    if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'beta']);
+    if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'testers']);
     const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
-    if(stale.length) rows.push(['warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', '),'sync']);
+    if(stale.length){const sn0=devNote('attention:sync_waiting');rows.push([sn0?'info':'warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', ')+(sn0?' · '+sn0:''),'sync']);}
+    if(snap.reaper){const rm=reaperMode(); if(rm!=='live') rows.push(['warn',rm?'Cleanup job is in '+human(rm).toLowerCase()+' mode':'Cleanup job mode unknown',rm?'It records decisions and removes nothing':'The snapshot did not report a mode','cleanup']);}
     const sn=snap.sentry||{};
-    (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
+    (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5&&!devNote('sentry:'+x.short_id)).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
     if(sn.error) rows.push(['warn','Sentry read failed',sn.error,'dev']);
     return rows;
   }
@@ -585,37 +649,41 @@ body.mopen{overflow:hidden}
 
   /* ---------- panels ---------- */
   const P={};
+  const briefInline=()=>{
+    if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
+    const head=`<div class="sechead"><h2>Latest brief</h2><button class="btn" type="button" data-tab="briefs">All briefs</button></div>`;
+    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading brief…</p>'}</section>`;
+    const x=br.items[0];
+    return `<section>${head}${x?`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`:`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
+  };
   P.overview=()=>{
-    const u=snap.users||{},p=snap.plaid||{},r=snap.reaper||{},f=snap.feedback||{};
+    const u=snap.users||{},p=snap.plaid||{},f=snap.feedback||{};
     const open=(f.items||[]).filter(isOpen);
-    const lastRun=(r.last_runs||[])[0];
     const H=history.map(h=>({label:fmtDate(h.generated_at),...h}));
-    return `<div class="kpis">${[
-      kpi('Users',u.total??'—',`${n0(u.active_last_7d)} active in 7 days`),
-      kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),
-      kpi('Est. Plaid cost / mo',usd(estMo(p)),`${taxShort()} · midnight UTC`),
-      kpi('Open inbox items',f.items?open.length:'—',`${n0(f.counts?.pending)} new`),
-      kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet'),
-      kpi('App errors (24h)',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected')].join('')}</div>
+    const bm=(p.by_month||[]).filter(m=>n0(m.billed_items)>0);
+    return `<div class="kpis k6">${[
+      kpi('Active users 7d',n0(u.active_last_7d),`of ${u.total??'—'} users`,spark(history.map(h=>h.users_active7))),
+      kpi('Billed Items this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · ${n0(p.live_items??p.active_items)} live now`,spark(bm.map(m=>n0(m.billed_items)))),
+      kpi('Est. Plaid cost / mo',usd(estMo(p)),taxShort(),spark(bm.map(estM))),
+      kpi('Open inbox',f.items?open.length:'—',`${n0(f.counts?.pending)} new`,spark(history.map(h=>h.feedback_open))),
+      kpi('App errors 24h',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected'),
+      kpi('Pending sync signals',flagsOf().length,flagsOf().length?'waiting for the app':'all caught up')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
-    <section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
+    ${briefInline()}
+    <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
+      <div class="grid2 g22">
+        <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart(bm.map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})),{title:'Billed Items by month',minPts:3})}</div></div>
+        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart(bm.map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)',title:'Estimated Plaid cost by month',minPts:3})}</div></div>
+        <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)',title:'Users over visits'})}</div></div>
+        <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)',title:'Open inbox items over visits'})}</div></div>
+      </div></section>`;
+  };
+  P.tools=()=>`<section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
       <div class="links">${['plaidLogs','plaidDebugger','plaidSupport','plaidBilling','supabase','supabaseFns','ghReaper'].map(k=>`<a href="${LINKS[k][1]}" target="_blank" rel="noopener">${svg('ext')}<span>${esc(LINKS[k][0])}</span></a>`).join('')}</div></section>
     <section><div class="sechead"><h2>Recent admin activity</h2></div>
       ${table(['When','Action','Summary'],(Array.isArray(snap.audit)?snap.audit:[]).map(a=>`<tr><td>${esc(fmtDT(a.created_at))}</td><td>${esc(human(a.action))}</td><td class="note">${esc(a.summary||a.target||'')}</td></tr>`),'No admin actions recorded yet.')}</section>
-    <section><div class="sechead"><h2>Plaid billing months</h2><span class="note">UTC months, kept after they close</span></div>
-      ${monthRows(p)}
-      <p class="note">Plaid's month starts at midnight UTC. That is 7:00 PM Central while daylight saving is on, and 6:00 PM Central after the clocks fall back. The headline is the open month. Closed months stay in this list.</p>
-    </section>
-    <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
-      <div class="grid2 g22">
-        <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})))}</div></div>
-        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
-        <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)'})}</div></div>
-        <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)'})}</div></div>
-      </div></section>
     <section><div class="sechead"><h2>Phone alerts</h2></div>${pushHtml()}</section>`;
-  };
-  let selUser=null;
+  let selUser=null, cleanDays=innerWidth<640?14:30;
   const userPanel=()=>{
     const us=snap.users?.items||[], i=us.findIndex(x=>x.id===selUser); if(i<0) return '';
     const x=us[i];
@@ -653,7 +721,7 @@ body.mopen{overflow:hidden}
     const commits=arr(d.commits).filter(r=>r&&typeof r==='object').map(c=>`<tr><td>${esc(fmtDT(c.date))}</td><td><span class="mono">${esc(c.short||'')}</span></td><td style="overflow-wrap:anywhere">${esc(c.subject||'')}</td><td>${c.shipped===true?'<span class="pill good">On main</span>':'<span class="pill mute">Not shipped</span>'}</td></tr>`);
     const ci=arr(d.ci_runs).filter(r=>r&&typeof r==='object').slice(0,10).map(c=>{const m=devCI(c.conclusion);return `<tr><td>${esc(fmtDT(c.created))}</td><td>${esc(c.workflow||'')}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="r num">${typeof c.minutes==='number'?esc(c.minutes.toFixed(1)):'—'}</td></tr>`});
     const sn=snap.sentry||{};
-    const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}</td><td><span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span></td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
+    const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}${devNote('sentry:'+x.short_id)?`<div class="note">${esc(devNote('sentry:'+x.short_id))}</div>`:''}</td><td>${devNote('sentry:'+x.short_id)?'<span class="pill good">Handled</span>':`<span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span>`}</td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
     const senNote=sn.configured===false?'<p class="note">Sentry not connected.</p>':sn.error?`<p class="note" style="overflow-wrap:anywhere">${esc(sn.error)}</p>`:'';
     return err+`<section><div class="sechead"><h2>App errors</h2><a class="note" href="https://blo-vault-05.sentry.io/issues/" target="_blank" rel="noopener">Open Sentry</a></div>${senNote}${table(['Issue','Title','Level','>Events','>Users','Last seen'],sen,'No open app errors in 24 hours.')}</section>`+top+secs+`
     <section><div class="sechead"><h2>Checks</h2></div>${table(['Check','Value','State','Detail'],checks,'No checks reported.')}</section>
@@ -668,47 +736,65 @@ body.mopen{overflow:hidden}
     catch(err){ devErr=(err instanceof TypeError)?'Network error.':'Could not load dev data: '+err.message; }
     devAt=Date.now(); devLoading=false; render();
   }
+  const userCard=(x,i)=>`<article class="rcard"><div class="l1"><span class="tname mono">${esc(x.short)}</span>${planPill(x)}${x.feature_preview?'<span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?'<span class="pill warn">Link not finished</span>':''}</div><div class="l2">${esc(x.entitlement?human(x.entitlement.source):'No access grant')} · opened ${esc(ago(x.last_active_at))} · ${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)} billed / live</div><div class="cacts"><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></div></article>`;
   P.users=()=>{
     const u=snap.users||{}, pc=u.plan_counts||{}, ec=u.entitlement_counts||{};
     const weeks=(u.signups_by_week||[]).map(w=>({label:wk(w.week_start),n:w.count}));
+    let run=typeof u.total==='number'?u.total-weeks.reduce((a,w)=>a+n0(w.n),0):0; // users from before the first week shown
+    const cum=weeks.map(w=>({label:w.label,v:(run+=n0(w.n))}));
     return `<div class="kpis">${[kpi('Total',u.total??'—'),kpi('Active 7 days',n0(u.active_last_7d)),kpi('Active 30 days',n0(u.active_last_30d)),kpi('On trial',n0(pc.trial)),kpi('Pro or beta',n0(pc.pro))].join('')}</div>
     <div class="grid2">
-      <div class="box"><h3>Plans</h3>${hbars([['pro','Pro','var(--good)'],['trial','Trial','var(--accent)'],['expired','Expired','var(--bad)'],['free','Free','var(--fg3)'],['unknown','Unknown','var(--fg3)']].map(([k,l,c])=>({label:l,v:n0(pc[k]),color:c})))}</div>
-      <div class="box"><h3>Access source</h3>${hbars([['owner','Owner'],['beta_permanent','Beta · permanent'],['beta_limited','Beta · 30 days'],['revenuecat','Paid (App Store)'],['none','None']].map(([k,l])=>({label:l,v:n0(ec[k])})),{color:'var(--violet)'})}</div>
+      <div class="box"><h3>Plans</h3>${splitBar([['pro','Pro','var(--good)'],['trial','Trial','var(--accent)'],['expired','Expired','var(--bad)'],['free','Free','var(--fg3)'],['unknown','Unknown','var(--line2)']].map(([k,l,c])=>({label:l,v:n0(pc[k]),color:c})),{title:'Plan mix'})}</div>
+      <div class="box"><h3>Access source</h3>${splitBar([['owner','Owner','var(--teal)'],['beta_permanent','Beta · permanent','var(--violet)'],['beta_limited','Beta · 30 days','var(--accent)'],['revenuecat','Paid (App Store)','var(--good)'],['none','None','var(--line2)']].map(([k,l,c])=>({label:l,v:n0(ec[k]),color:c})),{title:'Access source mix'})}</div>
       ${funnelBox('Link funnel · all users',u.link_funnel?.all)}
       ${funnelBox('Link funnel · signed up in last 30 days',u.link_funnel?.last_30d)}
-      <div class="box wide"><h3>Sign-ups per week</h3><div class="chart">${stackedBars(weeks,[['n','New accounts','var(--accent)']])}</div></div>
+      ${weeks.length?`<div class="box"><h3>Sign-ups per week</h3><div class="chart">${stackedBars(weeks,[['n','New accounts','var(--accent)']],{title:'New accounts per week'})}</div></div>
+      <div class="box"><h3>Total users over time</h3><div class="chart">${lineChart(cum,{color:'var(--teal)',title:'Total users by week'})}</div></div>`:''}
     </div>
     ${u.trial_ends_note?`<p class="note">${esc(u.trial_ends_note)}</p>`:''}
     ${userPanel()}
-    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> <span class="mono">${esc(x.short)}</span>${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source)):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
+    <div class="only-d">${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> <span class="mono">${esc(x.short)}</span>${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source)):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}</div>
+    <div class="only-m">${(u.items||[]).map((x,i)=>userCard(x,i)).join('')||'<div class="empty"><p>No users in this snapshot.</p></div>'}</div>`;
   };
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
-    const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
     return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(inclTax(n0(cp.transactions)))+' / mo'),kpi('Investments Items',n0(bp.investments),usd(inclTax(n0(cp.investments)))+' / mo'),kpi('Est. total / mo',usd(estMo(p)),taxShort())].join('')}</div>
+    ${(()=>{const sp=splitBar([{label:'Transactions',v:inclTax(n0(cp.transactions)),color:'var(--accent)'},{label:'Investments',v:inclTax(n0(cp.investments)),color:'var(--violet)'}],{fmt:v=>usd(v)+' / mo',title:'Monthly cost split by product'});return sp.startsWith('<div class="note">')?'':`<div class="box" style="margin:12px 0"><h3>Cost by product</h3>${sp}</div>`})()}
     <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p><div class="acts"><button class="btn" type="button" data-act="invoice">Record invoice</button></div></div>
-    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates, ${esc(taxNote())}. Line: Plaid's invoice total, when recorded.</p></div>
-    <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
+    <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced'],title:'Estimated Plaid cost by month'})}</div><p class="note">Bars: estimate from the billing ledger at contract rates, ${esc(taxNote())}. Line: Plaid's invoice total, when recorded.</p></div>
+    <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id on the Items page) \u00b7 ${lnk('plaidLogs')} \u00b7 ${lnk('plaidSupport')} \u00b7 ${lnk('plaidBilling')}</p>`;
+  };
+  const itemCard=(i,n)=>`<article class="rcard"><div class="l1"><span class="tname">${esc(inst(i.institution_id))}</span>${itemState(i)}</div><div class="l2"><span class="mono">${esc(i.item_id_short)}</span> · ${esc(i.product_assumed||'—')} · webhook ${esc(ago(i.last_webhook_at))}</div><div class="cacts"><button class="btn" type="button" data-itemopen="${n}" aria-label="Open details for Item ${esc(i.item_id_short)}">Details</button></div></article>`;
+  P.items=()=>{
+    const p=snap.plaid||{};
+    const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
+    return `<p class="note">Search a short Item id in ${lnk('plaidDebugger')}. ${lnk('plaidLogs')} \u00b7 ${lnk('plaidSupport')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
     </div>
-    ${table(['Item','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}`;
+    <div class="only-d">${table(['Item','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map((i,n)=>`<tr><td class="mono">${esc(i.item_id_short)} <button class="btn quiet" type="button" data-itemopen="${n}" aria-label="Open details for Item ${esc(i.item_id_short)}">Details</button></td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}</div>
+    <div class="only-m">${(p.items||[]).map((i,n)=>itemCard(i,n)).join('')||'<div class="empty"><p>No bank connections in this snapshot.</p></div>'}</div>`;
   };
   P.sync=()=>{
     const p=snap.plaid||{}, flags=flagsOf();
     const statusItems=(p.items||[]).filter(i=>i.is_active&&i.item_status);
     return `<p class="note">Plaid sends a signal when an Item has new data; the app syncs it the next time it opens. Signals that stay pending for days point to a sync problem on that Item.</p>
+    ${(()=>{if(!flags.length) return ''; const hr=w=>w.last_webhook_at&&dOf(w.last_webhook_at)?(Date.now()-dOf(w.last_webhook_at))/36e5:null, c=[0,0,0,0];
+      flags.forEach(w=>{const h=hr(w); c[h==null?3:h<24?0:h<48?1:2]++;});
+      const it=[{label:'Under 24 hours',v:c[0],color:'var(--good)'},{label:'1 to 2 days',v:c[1],color:'var(--warn)'},{label:'Over 2 days (stale)',v:c[2],color:'var(--bad)'}]; if(c[3]) it.push({label:'No time recorded',v:c[3],color:'var(--fg3)'});
+      return `<section><div class="sechead"><h2>Signal age</h2></div><div class="box" role="img" aria-label="Pending sync signals by age: ${esc(it.map(i=>i.label+' '+i.v).join(', '))}">${hbars(it,{fmt:v=>v+' signal'+(v===1?'':'s')})}</div></section>`})()}
     <section><div class="sechead"><h2>Pending sync signals</h2><span class="note">${flags.length} pending</span></div>
     ${table(['Item','Institution','Signal','Needs','Received'],flags.map(w=>{const it=(p.items||[]).find(i=>i.item_id_short===w.item_id_short)||{};const old=w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48;return `<tr><td class="mono">${esc(w.item_id_short)}</td><td>${esc(inst(it.institution_id))}</td><td>${esc(w.webhook_type)}</td><td>${[w.needs_tx?'transactions':'',w.needs_holdings?'holdings':''].filter(Boolean).join(', ')||'—'}</td><td>${old?'<span class="pill warn">'+esc(ago(w.last_webhook_at))+'</span>':esc(ago(w.last_webhook_at))}</td></tr>`}),'No pending signals — every Item is caught up.')}</section>
     <section><div class="sechead"><h2>Connection alerts</h2></div>
     ${table(['Item','Institution','Alert','Since'],statusItems.map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${itemState(i)}</td><td>${esc(ago(i.item_status_at))}</td></tr>`),'No connection alerts from Plaid.')}</section>
     <section><div class="sechead"><h2>Link exits and errors</h2><span class="note">${(snap.link_events_counts_30d||[]).map(c=>esc(c.error_code)+' '+n0(c.count)).join(' \u00b7 ')||'none in 30 days'}</span></div>
+    ${(()=>{const lc=(Array.isArray(snap.link_events_counts_30d)?snap.link_events_counts_30d:[]).filter(c=>n0(c.count)>0).sort((a,b)=>n0(b.count)-n0(a.count)); if(!lc.length) return ''; const pal=['var(--bad)','var(--warn)','var(--violet)','var(--accent)','var(--teal)'], top=lc.slice(0,5).map((c,i)=>({label:String(c.error_code||'unknown'),v:n0(c.count),color:pal[i]})), rest=lc.slice(5).reduce((a,c)=>a+n0(c.count),0); if(rest) top.push({label:'Other codes',v:rest,color:'var(--line2)'});
+      return `<div class="box">${splitBar(top,{title:'Link exit codes, last 30 days'})}</div>`})()}
     ${table(['Time','Institution','Code / status','Mode'],(snap.link_events_recent||[]).map(e=>`<tr><td>${esc(ago(e.at))}</td><td>${esc(e.institution||inst(e.institution_id))}</td><td class="mono">${esc(e.error_code||e.exit_status||e.outcome||'\u2014')}</td><td>${e.mode==='update'?'update':'new'}</td></tr>`),'No Link exits or errors reported yet.')}</section>`;
   };
   P.cleanup=()=>{
     const r=snap.reaper||{};
-    const daily=(r.daily||[]).map(d=>({label:fmtDate(d.date+'T12:00:00'),...d}));
+    const daily=(r.daily||[]).map(d=>({label:fmtDate(d.date+'T12:00:00'),...d})).slice(-cleanDays);
     const reasons=Object.entries(r.by_reason||{}).map(([k,v])=>({label:human(k),v:n0(v)})).sort((a,b)=>b.v-a.v);
     return `<div class="kpis">${[kpi('Mode',human(r.mode_hint)||'—',r.mode_hint==='live'?'removals are real':'records only, removes nothing'),kpi('Runs recorded',(r.last_runs||[]).length),kpi('Errors in last run',n0(((r.last_runs||[])[0]||{}).counts?.error))].join('')}</div>
     ${(()=>{const m=reaperMode(), live=m==='live', at=snap.settings?.reaper_mode_updated_at;
@@ -730,7 +816,7 @@ body.mopen{overflow:hidden}
       ${table(['When','Mode','User','Decision','Error'],(rm.recent_errors||[]).map(x=>`<tr><td>${fmtDT(x.run_at)}</td><td>${esc(human(x.mode)||'')}</td><td class="mono">${esc(x.user_short||'—')}</td><td>${esc(human(x.decision)||'')}</td><td class="note">${esc(x.error||'')}</td></tr>`),'No scheduled-removal errors.')}
       ${rm.error?`<p class="note">Could not load: ${esc(rm.error)}</p>`:''}</section>`})()}
     <div class="grid2">
-      <div class="box wide"><h3>Decisions per day (30 days)</h3><div class="chart">${stackedBars(daily,[['keep','Keep','var(--good)'],['would_remove','Would remove','var(--warn)'],['removed','Removed','var(--violet)'],['error','Error','var(--bad)'],['skip','Skip','var(--fg3)']])}</div></div>
+      <div class="box wide"><div class="sechead"><h3>Decisions per day</h3><div class="filters" role="group" aria-label="Days shown">${[14,30].map(d=>`<button class="btn" type="button" data-cdays="${d}" aria-pressed="${cleanDays===d}">${d} days</button>`).join('')}</div></div><div class="chart">${stackedBars(daily,[['keep','Keep','var(--good)'],['would_remove','Would remove','var(--warn)'],['removed','Removed','var(--violet)'],['error','Error','var(--bad)'],['skip','Skip','var(--fg3)']],{title:'Cleanup decisions per day'})}</div></div>
       <div class="box"><h3>Reasons</h3>${hbars(reasons)}</div>
     </div>
     <section><div class="sechead"><h2>Runs</h2></div>
@@ -829,18 +915,20 @@ body.mopen{overflow:hidden}
   // First line is the greeting, bullet lines group into one list, other lines are section heads.
   const brBody=b=>{const L=String(b).split('\n').map(l=>l.trim()).filter(Boolean);let o='',ul=false;L.forEach((l,i)=>{const bl=i>0&&l[0]==='\u2022';if(ul&&!bl){o+='</ul>';ul=false;}if(bl){if(!ul){o+='<ul class="brlist">';ul=true;}o+=`<li>${esc(l.slice(1).trim())}</li>`;}else o+=`<p class="${i?'brhead':'note'}">${esc(l)}</p>`;});return o+(ul?'</ul>':'');};
   P.briefs=()=>{
-    if(br.items===null&&!br.loading) setTimeout(loadBriefs,0);
+    if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
     const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
     if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
     return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
   };
-  P.beta=()=>{
+  P.requests=()=>reqSection()||'<div class="empty"><span class="eico neutral">'+svg('inbox')+'</span><p>No invite requests.</p></div>';
+  P.builds=()=>tfSection();
+  P.features=()=>flagsCard();
+  P.testers=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
     const used=ts.filter(x=>x.src).length, unused=n0(b.unused), full=used+unused>=BETA_CEILING;
     const active7=n0(b.active_7d);
-    return `${reqSection()}<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
+    return `<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
     <div class="kpis">${[kpi('Testers used',`${used} / ${BETA_CEILING}`,'beta access granted'),kpi('Active in 7 days',active7,'testers who opened the app'),kpi('Invites unused',unused,`${n0(b.redeemed)} redeemed`)].join('')}</div>
-    ${tfSection()}
     <section><div class="sechead"><h2>Testers</h2><span class="note">${ts.length} total</span></div>
     <div class="fb">${ts.length?ts.map((x,i)=>{const perm=x.src==='beta_permanent', ended=!x.src||(x.days!=null&&x.days<0);
       const exp=!x.src?'Access ended':perm?'Permanent':x.exp?(x.days<0?'Ended '+fmtDate(x.exp):'Ends '+fmtDate(x.exp)+' · '+x.days+' day'+(x.days===1?'':'s')+' left'):'No expiry';
@@ -851,8 +939,7 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Invites</h2></div>
     <div class="kpis">${[kpi('Unused codes',unused),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>
-    ${flagsCard()}`;
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
   };
 
   /* ---------- admin actions: toast, modal, menu ---------- */
@@ -874,7 +961,7 @@ body.mopen{overflow:hidden}
   const mroot=document.createElement('div'); mroot.className='mback'; mroot.hidden=true; document.body.appendChild(mroot);
   let M=null;
   const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-  const selOf=el=>{if(!el||!el.getAttribute) return '';for(const a of ['data-umenu','data-uopen','data-uact','data-inv','data-act','data-shot','data-detail']){if(el.hasAttribute(a)) return '['+a+'="'+el.getAttribute(a)+'"]';}return '';};
+  const selOf=el=>{if(!el||!el.getAttribute) return '';for(const a of ['data-umenu','data-uopen','data-itemopen','data-uact','data-inv','data-act','data-shot','data-detail']){if(el.hasAttribute(a)) return '['+a+'="'+el.getAttribute(a)+'"]';}return '';};
   const isVis=(f,v)=>!f.showIf||f.showIf(v);
   const expected=()=>{const c=M.cfg;return typeof c.confirmText==='function'?String(c.confirmText(M.vals)||''):String(c.confirmText||'')};
   const needsConfirm=()=>M.cfg.confirmText!=null&&(!M.cfg.preview||M.phase==='confirm');
@@ -1198,6 +1285,10 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       run:()=>api('run_reaper',{}),
       done:r=>`<p>Run finished. Summary:</p>${kvHtml(r.result)}`},btn);
   }
+  function actItem(i,btn){
+    const row=(k,v)=>`<dt>${k}</dt><dd>${v}</dd>`;
+    openModal({title:'Item '+i.item_id_short,closeOnly:true,html:`<dl class="kv">${row('Institution',esc(inst(i.institution_id)))}${row('Product',esc(i.product_assumed||'—')+(i.product_known?'':' (guess)'))}${row('State',itemState(i))}${row('Billing',esc(human(i.billing_state)||'—'))}${row('Linked',esc(fmtDate(i.created_at)))}${row('Age',esc(i.age_days!=null?i.age_days+' days':'—'))}${row('Last webhook',esc(ago(i.last_webhook_at)))}${row('Plaid status',esc(i.item_status?human(i.item_status):'none'))}</dl><p class="note">Search this short id in ${lnk('plaidDebugger')}.</p>`},btn);
+  }
   function actShot(id,btn){
     const it=(snap.feedback?.items||[]).find(x=>x.id===id); if(!it||!/^https:\/\//.test(it.screenshot_url||'')) return;
     openModal({title:'Screenshot',wide:true,closeOnly:true,html:`<img class="lbimg" src="${esc(it.screenshot_url)}" alt="Screenshot attached to this report"><p class="note">This link expires after about 10 minutes. <a href="${esc(it.screenshot_url)}" target="_blank" rel="noopener">Open in a new tab</a></p>`},btn);
@@ -1268,13 +1359,19 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     w.classList.toggle('more-r',nav.scrollLeft+nav.clientWidth<nav.scrollWidth-4);
   }
   function renderTabs(){
-    const open=(snap.feedback?.items||[]).filter(isOpen).length, attn=attentionRows().length;
+    const open=(snap.feedback?.items||[]).filter(isOpen).length, attn=attentionRows().length, pend=n0(snap.beta_requests?.pending), cur=groupOf(tab)[0];
+    const cnt={home:attn,inbox:open+pend};
     const nav=$('tabs'), prev=nav.scrollLeft;
-    nav.innerHTML=TABS.map(([k,l])=>{const c=k==='inbox'&&open?open:k==='overview'&&attn?attn:k==='beta'&&snap.beta_requests?.pending?snap.beta_requests.pending:'';return `<button type="button" role="tab" id="tab-${k}" aria-controls="panel" aria-selected="${tab===k}" tabindex="${tab===k?0:-1}" data-tab="${k}">${esc(l)}${c?` <span class="count">${c}</span>`:''}</button>`}).join('');
+    const btn=(g,bar)=>{const c=cnt[g[0]]||'';return `<button type="button" id="${bar?'b':'t'}-${g[0]}" data-group="${g[0]}" ${cur===g[0]?' aria-current="page"':''}>${svg(g[2])}<span>${esc(g[1])}</span>${c?` <span class="count" aria-label="${c} open">${c}</span>`:''}</button>`};
+    nav.innerHTML=GROUPS.map(g=>btn(g,false)).join('');
+    $('bnav').innerHTML=GROUPS.map(g=>btn(g,true)).join('');
     nav.scrollLeft=prev;
-    const sel=$('tab-'+tab);
-    if(sel){const l=sel.offsetLeft, r=l+sel.offsetWidth; if(l<nav.scrollLeft+16) nav.scrollLeft=Math.max(0,l-16); else if(r>nav.scrollLeft+nav.clientWidth-16) nav.scrollLeft=r-nav.clientWidth+16;}
     updateFade();
+  }
+  function subnav(){
+    const g=groupOf(tab); if(g[3].length<2) return '';
+    const open=(snap.feedback?.items||[]).filter(isOpen).length, pend=n0(snap.beta_requests?.pending), c={inbox:open,requests:pend};
+    return `<div class="filters subnav" role="group" aria-label="${esc(g[1])} sections">${g[3].map(k=>`<button class="btn" type="button" data-tab="${k}" aria-pressed="${tab===k}">${esc(TABS.find(t=>t[0]===k)[1])}${c[k]?` <span class="count">${c[k]}</span>`:''}</button>`).join('')}</div>`;
   }
   function render(){
     const signedIn=!!session;
@@ -1301,11 +1398,12 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const secErr=['users','plaid','reaper','feedback','beta_invites','metrics'].filter(k=>snap[k]&&snap[k].error).map(k=>k+': '+snap[k].error);
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
-    $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${P[tab]()}</div>`;
+    $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="region" tabindex="0" aria-label="${esc(TABS.find(t=>t[0]===tab)[1])}">${subnav()}${P[tab]()}</div>`;
     if(tab==='dev'&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
+    if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
-  function go(k){tab=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
+  function go(k){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
   function history_replace(k){try{window.history.replaceState(null,'','#'+k)}catch(e){location.hash=k}}
 
   function recordHistory(){
@@ -1313,7 +1411,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const hourKey=new Date().toISOString().slice(0,13);
     const pt={generated_at:g.generated_at,hour:hourKey,
       items_active:n0(snap.plaid?.active_items),items_billed:n0(snap.plaid?.billed_this_month??snap.plaid?.active_items),est_monthly_cost_usd:n0(snap.plaid?.est_monthly_cost_usd),
-      users_total:n0(snap.users?.total),feedback_open:(snap.feedback?.items||[]).filter(isOpen).length};
+      users_total:n0(snap.users?.total),users_active7:n0(snap.users?.active_last_7d),feedback_open:(snap.feedback?.items||[]).filter(isOpen).length};
     const last=history[history.length-1];
     if(last&&last.hour===hourKey) history[history.length-1]=pt; else history.push(pt);
     history=history.slice(-HIST_MAX);
@@ -1425,6 +1523,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); else if(k==='tfsubmit') actTfSubmit(ac); return; }
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
+    const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
     const fg=e.target.closest('[data-flag]'); if(fg){ if(!fg.disabled) toggleFlag(fg.dataset.flag,fg); return; }
@@ -1436,10 +1535,13 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const tx=e.target.closest('[data-tx]'); if(tx){ const x=testerList()[+tx.dataset.ti]; if(x){ const k=tx.dataset.tx; if(k==='ext') quickExtend(x,tx); else if(k==='perm') actPermanent(x,tx); else actEnd(x,tx);} return; }
     const sh=e.target.closest('[data-shot]');
     if(sh){ actShot(sh.dataset.shot,sh); return; }
+    const ch=e.target.closest('.chart svg'); if(ch){ch.parentElement.classList.toggle('vals');return;}
     const t=e.target.closest('[data-tab]'); if(t){go(t.dataset.tab);return;}
+    const gr=e.target.closest('[data-group]'); if(gr){const g=GROUPS.find(x=>x[0]===gr.dataset.group); go(g[3].includes(tab)?tab:(lastSub[g[0]]||g[3][0]));return;}
     const g=e.target.closest('[data-goto]'); if(g){go(g.dataset.goto);return;}
     const sr=e.target.closest('[data-source]'); if(sr){fbSource=sr.dataset.source;render();const ns=document.querySelector('[data-source="'+fbSource+'"]'); if(ns) ns.focus({preventScroll:true});return;}
     const cf=e.target.closest('[data-case]'); if(cf){fbCase=cf.dataset.case;render();const nc=document.querySelector('[data-case="'+fbCase+'"]'); if(nc) nc.focus({preventScroll:true});return;}
+    const cd=e.target.closest('[data-cdays]'); if(cd){cleanDays=+cd.dataset.cdays;render();const nc=document.querySelector('[data-cdays="'+cleanDays+'"]'); if(nc) nc.focus({preventScroll:true});return;}
     const dw=e.target.closest('[data-devwho]'); if(dw){devWho=dw.dataset.devwho;render();const nd=document.querySelector('[data-devwho="'+devWho+'"]'); if(nd) nd.focus({preventScroll:true});return;}
     if(e.target.closest('[data-devretry]')){devAt=0;loadDev();return;}
     if(e.target.closest('[data-retry]')){load();return;}
@@ -1450,14 +1552,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
-    const i=TABS.findIndex(t=>t[0]===tab), n=TABS.length;
+    const i=GROUPS.findIndex(g=>g[0]===groupOf(tab)[0]), n=GROUPS.length;
     const j=e.key==='Home'?0:e.key==='End'?n-1:e.key==='ArrowRight'?(i+1)%n:(i-1+n)%n;
-    e.preventDefault(); go(TABS[j][0]);
-    const nt=$('tab-'+TABS[j][0]); if(nt) nt.focus();
+    e.preventDefault(); go(lastSub[GROUPS[j][0]]||GROUPS[j][3][0]);
+    const nt=$('t-'+GROUPS[j][0]); if(nt) nt.focus();
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs')loadBriefs();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
@@ -1469,7 +1571,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     }catch(err){$('loginErr').textContent='Network error. Try again.';}
     btn.disabled=false; btn.textContent='Sign in';
   });
-  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lsSet('ops_tab',k);render();}});
+  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);render();}});
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev') loadDev(); } });
 
   sb.auth.onAuthStateChange((event,s)=>{
