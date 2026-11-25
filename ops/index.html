@@ -117,6 +117,23 @@ nav.tabs button::after{content:"";position:absolute;left:10px;right:10px;bottom:
 nav.tabs button[aria-selected="true"]{color:var(--accent)}
 nav.tabs button[aria-selected="true"]::after{transform:scaleX(1)}
 nav.tabs button:focus-visible{outline-offset:-2px}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+nav.tabs button[aria-current="page"]::after{transform:scaleX(1)}
+nav.tabs .i{width:18px;height:18px}
+.bnav{display:none}
+.subnav{margin-bottom:calc(var(--s2) * -1)}
+@media (max-width:859px){
+  .tabwrap{display:none}
+  .bnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 16px -8px rgba(14,20,34,.18);padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+  .bnav button{position:relative;font:inherit;font-size:12px;font-weight:600;color:var(--fg3);background:none;border:0;min-height:56px;min-width:44px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+  .bnav button .i{width:22px;height:22px}
+  .bnav button[aria-current="page"]{color:var(--accent)}
+  .bnav button[aria-current="page"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+  .bnav button:focus-visible{outline-offset:-3px}
+  .bnav .count{position:absolute;top:4px;left:calc(50% + 6px);font-size:12px;padding:0 6px;min-width:18px;background:var(--accent);color:var(--on-accent)}
+  main{padding-block:var(--s4) calc(88px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+}
 .count{font-size:11.5px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
 nav.tabs button[aria-selected="true"] .count{background:var(--accent-bg);color:var(--accent)}
 
@@ -402,9 +419,10 @@ body.mopen{overflow:hidden}
           <span class="who"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg><span id="who"></span></span>
         </div>
       </div>
-      <div class="tabwrap" id="tabwrap"><nav class="tabs" role="tablist" aria-label="Dashboard sections" id="tabs"></nav></div>
+      <div class="tabwrap" id="tabwrap"><nav class="tabs" aria-label="Dashboard sections" id="tabs"></nav></div>
     </div>
   </div>
+  <nav class="bnav" id="bnav" aria-label="Dashboard sections"></nav>
   <main id="main"><div class="sr" role="status">Loading the latest snapshot…</div><div class="kpis" aria-hidden="true"><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div><div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div></div></main>
 </div>
 
@@ -430,7 +448,13 @@ body.mopen{overflow:hidden}
   const inst=id=>INST[id]||snap.plaid?.institution_names?.[id]||id||'—';
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
-  const TABS=[['overview','Overview'],['dev','Dev'],['users','Users'],['plaid','Plaid & cost'],['sync','Sync health'],['cleanup','Cleanup job'],['inbox','Inbox'],['beta','Beta'],['briefs','Briefs']];
+  // Sections are the old tab keys (and hashes). GROUPS puts them under the five navigation entries.
+  const TABS=[['overview','Today'],['briefs','Briefs'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
+  const GROUPS=[['home','Home','home',['overview','briefs']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
+  const groupOf=k=>GROUPS.find(g=>g[3].includes(k))||GROUPS[0];
+  // Old hashes and group names land on a section. #beta was the push alert for invite requests.
+  const ALIAS={bugs:'inbox',beta:'requests',home:'overview',money:'plaid',ops:'cleanup',admin:'tools',shortcuts:'tools',activity:'tools',alerts:'tools',testflight:'builds',flags:'features',invites:'testers'};
+  const lastSub={};
   const HIST_KEY='ops_history_v1', HIST_MAX=365;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
@@ -438,7 +462,7 @@ body.mopen{overflow:hidden}
   let dev=null, devTried=false, devErr='', devLoading=false, devAt=0, devWho='owner';
   const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
   const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-  const tabAlias=k=>k==='bugs'?'inbox':k;
+  const tabAlias=k=>ALIAS[k]||k;
   let tab=tabAlias((location.hash||'').slice(1)); if(!TABS.some(t=>t[0]===tab)) tab=tabAlias(lsGet('ops_tab')||'overview');
   if(!TABS.some(t=>t[0]===tab)) tab='overview';
   try{const h=JSON.parse(lsGet(HIST_KEY)||'[]'); if(Array.isArray(h)) history=h.filter(x=>x&&x.generated_at).slice(-HIST_MAX);}catch(e){history=[];}
@@ -457,6 +481,8 @@ body.mopen{overflow:hidden}
     alert:'<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17.2v.1"/>',
     inbox:'<path d="M4 13l2-8h12l2 8v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
     chev:'<path d="M6 9l6 6 6-6"/>',
+    home:'<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-5h4v5"/>',
+    ops:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
     ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'
   };
   const LINKS={
@@ -572,9 +598,9 @@ body.mopen{overflow:hidden}
     (snap.reaper?.recent_rows||[]).filter(x=>x.decision==='error'||x.error).slice(0,5).forEach(x=>rows.push(['bad','Cleanup job problem: '+(human(x.decision)||''),`${fmtDT(x.run_at)} · user ${x.user_short||'—'} · ${x.error||x.reason||''}`,'cleanup']));
     (snap.users?.items||[]).forEach(x=>{ if(x.plan==='trial'&&x.trial_days_remaining!=null&&x.trial_days_remaining<=3) rows.push(['warn',`Trial ends in ${x.trial_days_remaining} day(s)`,`User ${x.short} · ${x.items_active??x.institution_count??0} bank link(s)`,'users']);});
     const fresh=(snap.feedback?.items||[]).filter(x=>x.status==='pending');
-    if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox tab','inbox']);
+    if(fresh.length) rows.push(['info',`${fresh.length} new inbox item(s)`,'Open the Inbox','inbox']);
     const soon=testerList().filter(t=>t.days!=null&&t.days<=7);
-    if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'beta']);
+    if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'testers']);
     const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
     if(stale.length){const sn0=devNote('attention:sync_waiting');rows.push([sn0?'info':'warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', ')+(sn0?' · '+sn0:''),'sync']);}
     const sn=snap.sentry||{};
@@ -599,14 +625,6 @@ body.mopen{overflow:hidden}
       kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet'),
       kpi('App errors (24h)',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
-    <section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
-      <div class="links">${['plaidLogs','plaidDebugger','plaidSupport','plaidBilling','supabase','supabaseFns','ghReaper'].map(k=>`<a href="${LINKS[k][1]}" target="_blank" rel="noopener">${svg('ext')}<span>${esc(LINKS[k][0])}</span></a>`).join('')}</div></section>
-    <section><div class="sechead"><h2>Recent admin activity</h2></div>
-      ${table(['When','Action','Summary'],(Array.isArray(snap.audit)?snap.audit:[]).map(a=>`<tr><td>${esc(fmtDT(a.created_at))}</td><td>${esc(human(a.action))}</td><td class="note">${esc(a.summary||a.target||'')}</td></tr>`),'No admin actions recorded yet.')}</section>
-    <section><div class="sechead"><h2>Plaid billing months</h2><span class="note">UTC months, kept after they close</span></div>
-      ${monthRows(p)}
-      <p class="note">Plaid's month starts at midnight UTC. That is 7:00 PM Central while daylight saving is on, and 6:00 PM Central after the clocks fall back. The headline is the open month. Closed months stay in this list.</p>
-    </section>
     <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
       <div class="grid2 g22">
         <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})))}</div></div>
@@ -614,8 +632,13 @@ body.mopen{overflow:hidden}
         <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)'})}</div></div>
         <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)'})}</div></div>
       </div></section>
-    <section><div class="sechead"><h2>Phone alerts</h2></div>${pushHtml()}</section>`;
+    `;
   };
+  P.tools=()=>`<section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
+      <div class="links">${['plaidLogs','plaidDebugger','plaidSupport','plaidBilling','supabase','supabaseFns','ghReaper'].map(k=>`<a href="${LINKS[k][1]}" target="_blank" rel="noopener">${svg('ext')}<span>${esc(LINKS[k][0])}</span></a>`).join('')}</div></section>
+    <section><div class="sechead"><h2>Recent admin activity</h2></div>
+      ${table(['When','Action','Summary'],(Array.isArray(snap.audit)?snap.audit:[]).map(a=>`<tr><td>${esc(fmtDT(a.created_at))}</td><td>${esc(human(a.action))}</td><td class="note">${esc(a.summary||a.target||'')}</td></tr>`),'No admin actions recorded yet.')}</section>
+    <section><div class="sechead"><h2>Phone alerts</h2></div>${pushHtml()}</section>`;
   let selUser=null;
   const userPanel=()=>{
     const us=snap.users?.items||[], i=us.findIndex(x=>x.id===selUser); if(i<0) return '';
@@ -686,11 +709,15 @@ body.mopen{overflow:hidden}
   };
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
-    const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
     return `<div class="kpis">${[kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),kpi('Transactions Items',n0(bp.transactions),usd(inclTax(n0(cp.transactions)))+' / mo'),kpi('Investments Items',n0(bp.investments),usd(inclTax(n0(cp.investments)))+' / mo'),kpi('Est. total / mo',usd(estMo(p)),taxShort())].join('')}</div>
     <div class="box" style="margin:12px 0"><h3>Billing months</h3>${monthRows(p)}<p class="note">Every recorded UTC month. A closed month stays here after Plaid opens the next one at midnight UTC.</p><div class="acts"><button class="btn" type="button" data-act="invoice">Record invoice</button></div></div>
     <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates, ${esc(taxNote())}. Line: Plaid's invoice total, when recorded.</p></div>
-    <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id from the table below) · ${lnk('plaidLogs')} · ${lnk('plaidSupport')} · ${lnk('plaidBilling')}</p>
+    <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id on the Items page) \u00b7 ${lnk('plaidLogs')} \u00b7 ${lnk('plaidSupport')} \u00b7 ${lnk('plaidBilling')}</p>`;
+  };
+  P.items=()=>{
+    const p=snap.plaid||{};
+    const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
+    return `<p class="note">Search a short Item id in ${lnk('plaidDebugger')}. ${lnk('plaidLogs')} \u00b7 ${lnk('plaidSupport')}</p>
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
     </div>
@@ -835,13 +862,15 @@ body.mopen{overflow:hidden}
     if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
     return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
   };
-  P.beta=()=>{
+  P.requests=()=>reqSection()||'<div class="empty"><span class="eico neutral">'+svg('inbox')+'</span><p>No invite requests.</p></div>';
+  P.builds=()=>tfSection();
+  P.features=()=>flagsCard();
+  P.testers=()=>{
     const b=snap.beta_invites||{}, t=b.by_tier||{}, ts=testerList();
     const used=ts.filter(x=>x.src).length, unused=n0(b.unused), full=used+unused>=BETA_CEILING;
     const active7=n0(b.active_7d);
-    return `${reqSection()}<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
+    return `<div class="cta"><button class="btn primary" type="button" data-act="invite"${full?' disabled':''}>New invite</button><button class="btn" type="button" data-act="tfremove">Remove TestFlight tester</button>${full?`<span class="note">Beta is full: ${used} tester(s) + ${unused} unused invite(s) reach the ceiling of ${BETA_CEILING}. <a href="#beta" data-act="invite-force">Issue anyway</a></span>`:`<span class="note">${BETA_CEILING-used-unused} slot(s) left before the ceiling of ${BETA_CEILING}.</span>`}</div>
     <div class="kpis">${[kpi('Testers used',`${used} / ${BETA_CEILING}`,'beta access granted'),kpi('Active in 7 days',active7,'testers who opened the app'),kpi('Invites unused',unused,`${n0(b.redeemed)} redeemed`)].join('')}</div>
-    ${tfSection()}
     <section><div class="sechead"><h2>Testers</h2><span class="note">${ts.length} total</span></div>
     <div class="fb">${ts.length?ts.map((x,i)=>{const perm=x.src==='beta_permanent', ended=!x.src||(x.days!=null&&x.days<0);
       const exp=!x.src?'Access ended':perm?'Permanent':x.exp?(x.days<0?'Ended '+fmtDate(x.exp):'Ends '+fmtDate(x.exp)+' · '+x.days+' day'+(x.days===1?'':'s')+' left'):'No expiry';
@@ -852,8 +881,7 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Invites</h2></div>
     <div class="kpis">${[kpi('Unused codes',unused),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>
-    ${flagsCard()}`;
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
   };
 
   /* ---------- admin actions: toast, modal, menu ---------- */
@@ -1269,13 +1297,19 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     w.classList.toggle('more-r',nav.scrollLeft+nav.clientWidth<nav.scrollWidth-4);
   }
   function renderTabs(){
-    const open=(snap.feedback?.items||[]).filter(isOpen).length, attn=attentionRows().length;
+    const open=(snap.feedback?.items||[]).filter(isOpen).length, attn=attentionRows().length, pend=n0(snap.beta_requests?.pending), cur=groupOf(tab)[0];
+    const cnt={home:attn,inbox:open+pend};
     const nav=$('tabs'), prev=nav.scrollLeft;
-    nav.innerHTML=TABS.map(([k,l])=>{const c=k==='inbox'&&open?open:k==='overview'&&attn?attn:k==='beta'&&snap.beta_requests?.pending?snap.beta_requests.pending:'';return `<button type="button" role="tab" id="tab-${k}" aria-controls="panel" aria-selected="${tab===k}" tabindex="${tab===k?0:-1}" data-tab="${k}">${esc(l)}${c?` <span class="count">${c}</span>`:''}</button>`}).join('');
+    const btn=(g,bar)=>{const c=cnt[g[0]]||'';return `<button type="button" id="${bar?'b':'t'}-${g[0]}" data-group="${g[0]}" ${cur===g[0]?' aria-current="page"':''}>${svg(g[2])}<span>${esc(g[1])}</span>${c?` <span class="count" aria-label="${c} open">${c}</span>`:''}</button>`};
+    nav.innerHTML=GROUPS.map(g=>btn(g,false)).join('');
+    $('bnav').innerHTML=GROUPS.map(g=>btn(g,true)).join('');
     nav.scrollLeft=prev;
-    const sel=$('tab-'+tab);
-    if(sel){const l=sel.offsetLeft, r=l+sel.offsetWidth; if(l<nav.scrollLeft+16) nav.scrollLeft=Math.max(0,l-16); else if(r>nav.scrollLeft+nav.clientWidth-16) nav.scrollLeft=r-nav.clientWidth+16;}
     updateFade();
+  }
+  function subnav(){
+    const g=groupOf(tab); if(g[3].length<2) return '';
+    const open=(snap.feedback?.items||[]).filter(isOpen).length, pend=n0(snap.beta_requests?.pending), c={inbox:open,requests:pend};
+    return `<div class="filters subnav" role="group" aria-label="${esc(g[1])} sections">${g[3].map(k=>`<button class="btn" type="button" data-tab="${k}" aria-pressed="${tab===k}">${esc(TABS.find(t=>t[0]===k)[1])}${c[k]?` <span class="count">${c[k]}</span>`:''}</button>`).join('')}</div>`;
   }
   function render(){
     const signedIn=!!session;
@@ -1302,12 +1336,12 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const secErr=['users','plaid','reaper','feedback','beta_invites','metrics'].filter(k=>snap[k]&&snap[k].error).map(k=>k+': '+snap[k].error);
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
-    $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="tabpanel" tabindex="0" aria-labelledby="tab-${tab}">${P[tab]()}</div>`;
+    $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="region" tabindex="0" aria-label="${esc(TABS.find(t=>t[0]===tab)[1])}">${subnav()}${P[tab]()}</div>`;
     if(tab==='dev'&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
     if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
-  function go(k){tab=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
+  function go(k){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
   function history_replace(k){try{window.history.replaceState(null,'','#'+k)}catch(e){location.hash=k}}
 
   function recordHistory(){
@@ -1439,6 +1473,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const sh=e.target.closest('[data-shot]');
     if(sh){ actShot(sh.dataset.shot,sh); return; }
     const t=e.target.closest('[data-tab]'); if(t){go(t.dataset.tab);return;}
+    const gr=e.target.closest('[data-group]'); if(gr){const g=GROUPS.find(x=>x[0]===gr.dataset.group); go(g[3].includes(tab)?tab:(lastSub[g[0]]||g[3][0]));return;}
     const g=e.target.closest('[data-goto]'); if(g){go(g.dataset.goto);return;}
     const sr=e.target.closest('[data-source]'); if(sr){fbSource=sr.dataset.source;render();const ns=document.querySelector('[data-source="'+fbSource+'"]'); if(ns) ns.focus({preventScroll:true});return;}
     const cf=e.target.closest('[data-case]'); if(cf){fbCase=cf.dataset.case;render();const nc=document.querySelector('[data-case="'+fbCase+'"]'); if(nc) nc.focus({preventScroll:true});return;}
@@ -1452,14 +1487,14 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
-    const i=TABS.findIndex(t=>t[0]===tab), n=TABS.length;
+    const i=GROUPS.findIndex(g=>g[0]===groupOf(tab)[0]), n=GROUPS.length;
     const j=e.key==='Home'?0:e.key==='End'?n-1:e.key==='ArrowRight'?(i+1)%n:(i-1+n)%n;
-    e.preventDefault(); go(TABS[j][0]);
-    const nt=$('tab-'+TABS[j][0]); if(nt) nt.focus();
+    e.preventDefault(); go(lastSub[GROUPS[j][0]]||GROUPS[j][3][0]);
+    const nt=$('t-'+GROUPS[j][0]); if(nt) nt.focus();
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs')loadBriefs();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
@@ -1471,7 +1506,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     }catch(err){$('loginErr').textContent='Network error. Try again.';}
     btn.disabled=false; btn.textContent='Sign in';
   });
-  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lsSet('ops_tab',k);render();}});
+  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);render();}});
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev') loadDev(); } });
 
   sb.auth.onAuthStateChange((event,s)=>{
