@@ -164,6 +164,11 @@ section{display:flex;flex-direction:column;gap:var(--s3);min-width:0}
 .kpi .ico{grid-area:ico;width:32px;height:32px;border-radius:var(--r-md);background:var(--sunken);color:var(--fg2);display:grid;place-items:center}
 .kpi .ico .i{width:18px;height:18px}
 .kpi .value{grid-area:value;font-size:26px;line-height:1.15;font-weight:650;letter-spacing:-.015em;overflow-wrap:anywhere}
+.kpi.hasspark{grid-template-areas:"label ico" "value spark" "sub sub"}
+.kpi .spark{grid-area:spark;width:64px;height:22px;color:var(--accent);align-self:center;justify-self:end}
+.kpis.k6{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:639px){.kpis.k6 .kpi{min-height:104px;padding:12px}.kpis.k6 .kpi .value{font-size:24px}.kpis.k6 .kpi .ico{display:none}.kpis.k6 .kpi{grid-template-columns:minmax(0,1fr) auto}}
+@media (min-width:720px){.kpis.k6{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .kpi .sub{grid-area:sub;font-size:13px;color:var(--fg3);min-height:1.5em}
 .kpi .sub:empty::before{content:"\00a0"}
 
@@ -563,7 +568,10 @@ body.mopen{overflow:hidden}
   };
 
   /* ---------- helpers ---------- */
-  const kpi=(l,v,s)=>`<div class="kpi"><span class="label">${esc(l)}</span><span class="ico">${svg(iconFor(l))}</span><span class="value num">${esc(v)}</span><span class="sub">${esc(s||'')}</span></div>`;
+  // Tiny trend line for a KPI tile; decorative (the value is already in text). Needs two or more points.
+  const spark=vs=>{const a=vs.filter(v=>typeof v==='number'&&isFinite(v)); if(a.length<2) return ''; const mx=Math.max(...a), mn=Math.min(...a), W=64, H=22, y=v=>mx===mn?H/2:H-3-(v-mn)/(mx-mn)*(H-6);
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><path d="${a.map((v,i)=>`${i?'L':'M'}${(i*(W-4)/(a.length-1)+2).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;};
+  const kpi=(l,v,s,sp)=>`<div class="kpi${sp?' hasspark':''}"><span class="label">${esc(l)}</span><span class="ico">${svg(iconFor(l))}</span><span class="value num">${esc(v)}</span>${sp||''}<span class="sub">${esc(s||'')}</span></div>`;
   const table=(head,rows,empty)=>`<div class="tablebox"><table><thead><tr>${head.map(h=>`<th scope="col"${h.startsWith('>')?' class="r"':''}>${esc(h.replace(/^>/,''))}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.join(''):`<tr><td colspan="${head.length}" class="tempty">${esc(empty)}</td></tr>`}</tbody></table></div>`;
   const skelKpi='<div class="kpi sk"><span class="skl w40"></span><span class="skl w70 h22"></span><span class="skl w55"></span></div>';
   const skelBox='<div class="box sk"><span class="skl w40"></span><span class="skl block"></span></div>';
@@ -603,6 +611,7 @@ body.mopen{overflow:hidden}
     if(soon.length) rows.push(['warn',`${soon.length} beta tester(s) ending within 7 days`,soon.map(t=>t.name+(t.days<0?' (ended)':' ('+t.days+'d)')).join(', '),'testers']);
     const stale=flagsOf().filter(w=>w.last_webhook_at&&(Date.now()-dOf(w.last_webhook_at))/36e5>48);
     if(stale.length){const sn0=devNote('attention:sync_waiting');rows.push([sn0?'info':'warn',`${stale.length} sync signal(s) waiting over 2 days`,stale.map(w=>w.item_id_short).join(', ')+(sn0?' · '+sn0:''),'sync']);}
+    if(snap.reaper){const rm=reaperMode(); if(rm!=='live') rows.push(['warn',rm?'Cleanup job is in '+human(rm).toLowerCase()+' mode':'Cleanup job mode unknown',rm?'It records decisions and removes nothing':'The snapshot did not report a mode','cleanup']);}
     const sn=snap.sentry||{};
     (sn.items||[]).filter(x=>x.first_seen&&Date.now()-dOf(x.first_seen)<864e5&&!devNote('sentry:'+x.short_id)).forEach(x=>rows.push([x.level==='error'||x.level==='fatal'?'bad':'warn','App error: '+x.title,`${n0(x.count)} events · ${n0(x.user_count)} users · ${x.environment||''} · ${ago(x.last_seen)}`,'dev']));
     if(sn.error) rows.push(['warn','Sentry read failed',sn.error,'dev']);
@@ -612,27 +621,34 @@ body.mopen{overflow:hidden}
 
   /* ---------- panels ---------- */
   const P={};
+  const briefInline=()=>{
+    if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
+    const head=`<div class="sechead"><h2>Latest brief</h2><button class="btn" type="button" data-tab="briefs">All briefs</button></div>`;
+    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading brief…</p>'}</section>`;
+    const x=br.items[0];
+    return `<section>${head}${x?`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`:`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
+  };
   P.overview=()=>{
-    const u=snap.users||{},p=snap.plaid||{},r=snap.reaper||{},f=snap.feedback||{};
+    const u=snap.users||{},p=snap.plaid||{},f=snap.feedback||{};
     const open=(f.items||[]).filter(isOpen);
-    const lastRun=(r.last_runs||[])[0];
     const H=history.map(h=>({label:fmtDate(h.generated_at),...h}));
-    return `<div class="kpis">${[
-      kpi('Users',u.total??'—',`${n0(u.active_last_7d)} active in 7 days`),
-      kpi('Billed this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · Plaid UTC · ${n0(p.live_items??p.active_items)} live now`),
-      kpi('Est. Plaid cost / mo',usd(estMo(p)),`${taxShort()} · midnight UTC`),
-      kpi('Open inbox items',f.items?open.length:'—',`${n0(f.counts?.pending)} new`),
-      kpi('Cleanup job',human(r.mode_hint)||'—',lastRun?'last run '+ago(lastRun.run_at):'no runs yet'),
-      kpi('App errors (24h)',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected')].join('')}</div>
+    const bm=(p.by_month||[]).filter(m=>n0(m.billed_items)>0);
+    return `<div class="kpis k6">${[
+      kpi('Active users 7d',n0(u.active_last_7d),`of ${u.total??'—'} users`,spark(history.map(h=>h.users_active7))),
+      kpi('Billed Items this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · ${n0(p.live_items??p.active_items)} live now`,spark(bm.map(m=>n0(m.billed_items)))),
+      kpi('Est. Plaid cost / mo',usd(estMo(p)),taxShort(),spark(bm.map(estM))),
+      kpi('Open inbox',f.items?open.length:'—',`${n0(f.counts?.pending)} new`,spark(history.map(h=>h.feedback_open))),
+      kpi('App errors 24h',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected'),
+      kpi('Pending sync signals',flagsOf().length,flagsOf().length?'waiting for the app':'all caught up')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
+    ${briefInline()}
     <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
       <div class="grid2 g22">
-        <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})))}</div></div>
-        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart((p.by_month||[]).filter(m=>n0(m.billed_items)>0).map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
+        <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart(bm.map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})))}</div></div>
+        <div class="box"><div class="bh"><h3>Est. Plaid cost by month</h3></div><div class="chart">${lineChart(bm.map(m=>({label:monthName(m.billing_month),v:estM(m)})),{fmt:v=>'$'+v.toFixed(2),color:'var(--violet)'})}</div></div>
         <div class="box"><div class="bh"><h3>Users</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.users_total)})),{color:'var(--teal)'})}</div></div>
         <div class="box"><div class="bh"><h3>Open inbox items</h3></div><div class="chart">${lineChart(H.map(h=>({label:h.label,v:n0(h.feedback_open)})),{color:'var(--warn)'})}</div></div>
-      </div></section>
-    `;
+      </div></section>`;
   };
   P.tools=()=>`<section><div class="sechead"><h2>Shortcuts</h2><span class="note">Open in a new tab</span></div>
       <div class="links">${['plaidLogs','plaidDebugger','plaidSupport','plaidBilling','supabase','supabaseFns','ghReaper'].map(k=>`<a href="${LINKS[k][1]}" target="_blank" rel="noopener">${svg('ext')}<span>${esc(LINKS[k][0])}</span></a>`).join('')}</div></section>
@@ -857,7 +873,7 @@ body.mopen{overflow:hidden}
   // First line is the greeting, bullet lines group into one list, other lines are section heads.
   const brBody=b=>{const L=String(b).split('\n').map(l=>l.trim()).filter(Boolean);let o='',ul=false;L.forEach((l,i)=>{const bl=i>0&&l[0]==='\u2022';if(ul&&!bl){o+='</ul>';ul=false;}if(bl){if(!ul){o+='<ul class="brlist">';ul=true;}o+=`<li>${esc(l.slice(1).trim())}</li>`;}else o+=`<p class="${i?'brhead':'note'}">${esc(l)}</p>`;});return o+(ul?'</ul>':'');};
   P.briefs=()=>{
-    if(br.items===null&&!br.loading) setTimeout(loadBriefs,0);
+    if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
     const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
     if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
     return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
@@ -1349,7 +1365,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const hourKey=new Date().toISOString().slice(0,13);
     const pt={generated_at:g.generated_at,hour:hourKey,
       items_active:n0(snap.plaid?.active_items),items_billed:n0(snap.plaid?.billed_this_month??snap.plaid?.active_items),est_monthly_cost_usd:n0(snap.plaid?.est_monthly_cost_usd),
-      users_total:n0(snap.users?.total),feedback_open:(snap.feedback?.items||[]).filter(isOpen).length};
+      users_total:n0(snap.users?.total),users_active7:n0(snap.users?.active_last_7d),feedback_open:(snap.feedback?.items||[]).filter(isOpen).length};
     const last=history[history.length-1];
     if(last&&last.hour===hourKey) history[history.length-1]=pt; else history.push(pt);
     history=history.slice(-HIST_MAX);
