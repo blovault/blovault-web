@@ -75,7 +75,7 @@ p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--mono);font-size:12.5px}
 .unote{display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.usub{display:block;font-size:11px;color:var(--fg3)}
+.usub{display:block;font-size:12px;color:var(--fg3)}
 
 /* brand */
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
@@ -134,7 +134,7 @@ nav.tabs .i{width:18px;height:18px}
   main{padding-block:var(--s4) calc(88px + env(safe-area-inset-bottom,0px))}
   .toast{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
 }
-.count{font-size:11.5px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
+.count{font-size:12px;font-weight:650;background:var(--sunken);color:var(--fg2);border-radius:999px;padding:1px 7px;min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
 nav.tabs button[aria-selected="true"] .count{background:var(--accent-bg);color:var(--accent)}
 
 main{max-width:1200px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:var(--s5) 64px}
@@ -254,6 +254,15 @@ td.note{font-size:13px}
   .links a{line-height:1.25;padding:8px 12px}
 }
 
+/* two-line cards for users and Items (phones); the table shows from 640px */
+.only-m{display:none}
+@media (max-width:639px){.only-d{display:none!important}.only-m{display:flex;flex-direction:column;gap:var(--s2)}}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;display:flex;flex-direction:column;gap:var(--s2);min-width:0;box-shadow:var(--sh1)}
+.rcard .l1{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;min-width:0}
+.rcard .l1 .tname{font-weight:650;overflow-wrap:anywhere}
+.rcard .l2{font-size:13px;color:var(--fg3);overflow-wrap:anywhere}
+.rcard .cacts{margin-top:2px}
+
 /* bug cards */
 .fb{display:flex;flex-direction:column;gap:var(--s3)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:var(--s3);min-width:0;box-shadow:var(--sh1)}
@@ -305,15 +314,13 @@ td.note{font-size:13px}
 .sw::after{content:"";position:absolute;left:3px;top:50%;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
 .sw[aria-checked="true"]::before{background:var(--accent)}
 .sw[aria-checked="true"]::after{transform:translateX(34px)}
-.sw .swl{position:absolute;top:50%;margin-top:-8px;font-size:11px;line-height:16px;font-weight:700;color:var(--fg2);right:9px;z-index:1;pointer-events:none}
+.sw .swl{position:absolute;top:50%;margin-top:-8px;font-size:12px;line-height:16px;font-weight:700;color:var(--fg2);right:9px;z-index:1;pointer-events:none}
 .sw[aria-checked="true"] .swl{right:auto;left:9px;color:var(--on-accent)}
 .sw:disabled{opacity:.55;cursor:default}
 .sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:999px}
 
 /* buttons */
-.btn{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line2);background:var(--surface);color:var(--fg);padding:0 14px;border-radius:var(--r-md);cursor:pointer;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh1);white-space:nowrap}
-@media (pointer:coarse){.btn{min-height:44px}}
-@media (max-width:859px){.btn{min-height:44px}}
+.btn{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line2);background:var(--surface);color:var(--fg);padding:0 14px;border-radius:var(--r-md);cursor:pointer;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--sh1);white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn[aria-pressed="true"]{background:var(--accent-bg);color:var(--accent);border-color:var(--accent)}
 .btn:active{transform:translateY(1px)}
@@ -708,6 +715,7 @@ body.mopen{overflow:hidden}
     catch(err){ devErr=(err instanceof TypeError)?'Network error.':'Could not load dev data: '+err.message; }
     devAt=Date.now(); devLoading=false; render();
   }
+  const userCard=(x,i)=>`<article class="rcard"><div class="l1"><span class="tname mono">${esc(x.short)}</span>${planPill(x)}${x.feature_preview?'<span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?'<span class="pill warn">Link not finished</span>':''}</div><div class="l2">${esc(x.entitlement?human(x.entitlement.source):'No access grant')} · opened ${esc(ago(x.last_active_at))} · ${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)} billed / live</div><div class="cacts"><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></div></article>`;
   P.users=()=>{
     const u=snap.users||{}, pc=u.plan_counts||{}, ec=u.entitlement_counts||{};
     const weeks=(u.signups_by_week||[]).map(w=>({label:wk(w.week_start),n:w.count}));
@@ -721,7 +729,8 @@ body.mopen{overflow:hidden}
     </div>
     ${u.trial_ends_note?`<p class="note">${esc(u.trial_ends_note)}</p>`:''}
     ${userPanel()}
-    ${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> <span class="mono">${esc(x.short)}</span>${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source)):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}`;
+    <div class="only-d">${table(['User','Plan','Access','>Billed / live','Trial ends','Last opened','App','Joined','Actions'],(u.items||[]).map((x,i)=>`<tr><td><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button> <span class="mono">${esc(x.short)}</span>${x.feature_preview?' <span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?' <span class="pill warn">Opened Link, not linked</span>':''}</td><td>${planPill(x)}</td><td>${x.entitlement?esc(human(x.entitlement.source)):'—'}</td><td class="r num">${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)}</td><td>${x.entitlement?'—':fmtDate(x.trial_ends_at)}</td><td>${esc(ago(x.last_active_at))}</td><td class="mono">${esc(x.app_version||'—')}</td><td>${fmtDate(x.created_at)}</td><td><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></td></tr>`),'No users in this snapshot.')}</div>
+    <div class="only-m">${(u.items||[]).map((x,i)=>userCard(x,i)).join('')||'<div class="empty"><p>No users in this snapshot.</p></div>'}</div>`;
   };
   P.plaid=()=>{
     const p=snap.plaid||{}, bp=p.by_product||{}, cp=p.cost_by_product||{};
@@ -730,6 +739,7 @@ body.mopen{overflow:hidden}
     <div class="box" style="margin:12px 0"><h3>Plaid cost by month</h3><div class="chart">${stackedBars(planChart(p),[['tx','Transactions','var(--accent)'],['inv','Investments','var(--violet)']],{fmt:v=>'$'+(+v).toFixed(2),totals:true,mark:['inv_usd','Invoiced']})}</div><p class="note">Bars: estimate from the billing ledger at contract rates, ${esc(taxNote())}. Line: Plaid's invoice total, when recorded.</p></div>
     <p class="note">Item details: ${lnk('plaidDebugger')} (search for the short Item id on the Items page) \u00b7 ${lnk('plaidLogs')} \u00b7 ${lnk('plaidSupport')} \u00b7 ${lnk('plaidBilling')}</p>`;
   };
+  const itemCard=(i,n)=>`<article class="rcard"><div class="l1"><span class="tname">${esc(inst(i.institution_id))}</span>${itemState(i)}</div><div class="l2"><span class="mono">${esc(i.item_id_short)}</span> · ${esc(i.product_assumed||'—')} · webhook ${esc(ago(i.last_webhook_at))}</div><div class="cacts"><button class="btn" type="button" data-itemopen="${n}" aria-label="Open details for Item ${esc(i.item_id_short)}">Details</button></div></article>`;
   P.items=()=>{
     const p=snap.plaid||{};
     const insts=(p.by_institution_named||Object.entries(p.by_institution||{}).map(([id,n])=>({institution_id:id,name:inst(id),active:n}))).map(x=>({label:x.name||inst(x.institution_id),v:n0(x.active)}));
@@ -737,7 +747,8 @@ body.mopen{overflow:hidden}
     <div class="grid2">
       <div class="box"><h3>Links by institution</h3>${hbars(insts)}</div>
     </div>
-    ${table(['Item','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map(i=>`<tr><td class="mono">${esc(i.item_id_short)}</td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}`;
+    <div class="only-d">${table(['Item','Institution','Product','State','Last webhook','>Age (days)'],(p.items||[]).map((i,n)=>`<tr><td class="mono">${esc(i.item_id_short)} <button class="btn quiet" type="button" data-itemopen="${n}" aria-label="Open details for Item ${esc(i.item_id_short)}">Details</button></td><td>${esc(inst(i.institution_id))}</td><td>${esc(i.product_assumed||'—')}${i.product_known?'':' <span class="note">(guess)</span>'}</td><td>${itemState(i)}</td><td>${esc(ago(i.last_webhook_at))}</td><td class="r num">${i.age_days??'—'}</td></tr>`),'No bank connections in this snapshot.')}</div>
+    <div class="only-m">${(p.items||[]).map((i,n)=>itemCard(i,n)).join('')||'<div class="empty"><p>No bank connections in this snapshot.</p></div>'}</div>`;
   };
   P.sync=()=>{
     const p=snap.plaid||{}, flags=flagsOf();
@@ -919,7 +930,7 @@ body.mopen{overflow:hidden}
   const mroot=document.createElement('div'); mroot.className='mback'; mroot.hidden=true; document.body.appendChild(mroot);
   let M=null;
   const FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-  const selOf=el=>{if(!el||!el.getAttribute) return '';for(const a of ['data-umenu','data-uopen','data-uact','data-inv','data-act','data-shot','data-detail']){if(el.hasAttribute(a)) return '['+a+'="'+el.getAttribute(a)+'"]';}return '';};
+  const selOf=el=>{if(!el||!el.getAttribute) return '';for(const a of ['data-umenu','data-uopen','data-itemopen','data-uact','data-inv','data-act','data-shot','data-detail']){if(el.hasAttribute(a)) return '['+a+'="'+el.getAttribute(a)+'"]';}return '';};
   const isVis=(f,v)=>!f.showIf||f.showIf(v);
   const expected=()=>{const c=M.cfg;return typeof c.confirmText==='function'?String(c.confirmText(M.vals)||''):String(c.confirmText||'')};
   const needsConfirm=()=>M.cfg.confirmText!=null&&(!M.cfg.preview||M.phase==='confirm');
@@ -1243,6 +1254,10 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       run:()=>api('run_reaper',{}),
       done:r=>`<p>Run finished. Summary:</p>${kvHtml(r.result)}`},btn);
   }
+  function actItem(i,btn){
+    const row=(k,v)=>`<dt>${k}</dt><dd>${v}</dd>`;
+    openModal({title:'Item '+i.item_id_short,closeOnly:true,html:`<dl class="kv">${row('Institution',esc(inst(i.institution_id)))}${row('Product',esc(i.product_assumed||'—')+(i.product_known?'':' (guess)'))}${row('State',itemState(i))}${row('Billing',esc(human(i.billing_state)||'—'))}${row('Linked',esc(fmtDate(i.created_at)))}${row('Age',esc(i.age_days!=null?i.age_days+' days':'—'))}${row('Last webhook',esc(ago(i.last_webhook_at)))}${row('Plaid status',esc(i.item_status?human(i.item_status):'none'))}</dl><p class="note">Search this short id in ${lnk('plaidDebugger')}.</p>`},btn);
+  }
   function actShot(id,btn){
     const it=(snap.feedback?.items||[]).find(x=>x.id===id); if(!it||!/^https:\/\//.test(it.screenshot_url||'')) return;
     openModal({title:'Screenshot',wide:true,closeOnly:true,html:`<img class="lbimg" src="${esc(it.screenshot_url)}" alt="Screenshot attached to this report"><p class="note">This link expires after about 10 minutes. <a href="${esc(it.screenshot_url)}" target="_blank" rel="noopener">Open in a new tab</a></p>`},btn);
@@ -1477,6 +1492,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(ac&&!ac.disabled){ const k=ac.dataset.act; if(k==='invite'||k==='invite-force'){ if(k==='invite-force') e.preventDefault(); actInvite(ac);} else if(k==='mode') actMode(ac); else if(k==='linkpause') actLinkPause(ac); else if(k==='linkcode') actLinkCode(ac); else if(k==='invoice') actInvoice(ac); else if(k==='run') actRun(ac); else if(k==='tfremove') actTfRemove(ac); else if(k==='tfsubmit') actTfSubmit(ac); return; }
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
+    const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
     const fg=e.target.closest('[data-flag]'); if(fg){ if(!fg.disabled) toggleFlag(fg.dataset.flag,fg); return; }
