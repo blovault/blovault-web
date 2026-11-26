@@ -1,11 +1,10 @@
 # BLO VAULT Terms of Service
 
-**Last Updated:** November 4, 2026
+**Last Updated:** November 25, 2026
 
-**In-app:** Settings → Data & Privacy → Terms of Service.
+**In-app:** More → Settings → Privacy → Terms of service.
 
-**Public copy — GitHub:** https://github.com/blovault/blovault-web/blob/main/terms-of-service.md  
-**Easy read — GitHub Pages (enable Pages first):** https://blovault.com/terms-of-service.html
+Web: https://blovault.com/terms-of-service.html
 
 ---
 
@@ -15,9 +14,9 @@ By downloading or using BLO VAULT (the "App"), you agree to these Terms of Servi
 
 The App provides financial information tools only. Nothing in the App is investment, tax, or legal advice. Consult a licensed professional for decisions that could significantly affect your finances.
 
-## 2. Beta and pre-release software
+## 2. Test builds (TestFlight)
 
-Pre-release, beta, or TestFlight builds may be less stable than production releases. They may crash, lose data, or show incorrect balances, AI output, or charts. You use such builds at your own risk. Apple, Google, or other distributors may apply additional terms for beta distribution.
+TestFlight test builds may be less stable than production releases. They may crash, lose data, or show incorrect balances or charts. You use such builds at your own risk. Apple may apply additional terms to TestFlight distribution.
 
 ## 3. Plaid
 
@@ -25,19 +24,21 @@ By connecting bank accounts, you authorize BLO VAULT to access your financial da
 
 ## 4. Subscriptions, payments, and refunds
 
-Paid features may be offered through in-app purchase. Payments are processed by Apple App Store, Google Play, and/or RevenueCat. Pricing, billing, renewal, cancellation, and refunds are governed by the platform’s policies and your account settings with Apple or Google. To the maximum extent permitted by law, we do not grant refunds outside those platform rules.
+Paid features may be offered through in-app purchase. Payments are processed by the Apple App Store and RevenueCat. Pricing, billing, renewal, cancellation, and refunds are governed by Apple’s policies and your Apple account settings. To the maximum extent permitted by law, we do not grant refunds outside those platform rules.
 
 ### 4.1 Free trial, plans, and limits
 
-New users get a 14-day free trial that starts when your pseudonymous account is created. During the trial you may link up to 3 institutions. When the trial ends without an active subscription, syncing stops and we remove your bank connections at Plaid; data already on your device stays until you delete it, and you can link again after subscribing. When a subscription or beta access ends, the same applies. To control costs and prevent abuse, each account may hold at most 10 bank connections. If you use Panic Delete or "Delete account & data", the data on your device is erased immediately and we remove your bank connections and delete your account by the last day of that calendar month (Plaid bills each connection per calendar month); until then you can restore the connections by signing back in with the same account, if a copy encrypted with your recovery key exists. For complimentary (permanent) beta access, we remove your bank connections after 90 days without you opening the App; the beta access itself continues and you can link again. Beta access is by invitation, may be time-limited, and may be changed or ended at our discretion.
+New users get a 14-day free trial that starts when your pseudonymous account is created. During the trial you may link up to 3 institutions. When the trial ends without an active subscription, syncing stops and we remove your bank connections at Plaid; data already on your device stays until you delete it, and you can link again after subscribing. When a subscription or access granted with an access code ends, the same applies. To control costs and prevent abuse, each account may hold at most 10 bank connections. If you use "Erase this phone", the data on your device is erased immediately and we remove your bank connections and delete your account by the last day of that calendar month (Plaid bills each connection per calendar month); until then you can restore the connections by signing back in with the same account, if a copy encrypted with your recovery key exists. For complimentary (permanent) access granted with an access code, we remove your bank connections after 90 days without you opening the App, unless you also have an active subscription; the access itself continues and you can link again. Access codes are given at our discretion, may be time-limited, and the access they grant may be changed or ended at our discretion.
 
 ## 5. Changes to the service and terms
 
 We may modify the App or these Terms. Material changes to the Terms will be reflected in the App and/or on our public terms page with an updated date. Continued use after changes, where allowed by law, means you accept the updated Terms. We may suspend or discontinue features where reasonably necessary (for example, security or legal compliance).
 
+If we decide to shut down BLO VAULT, we will tell you in the App, and by email if we have your address, at least 30 days in advance. Data stored on your iPhone stays on your device, and we will disconnect your bank connections at Plaid.
+
 ## 6. No warranties
 
-The App is provided "as is." We do not warrant uninterrupted or error-free operation, or the accuracy of financial data, AI output, or scores shown in the App.
+The App is provided "as is." We do not warrant uninterrupted or error-free operation, or the accuracy of financial data or scores shown in the App.
 
 ## 7. Limitation of liability
 
