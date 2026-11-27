@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-jiKc+CJL9A8uii5+op9W+9NK7fozAQtKoEcs4Ko8nkk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-uf8AgFy/HqWyLugM17EtTVMpnxXv/C53KfIlyYaAEWA='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -948,7 +948,8 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Invites</h2></div>
     <div class="kpis">${[kpi('Unused codes',unused,n0(b.expired)?`${n0(b.expired)} expired`:''),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':x.expired?'<span class="pill bad">Expired</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed||x.expired?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
+    ${n0(b.expired)?`<label class="note" style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" data-hideexp${hideExpired()?' checked':''}> Hide expired codes (${n0(b.expired)})</label>`:''}
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>hideExpired()&&x.expired?'':`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':x.expired?'<span class="pill bad">Expired</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':x.expired?`<button class="btn danger" type="button" data-inv="${i}" aria-label="Delete expired invite ${esc(x.code_masked)}">Delete</button>`:`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
   };
 
   /* ---------- admin actions: toast, modal, menu ---------- */
@@ -1243,7 +1244,11 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
       toast:r=>r&&r.testflight&&r.testflight!=='invited'&&r.testflight!=='exists'&&r.testflight!=='already_in_group'?'TestFlight: '+(r.testflight_error||r.testflight):'Approved \u00b7 TestFlight invited \u00b7 invite mail '+((r&&r.mail_status)||'queued'),
       run:v=>api('beta_request_approve',{id:x.id,tier:v.tier})},btn);
   }
+  const hideExpired=()=>lsGet('ops_hide_expired_invites')==='1';
   function actRevokeInvite(x,btn){
+    if(x.expired){ openModal({title:'Delete expired invite',intro:`<p>Deletes the expired code <b class="mono">${esc(x.code_masked)}</b>${x.note?' for '+esc(x.note):''} from the list. It can no longer be redeemed anyway.</p>`,
+      danger:true,submit:'Delete',toast:'Expired invite deleted',
+      run:()=>api('revoke_invite',{code_masked_prefix:x.code_masked_prefix||x.code_masked,created_at:x.created_at})},btn); return; }
     openModal({title:'Revoke invite',intro:`<p>Invalidates the unused code <b class="mono">${esc(x.code_masked)}</b>${x.note?' for '+esc(x.note):''}. Nobody will be able to redeem it.</p>`,
       danger:true,submit:'Revoke invite',toast:'Invite revoked',
       run:()=>api('revoke_invite',{code_masked_prefix:x.code_masked_prefix||x.code_masked,created_at:x.created_at})},btn);
@@ -1382,6 +1387,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const open=(snap.feedback?.items||[]).filter(isOpen).length, pend=n0(snap.beta_requests?.pending), c={inbox:open,requests:pend};
     return `<div class="filters subnav" role="group" aria-label="${esc(g[1])} sections">${g[3].map(k=>`<button class="btn" type="button" data-tab="${k}" aria-pressed="${tab===k}">${esc(TABS.find(t=>t[0]===k)[1])}${c[k]?` <span class="count">${c[k]}</span>`:''}</button>`).join('')}</div>`;
   }
+  document.addEventListener('change',e=>{const c=e.target.closest&&e.target.closest('[data-hideexp]'); if(!c) return; lsSet('ops_hide_expired_invites',c.checked?'1':'0'); render();});
   function render(){
     const signedIn=!!session;
     closeMenu();
