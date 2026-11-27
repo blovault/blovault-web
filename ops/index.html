@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-Zk+gRYgqdziaac79B06fr6jk7l23M7E8ECWULq5NqOg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-2GTGm7o816yFyK/XCz0UQ2lHwh7SZehP88/N3BSiQns='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -769,7 +769,7 @@ body.mopen{overflow:hidden}
     const rep=arr(t.reports).filter(r=>r&&typeof r==='object').map(r=>{const m=ms.find(x=>x.id===r.who)||{},c=tmCol(r.who);return `<div class="tmrep" lang="ko"><span style="font-size:13px;font-weight:600;color:${c[1]}">${esc(m.name||r.who||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="note">${esc(r.detail)}</span>`:''}</div>`}).join('');
     return err+`<div class="kpis" lang="ko">${kpi('일하는 중',String(cnt('working'))).replace('class="kpi"','class="kpi kg"')}${kpi('대기',String(cnt('waiting')))}${kpi('막힘',String(cnt('blocked'))).replace('class="kpi"','class="kpi kw"')}</div>
     <section><div class="sechead"><h2>Office</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
-    <section><div class="sechead"><h2 lang="ko">오늘 보고 · 카리나 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
+    <section><div class="sechead"><h2 lang="ko">오늘 보고 · 윤아 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
     <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p>`;
   };
   function actTeam(id,btn){
