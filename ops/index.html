@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-TOk/maJqpGeG/4ZP9meoyBaFR5zlsDYkc13CPwpUkpI='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-jiKc+CJL9A8uii5+op9W+9NK7fozAQtKoEcs4Ko8nkk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -946,9 +946,9 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Review access codes</h2><span class="note">Demo vault for App Review</span></div>
     ${table(['Code','Note','Created','Status'],(snap.review_codes?.items||[]).map(x=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.note||'')}</td><td>${fmtDate(x.created_at)}</td><td>${x.revoked_at?'<span class="pill mute">revoked '+esc(fmtDate(x.revoked_at))+'</span>':'<span class="pill good">active</span>'}</td></tr>`),snap.review_codes?.error?'Could not load: '+snap.review_codes.error:'No review codes.')}</section>
     <section><div class="sechead"><h2>Invites</h2></div>
-    <div class="kpis">${[kpi('Unused codes',unused),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
+    <div class="kpis">${[kpi('Unused codes',unused,n0(b.expired)?`${n0(b.expired)} expired`:''),kpi('Redeemed',n0(b.redeemed)),kpi('Permanent',`${n0(t.permanent?.redeemed)} / ${n0(t.permanent?.issued)}`,'redeemed / issued'),kpi('30-day',`${n0(t.limited?.redeemed)} / ${n0(t.limited?.issued)}`,'redeemed / issued')].join('')}</div>
     <p class="note">The full code is shown once, right after it is created.</p>
-    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
+    ${table(['Code','Tier','For','Created','Redeemed','Actions'],(b.items||[]).map((x,i)=>`<tr><td class="mono">${esc(x.code_masked)}</td><td>${esc(x.tier)}</td><td>${esc(x.note)}</td><td>${fmtDate(x.created_at)}</td><td>${x.redeemed?'<span class="pill good">Redeemed</span>':x.expired?'<span class="pill bad">Expired</span>':'<span class="pill mute">unused</span>'}</td><td>${x.redeemed||x.expired?'':`<button class="btn" type="button" data-inv="${i}" aria-label="Revoke invite ${esc(x.code_masked)}">Revoke</button>`}</td></tr>`),'No invites issued yet.')}</section>`;
   };
 
   /* ---------- admin actions: toast, modal, menu ---------- */
