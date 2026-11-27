@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-7FRSZ3EmIRRat0chQYT1OhvrcCFNYvAxcgcybyJtyo8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-0FDdSL9JZOlF+jTM49+h9NlIiyR+RjdnmJral5NdUyk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -813,11 +813,11 @@ body.mopen{overflow:hidden}
       const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('\uc774\ubbf8\uc9c0\ub97c \uc5f4 \uc218 \uc5c6\uc5b4\uc694'));i.src=url;});
       const c=document.createElement('canvas'); c.width=c.height=512;
       const side=Math.min(img.naturalWidth,img.naturalHeight);
-      c.getContext('2d').drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,512,512);
+      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,512,512); g.drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,512,512);
       const blob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(new Error('\ubcc0\ud658 \uc2e4\ud328')),'image/jpeg',0.85));
       const data_b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>no(new Error('\uc77d\uae30 \uc2e4\ud328'));r.readAsDataURL(blob);});
       await api('team_avatar_set',{member:id,content_type:'image/jpeg',data_b64});
-      toast('\uc0ac\uc9c4\uc744 \uc62c\ub838\uc5b4\uc694');
+      toast('\uc0ac\uc9c4\uc744 \uc62c\ub838\uc5b4\uc694. \uba87 \ubd84 \ub4a4 \ubc30\uacbd\uc774 \ud770\uc0c9\uc73c\ub85c \ubc14\ub00c\uc5b4\uc694');
       await loadAvatars(); actTeam(id);
     }catch(err){ toast('\uc0ac\uc9c4 \uc62c\ub9ac\uae30 \uc2e4\ud328: '+errMsg(err)); if(btn.isConnected){btn.disabled=false;btn.textContent=label;} }
     finally{ URL.revokeObjectURL(url); }
