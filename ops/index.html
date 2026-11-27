@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-2GTGm7o816yFyK/XCz0UQ2lHwh7SZehP88/N3BSiQns='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-YdIr+wlaK1VTpQqI7lWS6z/VvmoRUfLys5a4Sdtmm6s='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -416,6 +416,7 @@ body.mopen{overflow:hidden}
 .tmcard.lead .tmav{width:56px;height:56px;font-size:22px}
 .tmav.big{width:72px;height:72px;font-size:30px}
 .tmdot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-sizing:content-box}
+.kpi.tb{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
 .kpi.kg .value{color:var(--good)}.kpi.kw .value{color:#8A6A00}
 .tmfocus{background:var(--accent-bg);border-radius:var(--r-md);padding:var(--s3);margin:var(--s3) 0}
 .tmrow{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-bottom:1px solid var(--line)}
@@ -767,11 +768,18 @@ body.mopen{overflow:hidden}
     const card=m=>`<button type="button" class="tmcard${m.lead?' lead':''}" data-tm="${esc(m.id)}" lang="ko">${tmAv(m)}<span class="tmt"><b>${esc(m.name)}</b><span>${esc(m.role||'')}</span><span>${esc(m.task||'')}</span></span></button>`;
     const lead=ms.filter(m=>m.lead), rest=ms.filter(m=>!m.lead);
     const rep=arr(t.reports).filter(r=>r&&typeof r==='object').map(r=>{const m=ms.find(x=>x.id===r.who)||{},c=tmCol(r.who);return `<div class="tmrep" lang="ko"><span style="font-size:13px;font-weight:600;color:${c[1]}">${esc(m.name||r.who||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="note">${esc(r.detail)}</span>`:''}</div>`}).join('');
-    return err+`<div class="kpis" lang="ko">${kpi('일하는 중',String(cnt('working'))).replace('class="kpi"','class="kpi kg"')}${kpi('대기',String(cnt('waiting')))}${kpi('막힘',String(cnt('blocked'))).replace('class="kpi"','class="kpi kw"')}</div>
+    const kb=(l,k,c)=>kpi(l,String(cnt(k))).replace('<div class="kpi"','<button type="button" data-tmstat="'+k+'" class="kpi tb'+c+'"').replace(/<\/div>$/,'</button>');
+    return err+`<div class="kpis" lang="ko">${kb('일하는 중','working',' kg')}${kb('대기','waiting','')}${kb('막힘','blocked',' kw')}</div>
     <section><div class="sechead"><h2>Office</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
     <section><div class="sechead"><h2 lang="ko">오늘 보고 · 윤아 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
     <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p>`;
   };
+  function actTeamStat(k,btn){
+    const t=tmTeam(), st=TM_ST[k]; if(!t||!st) return;
+    const ms=arr(t.members).filter(m=>m&&typeof m==='object'&&m.status===k);
+    const row=m=>{const n=arr(m.next).find(x=>x&&typeof x==='object');return `<button type="button" class="tmcard" data-tm="${esc(m.id)}">${tmAv(m)}<span class="tmt"><b>${esc(m.name)} <span>${esc(m.role||'')}</span></b><span>${esc(m.task||'')}</span>${n?`<span>${esc(n.what)} · ${esc(n.when)}</span>`:''}</span></button>`};
+    openModal({title:st[0]+' '+ms.length+'명',closeOnly:true,html:`<div lang="ko" style="display:grid;gap:var(--s3)">${ms.length?ms.map(row).join(''):'<p class="note">지금은 없어요.</p>'}</div>`},btn);
+  }
   function actTeam(id,btn){
     const t=tmTeam(), m=t&&arr(t.members).find(x=>x&&x.id===id); if(!m) return;
     const lead=arr(t.members).find(x=>x&&x.lead), st=TM_ST[m.status]||TM_ST.waiting;
@@ -1584,6 +1592,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
+    const ts=e.target.closest('[data-tmstat]'); if(ts){ actTeamStat(ts.dataset.tmstat,ts); return; }
     const tm=e.target.closest('[data-tm]'); if(tm){ actTeam(tm.dataset.tm,tm); return; }
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
