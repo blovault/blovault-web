@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-uf8AgFy/HqWyLugM17EtTVMpnxXv/C53KfIlyYaAEWA='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-Zk+gRYgqdziaac79B06fr6jk7l23M7E8ECWULq5NqOg='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -405,6 +405,21 @@ body.mopen{overflow:hidden}
 .note a{color:var(--accent);font-weight:600}
 .modebox{display:flex;gap:var(--s3);align-items:center;justify-content:space-between;flex-wrap:wrap}
 .modebox .acts{display:flex;gap:var(--s2);flex-wrap:wrap}
+.tmbox{background:var(--sunken);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:var(--s3)}
+.tmgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+.tmcard{display:flex;align-items:center;gap:var(--s3);min-height:64px;padding:var(--s3);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);text-align:left;font:inherit;color:var(--fg);cursor:pointer;width:100%;min-width:0}
+.tmcard.lead{border:2px solid var(--accent)}
+.tmcard:hover{background:var(--hover)}
+.tmcard .tmt{min-width:0;display:grid;gap:2px}
+.tmcard .tmt b{font-size:15px}.tmcard .tmt span{font-size:13px;color:var(--fg3);overflow-wrap:anywhere}
+.tmav{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px}
+.tmcard.lead .tmav{width:56px;height:56px;font-size:22px}
+.tmav.big{width:72px;height:72px;font-size:30px}
+.tmdot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-sizing:content-box}
+.kpi.kg .value{color:var(--good)}.kpi.kw .value{color:#8A6A00}
+.tmfocus{background:var(--accent-bg);border-radius:var(--r-md);padding:var(--s3);margin:var(--s3) 0}
+.tmrow{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-bottom:1px solid var(--line)}
+.tmrep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:4px}
 </style>
 </head>
 <body>
@@ -473,8 +488,8 @@ body.mopen{overflow:hidden}
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
   // Sections are the old tab keys (and hashes). GROUPS puts them under the five navigation entries.
-  const TABS=[['overview','Today'],['briefs','Briefs'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
-  const GROUPS=[['home','Home','home',['overview','briefs']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
+  const TABS=[['overview','Today'],['briefs','Briefs'],['team','Team'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
+  const GROUPS=[['home','Home','home',['overview','briefs','team']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
   const groupOf=k=>GROUPS.find(g=>g[3].includes(k))||GROUPS[0];
   // Old hashes and group names land on a section. #beta was the push alert for invite requests.
   const ALIAS={bugs:'inbox',beta:'requests',home:'overview',money:'plaid',ops:'cleanup',admin:'tools',shortcuts:'tools',activity:'tools',alerts:'tools',testflight:'builds',flags:'features',invites:'testers'};
@@ -737,6 +752,36 @@ body.mopen{overflow:hidden}
     <section><div class="sechead"><h2>Recent commits</h2></div>${table(['When','Commit','Subject','Shipped'],commits,'No commits.')}</section>
     <section><div class="sechead"><h2>CI</h2></div>${table(['When','Workflow','Result','>Minutes'],ci,'No CI runs.')}</section>`;
   };
+  const TM_COL={karina:['#E3DAFF','#4B2BB3'],yujin:['#FFE0C2','#8A3D00'],tiffany:['#D6F0E6','#0B5A3E'],wonyoung:['#FFD9E8','#9C1F57'],winter:['#D3ECFF','#0B4F86'],yoona:['#E2F2D0','#36610B'],sejeong:['#FFF0B8','#6E5200']};
+  const TM_ST={working:['일하는 중','var(--good)'],waiting:['대기','#8A93A5'],blocked:['막힘','#D9A400']};
+  const tmCol=id=>TM_COL[id]||['#E6E9F0','#3E475A'];
+  const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
+  const tmTeam=()=>{const t=dev&&dev.data&&dev.data.team;return t&&typeof t==='object'?t:null};
+  P.team=()=>{
+    if(devLoading&&!dev&&!devErr) return skeleton();
+    const err=devErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(devErr)}</span><button class="btn" type="button" data-devretry="1">Retry</button></div>`:'';
+    if(!dev) return err||skeleton();
+    const t=tmTeam();
+    if(!t) return err+`<div class="empty"><span class="eico neutral">${svg('check')}</span><p>No team data yet.</p><p>Run make dev-dash-push on the Mac.</p></div>`;
+    const ms=arr(t.members).filter(m=>m&&typeof m==='object'), cnt=k=>ms.filter(m=>m.status===k).length;
+    const card=m=>`<button type="button" class="tmcard${m.lead?' lead':''}" data-tm="${esc(m.id)}" lang="ko">${tmAv(m)}<span class="tmt"><b>${esc(m.name)}</b><span>${esc(m.role||'')}</span><span>${esc(m.task||'')}</span></span></button>`;
+    const lead=ms.filter(m=>m.lead), rest=ms.filter(m=>!m.lead);
+    const rep=arr(t.reports).filter(r=>r&&typeof r==='object').map(r=>{const m=ms.find(x=>x.id===r.who)||{},c=tmCol(r.who);return `<div class="tmrep" lang="ko"><span style="font-size:13px;font-weight:600;color:${c[1]}">${esc(m.name||r.who||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="note">${esc(r.detail)}</span>`:''}</div>`}).join('');
+    return err+`<div class="kpis" lang="ko">${kpi('일하는 중',String(cnt('working'))).replace('class="kpi"','class="kpi kg"')}${kpi('대기',String(cnt('waiting')))}${kpi('막힘',String(cnt('blocked'))).replace('class="kpi"','class="kpi kw"')}</div>
+    <section><div class="sechead"><h2>Office</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
+    <section><div class="sechead"><h2 lang="ko">오늘 보고 · 카리나 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
+    <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p>`;
+  };
+  function actTeam(id,btn){
+    const t=tmTeam(), m=t&&arr(t.members).find(x=>x&&x.id===id); if(!m) return;
+    const lead=arr(t.members).find(x=>x&&x.lead), st=TM_ST[m.status]||TM_ST.waiting;
+    const nx=arr(m.next).filter(n=>n&&typeof n==='object').map(n=>`<div class="tmrow"><span>${esc(n.what)}</span><span class="note">${esc(n.when)}</span></div>`).join('');
+    openModal({title:String(m.name||''),closeOnly:true,html:`<div lang="ko"><div style="display:flex;gap:var(--s3);align-items:center">${tmAv(m,true)}<div><b>${esc(m.name)}</b><div class="note">${esc(m.role||'')}${m.lead?'':' · '+esc(lead?lead.name:'카리나')+'에게 보고'} · ${st[0]}</div></div></div>
+      <div class="tmfocus"><div class="note">지금 하는 일</div><b>${esc(m.task||'—')}</b></div>
+      <h3>다음 일정</h3>${nx||'<p class="note">—</p>'}
+      <h3>최근 보고</h3><p>${esc(m.last||'—')}</p>
+      <button class="btn" type="button" disabled>사진 바꾸기</button> <span class="note">곧 추가</span></div>`},btn);
+  }
   async function loadDev(){
     if(!session||devLoading) return;
     devLoading=true; render();
@@ -1414,7 +1459,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="region" tabindex="0" aria-label="${esc(TABS.find(t=>t[0]===tab)[1])}">${subnav()}${P[tab]()}</div>`;
-    if(tab==='dev'&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
+    if((tab==='dev'||tab==='team')&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
     if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
@@ -1539,6 +1584,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
+    const tm=e.target.closest('[data-tm]'); if(tm){ actTeam(tm.dataset.tm,tm); return; }
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
     const fg=e.target.closest('[data-flag]'); if(fg){ if(!fg.disabled) toggleFlag(fg.dataset.flag,fg); return; }
@@ -1574,7 +1620,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev'||tab==='team')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
@@ -1587,7 +1633,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     btn.disabled=false; btn.textContent='Sign in';
   });
   window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);render();}});
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev') loadDev(); } });
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev'||tab==='team') loadDev(); } });
 
   sb.auth.onAuthStateChange((event,s)=>{
     const was=session&&session.user?.id; session=s;
