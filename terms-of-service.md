@@ -1,6 +1,6 @@
 # BLO VAULT Terms of Service
 
-**Last Updated:** November 25, 2026
+**Last Updated:** November 26, 2026
 
 **In-app:** More → Settings → Privacy → Terms of service.
 
@@ -28,7 +28,7 @@ Paid features may be offered through in-app purchase. Payments are processed by 
 
 ### 4.1 Free trial, plans, and limits
 
-New users get a 14-day free trial that starts when your pseudonymous account is created. During the trial you may link up to 3 institutions. When the trial ends without an active subscription, syncing stops and we remove your bank connections at Plaid; data already on your device stays until you delete it, and you can link again after subscribing. When a subscription or access granted with an access code ends, the same applies. To control costs and prevent abuse, each account may hold at most 10 bank connections. If you use "Erase this phone", the data on your device is erased immediately and we remove your bank connections and delete your account by the last day of that calendar month (Plaid bills each connection per calendar month); until then you can restore the connections by signing back in with the same account, if a copy encrypted with your recovery key exists. For complimentary (permanent) access granted with an access code, we remove your bank connections after 90 days without you opening the App, unless you also have an active subscription; the access itself continues and you can link again. Access codes are given at our discretion, may be time-limited, and the access they grant may be changed or ended at our discretion.
+New users get a 14-day free trial that starts when your pseudonymous account is created. During the trial you may link up to 3 institutions. When the trial ends without an active subscription, syncing stops and we remove your bank connections at Plaid; data already on your device stays until you delete it, and you can link again after subscribing. When a subscription or access granted with an access code ends, the same applies. To control costs and prevent abuse, each account may hold at most 10 bank connections. If you use "Erase this phone", the data on your device is erased immediately and we remove your bank connections and delete your account by the last day of that calendar month (Plaid bills each connection per calendar month); until then you can restore the connections by signing back in with the same account, if a copy encrypted with your recovery code exists. For complimentary (permanent) access granted with an access code, we remove your bank connections after 90 days without you opening the App, unless you also have an active subscription; the access itself continues and you can link again. Access codes are given at our discretion, may be time-limited, and the access they grant may be changed or ended at our discretion.
 
 ## 5. Changes to the service and terms
 
