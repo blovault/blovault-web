@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-YdIr+wlaK1VTpQqI7lWS6z/VvmoRUfLys5a4Sdtmm6s='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-2QjGqRjvafHMC2vAYuAdiFhL6ctLgT/ObArfDXFqPuo='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -407,17 +407,25 @@ body.mopen{overflow:hidden}
 .modebox .acts{display:flex;gap:var(--s2);flex-wrap:wrap}
 .tmbox{background:var(--sunken);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:var(--s3)}
 .tmgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
-.tmcard{display:flex;align-items:center;gap:var(--s3);min-height:64px;padding:var(--s3);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);text-align:left;font:inherit;color:var(--fg);cursor:pointer;width:100%;min-width:0}
-.tmcard.lead{border:2px solid var(--accent)}
+.tmcard{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:136px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);text-align:left;font:inherit;color:var(--fg);cursor:pointer;width:100%;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.tmcard.lead{border:2px solid var(--accent);flex-direction:row;align-items:flex-start;gap:var(--s3);min-height:64px}
+.tmcard.row{flex-direction:row;align-items:flex-start;gap:var(--s3);min-height:64px}
 .tmcard:hover{background:var(--hover)}
-.tmcard .tmt{min-width:0;display:grid;gap:2px}
-.tmcard .tmt b{font-size:15px}.tmcard .tmt span{font-size:13px;color:var(--fg3);overflow-wrap:anywhere}
+.tmcard .tmt{min-width:0;width:100%;display:grid;gap:4px;align-content:start}
+.tmcard .tmt b{font-size:15px}.tmcard .tmt .tmr{white-space:nowrap;font-size:12px;color:var(--fg3);overflow-wrap:anywhere}
+.tmcard .tmt .tmk{font-size:13px;color:var(--fg2);overflow-wrap:anywhere}
+.tmcard:not(.lead):not(.row) .tmt .tmk{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tmpill{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.4;vertical-align:1px;background:var(--sunken);color:var(--fg3)}
+.tmpill.working{background:var(--good-bg);color:var(--good)}.tmpill.blocked{background:var(--warn-bg);color:var(--warn)}
 .tmav{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px}
 .tmcard.lead .tmav{width:56px;height:56px;font-size:22px}
 .tmav.big{width:72px;height:72px;font-size:30px}
 .tmdot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-sizing:content-box}
-.kpi.tb{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%}
-.kpi.kg .value{color:var(--good)}.kpi.kw .value{color:#8A6A00}
+.tmchips{display:flex;gap:8px}
+.tmchip{flex:1;min-width:0;min-height:56px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font:inherit;color:var(--fg3);font-size:13px;cursor:pointer;text-align:left}
+.tmchip:hover{background:var(--hover)}
+.tmchip i{flex:none;width:10px;height:10px;border-radius:50%}
+.tmchip b{margin-left:auto;font-size:20px;font-weight:700}
 .tmfocus{background:var(--accent-bg);border-radius:var(--r-md);padding:var(--s3);margin:var(--s3) 0}
 .tmrow{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-bottom:1px solid var(--line)}
 .tmrep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:4px}
@@ -755,6 +763,7 @@ body.mopen{overflow:hidden}
   };
   const TM_COL={karina:['#E3DAFF','#4B2BB3'],yujin:['#FFE0C2','#8A3D00'],tiffany:['#D6F0E6','#0B5A3E'],wonyoung:['#FFD9E8','#9C1F57'],winter:['#D3ECFF','#0B4F86'],yoona:['#E2F2D0','#36610B'],sejeong:['#FFF0B8','#6E5200']};
   const TM_ST={working:['일하는 중','var(--good)'],waiting:['대기','#8A93A5'],blocked:['막힘','#D9A400']};
+  const tmPill=m=>{const k=TM_ST[m.status]?m.status:'waiting';return `<span class="tmpill ${k}">${TM_ST[k][0]}</span>`};
   const tmCol=id=>TM_COL[id]||['#E6E9F0','#3E475A'];
   const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
   const tmTeam=()=>{const t=dev&&dev.data&&dev.data.team;return t&&typeof t==='object'?t:null};
@@ -765,19 +774,19 @@ body.mopen{overflow:hidden}
     const t=tmTeam();
     if(!t) return err+`<div class="empty"><span class="eico neutral">${svg('check')}</span><p>No team data yet.</p><p>Run make dev-dash-push on the Mac.</p></div>`;
     const ms=arr(t.members).filter(m=>m&&typeof m==='object'), cnt=k=>ms.filter(m=>m.status===k).length;
-    const card=m=>`<button type="button" class="tmcard${m.lead?' lead':''}" data-tm="${esc(m.id)}" lang="ko">${tmAv(m)}<span class="tmt"><b>${esc(m.name)}</b><span>${esc(m.role||'')}</span><span>${esc(m.task||'')}</span></span></button>`;
+    const card=m=>`<button type="button" class="tmcard${m.lead?' lead':''}" data-tm="${esc(m.id)}" lang="ko">${tmAv(m)}<span class="tmt"><span><b>${esc(m.name)}</b>${tmPill(m)} <span class="tmr">${esc(m.role||'')}</span></span><span class="tmk">${esc(m.task||'')}</span></span></button>`;
     const lead=ms.filter(m=>m.lead), rest=ms.filter(m=>!m.lead);
     const rep=arr(t.reports).filter(r=>r&&typeof r==='object').map(r=>{const m=ms.find(x=>x.id===r.who)||{},c=tmCol(r.who);return `<div class="tmrep" lang="ko"><span style="font-size:13px;font-weight:600;color:${c[1]}">${esc(m.name||r.who||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="note">${esc(r.detail)}</span>`:''}</div>`}).join('');
-    const kb=(l,k,c)=>kpi(l,String(cnt(k))).replace('<div class="kpi"','<button type="button" data-tmstat="'+k+'" class="kpi tb'+c+'"').replace(/<\/div>$/,'</button>');
-    return err+`<div class="kpis" lang="ko">${kb('일하는 중','working',' kg')}${kb('대기','waiting','')}${kb('막힘','blocked',' kw')}</div>
-    <section><div class="sechead"><h2>Office</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
+    const kb=(k,c)=>{const n=cnt(k),l=TM_ST[k][0];return `<button type="button" data-tmstat="${k}" class="tmchip" aria-label="${l} ${n}\uba85 \ubcf4\uae30"><i style="background:${TM_ST[k][1]}"></i>${l}<b style="color:${c}">${n}</b></button>`};
+    return err+`<div class="tmchips" lang="ko">${kb('working','var(--good)')}${kb('waiting','var(--fg)')}${kb('blocked','var(--warn)')}</div>
+    <section><div class="sechead"><h2 lang="ko">\uc0ac\ubb34\uc2e4</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
     <section><div class="sechead"><h2 lang="ko">오늘 보고 · 윤아 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
     <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p>`;
   };
   function actTeamStat(k,btn){
     const t=tmTeam(), st=TM_ST[k]; if(!t||!st) return;
     const ms=arr(t.members).filter(m=>m&&typeof m==='object'&&m.status===k);
-    const row=m=>{const n=arr(m.next).find(x=>x&&typeof x==='object');return `<button type="button" class="tmcard" data-tm="${esc(m.id)}">${tmAv(m)}<span class="tmt"><b>${esc(m.name)} <span>${esc(m.role||'')}</span></b><span>${esc(m.task||'')}</span>${n?`<span>${esc(n.what)} · ${esc(n.when)}</span>`:''}</span></button>`};
+    const row=m=>{const n=arr(m.next).find(x=>x&&typeof x==='object');return `<button type="button" class="tmcard row" data-tm="${esc(m.id)}">${tmAv(m)}<span class="tmt"><span><b>${esc(m.name)}</b>${tmPill(m)} <span class="tmr">${esc(m.role||'')}</span></span><span class="tmk">${esc(m.task||'')}</span>${n?`<span class="tmr">${esc(n.what)} · ${esc(n.when)}</span>`:''}</span></button>`};
     openModal({title:st[0]+' '+ms.length+'명',closeOnly:true,html:`<div lang="ko" style="display:grid;gap:var(--s3)">${ms.length?ms.map(row).join(''):'<p class="note">지금은 없어요.</p>'}</div>`},btn);
   }
   function actTeam(id,btn){
