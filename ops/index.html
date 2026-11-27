@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-2QjGqRjvafHMC2vAYuAdiFhL6ctLgT/ObArfDXFqPuo='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-7FRSZ3EmIRRat0chQYT1OhvrcCFNYvAxcgcybyJtyo8='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -765,7 +765,12 @@ body.mopen{overflow:hidden}
   const TM_ST={working:['일하는 중','var(--good)'],waiting:['대기','#8A93A5'],blocked:['막힘','#D9A400']};
   const tmPill=m=>{const k=TM_ST[m.status]?m.status:'waiting';return `<span class="tmpill ${k}">${TM_ST[k][0]}</span>`};
   const tmCol=id=>TM_COL[id]||['#E6E9F0','#3E475A'];
-  const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
+  let tmUrls={}, tmUrlsAt=0;
+  async function loadAvatars(){
+    try{ const r=await api('team_avatar_urls',{}); tmUrls=(r&&r.urls&&typeof r.urls==='object')?r.urls:{}; tmUrlsAt=Date.now(); }catch(e){ /* initials stay */ }
+    render();
+  }
+  const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${tmUrls[m.id]?`<img src="${esc(tmUrls[m.id])}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
   const tmTeam=()=>{const t=dev&&dev.data&&dev.data.team;return t&&typeof t==='object'?t:null};
   P.team=()=>{
     if(devLoading&&!dev&&!devErr) return skeleton();
@@ -797,7 +802,29 @@ body.mopen{overflow:hidden}
       <div class="tmfocus"><div class="note">지금 하는 일</div><b>${esc(m.task||'—')}</b></div>
       <h3>다음 일정</h3>${nx||'<p class="note">—</p>'}
       <h3>최근 보고</h3><p>${esc(m.last||'—')}</p>
-      <button class="btn" type="button" disabled>사진 바꾸기</button> <span class="note">곧 추가</span></div>`},btn);
+      <button class="btn" type="button" data-tmphoto="${esc(m.id)}">\uc0ac\uc9c4 \ubc14\uafb8\uae30</button>${tmUrls[m.id]?` <button class="btn danger" type="button" data-tmdel="${esc(m.id)}">\uc0ac\uc9c4 \uc9c0\uc6b0\uae30</button>`:''}
+      <input type="file" id="tmFile" accept="image/jpeg,image/png,image/webp" hidden></div>`},btn);
+  }
+  async function tmPhotoPick(file,id,btn){
+    if(!file) return;
+    const label=btn.textContent; btn.disabled=true; btn.textContent='\uc62c\ub9ac\ub294 \uc911\u2026';
+    const url=URL.createObjectURL(file);
+    try{
+      const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('\uc774\ubbf8\uc9c0\ub97c \uc5f4 \uc218 \uc5c6\uc5b4\uc694'));i.src=url;});
+      const c=document.createElement('canvas'); c.width=c.height=512;
+      const side=Math.min(img.naturalWidth,img.naturalHeight);
+      c.getContext('2d').drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,512,512);
+      const blob=await new Promise((ok,no)=>c.toBlob(b=>b?ok(b):no(new Error('\ubcc0\ud658 \uc2e4\ud328')),'image/jpeg',0.85));
+      const data_b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>no(new Error('\uc77d\uae30 \uc2e4\ud328'));r.readAsDataURL(blob);});
+      await api('team_avatar_set',{member:id,content_type:'image/jpeg',data_b64});
+      toast('\uc0ac\uc9c4\uc744 \uc62c\ub838\uc5b4\uc694');
+      await loadAvatars(); actTeam(id);
+    }catch(err){ toast('\uc0ac\uc9c4 \uc62c\ub9ac\uae30 \uc2e4\ud328: '+errMsg(err)); if(btn.isConnected){btn.disabled=false;btn.textContent=label;} }
+    finally{ URL.revokeObjectURL(url); }
+  }
+  function actTeamPhotoDel(id,btn){
+    openModal({title:'\uc0ac\uc9c4 \uc9c0\uc6b0\uae30',danger:true,intro:'<p lang="ko">\uc774 \uc0ac\uc9c4\uc744 \uc9c0\uc6b8\uae4c\uc694? \uc774\ub2c8\uc15c\ub85c \ub3cc\uc544\uac00\uc694.</p>',submit:'\uc9c0\uc6b0\uae30',toast:'\uc0ac\uc9c4\uc744 \uc9c0\uc6e0\uc5b4\uc694',
+      run:async()=>{ await api('team_avatar_delete',{member:id}); await loadAvatars(); }},btn);
   }
   async function loadDev(){
     if(!session||devLoading) return;
@@ -805,6 +832,7 @@ body.mopen{overflow:hidden}
     try{ dev=await api('dev_snapshot',{}); devErr=''; }
     catch(err){ devErr=(err instanceof TypeError)?'Network error.':'Could not load dev data: '+err.message; }
     devAt=Date.now(); devLoading=false; render();
+    if(dev) loadAvatars();
   }
   const userCard=(x,i)=>`<article class="rcard"><div class="l1"><span class="tname mono">${esc(x.short)}</span>${planPill(x)}${x.feature_preview?'<span class="pill info">Preview</span>':''}${x.link_opened_at&&!x.linked?'<span class="pill warn">Link not finished</span>':''}</div><div class="l2">${esc(x.entitlement?human(x.entitlement.source):'No access grant')} · opened ${esc(ago(x.last_active_at))} · ${n0(x.items_billed??x.items_active)} / ${n0(x.items_active??0)} billed / live</div><div class="cacts"><button class="btn" type="button" data-uopen="${i}" aria-label="Open details for user ${esc(x.short)}">Details</button><button class="btn" type="button" data-umenu="${i}" aria-haspopup="menu" aria-expanded="false" aria-label="Actions for user ${esc(x.short)}">Actions${svg('chev')}</button></div></article>`;
   P.users=()=>{
@@ -1449,7 +1477,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const open=(snap.feedback?.items||[]).filter(isOpen).length, pend=n0(snap.beta_requests?.pending), c={inbox:open,requests:pend};
     return `<div class="filters subnav" role="group" aria-label="${esc(g[1])} sections">${g[3].map(k=>`<button class="btn" type="button" data-tab="${k}" aria-pressed="${tab===k}">${esc(TABS.find(t=>t[0]===k)[1])}${c[k]?` <span class="count">${c[k]}</span>`:''}</button>`).join('')}</div>`;
   }
-  document.addEventListener('change',e=>{const c=e.target.closest&&e.target.closest('[data-hideexp]'); if(!c) return; lsSet('ops_hide_expired_invites',c.checked?'1':'0'); render();});
+  document.addEventListener('change',e=>{if(e.target.id==='tmFile'){const f=e.target.files[0],b=document.querySelector('[data-tmphoto]'); e.target.value=''; if(f&&b) tmPhotoPick(f,b.dataset.tmphoto,b); return;} const c=e.target.closest&&e.target.closest('[data-hideexp]'); if(!c) return; lsSet('ops_hide_expired_invites',c.checked?'1':'0'); render();});
   function render(){
     const signedIn=!!session;
     closeMenu();
@@ -1602,6 +1630,8 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
     const ts=e.target.closest('[data-tmstat]'); if(ts){ actTeamStat(ts.dataset.tmstat,ts); return; }
+    const tp=e.target.closest('[data-tmphoto]'); if(tp){ const f=$('tmFile'); if(f&&!tp.disabled) f.click(); return; }
+    const td=e.target.closest('[data-tmdel]'); if(td){ actTeamPhotoDel(td.dataset.tmdel,td); return; }
     const tm=e.target.closest('[data-tm]'); if(tm){ actTeam(tm.dataset.tm,tm); return; }
     const uo=e.target.closest('[data-uopen]');
     if(uo){ const x=(snap.users?.items||[])[+uo.dataset.uopen]; if(x){selUser=x.id;render();window.scrollTo(0,0);} return; }
