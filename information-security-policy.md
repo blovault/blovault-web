@@ -114,7 +114,7 @@ Incidents are logged; post-incident review updates controls and this Policy as n
 
 ## 11. Vendor and third-party management
 
-Subprocessors, as listed in Section 4 of the Privacy Policy, are **Plaid**, **Supabase**, **RevenueCat**, **Apple / Google** (in-app purchases, platform services, optional OS speech processing), **Sentry** (optional, only if a DSN is configured), and **Google ML Kit** (on-device text recognition); some features also request non-identifying reference or market data over HTTPS. They are selected for fit with BLO VAULT’s architecture. Contracts or standard terms are accepted per vendor. Consumer-facing disclosures appear in the **Privacy Policy** (`privacy-policy.md`). Changes to material subprocessors trigger Privacy Policy updates.
+Subprocessors, as listed in Section 4 of the Privacy Policy, are **Plaid**, **Supabase**, **RevenueCat**, **Apple / Google** (in-app purchases, platform services, optional OS speech processing), **Sentry** (optional, only if a DSN is configured), and **Apple Vision** (part of iOS; on-device text recognition); some features also request non-identifying reference or market data over HTTPS. They are selected for fit with BLO VAULT’s architecture. Contracts or standard terms are accepted per vendor. Consumer-facing disclosures appear in the **Privacy Policy** (`privacy-policy.md`). Changes to material subprocessors trigger Privacy Policy updates.
 
 ---
 
