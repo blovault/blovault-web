@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-y2TvTLBFDrg23mrWkTB3ZY/BVYj/5JPRhww9dRcfjOk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-piDeEk54xV/m5OuR8zHwhcuD8Xyd5s63Cma3LM2ZOyo='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -570,7 +570,7 @@ body.mopen{overflow:hidden}
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
   // Sections are the old tab keys (and hashes). GROUPS puts them under the five navigation entries.
   const TABS=[['overview','Today'],['briefs','Briefs'],['team','Team'],['marketing','Marketing'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
-  const GROUPS=[['home','Home','home',['overview','briefs','team','marketing']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
+  const GROUPS=[['home','Home','home',['overview','team','marketing']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
   const groupOf=k=>GROUPS.find(g=>g[3].includes(k))||GROUPS[0];
   // Old hashes and group names land on a section. #beta was the push alert for invite requests.
   const ALIAS={bugs:'inbox',beta:'requests',home:'overview',money:'plaid',ops:'cleanup',admin:'tools',shortcuts:'tools',activity:'tools',alerts:'tools',testflight:'builds',flags:'features',invites:'testers'};
@@ -764,7 +764,7 @@ body.mopen{overflow:hidden}
     const open=(f.items||[]).filter(isOpen);
     const H=history.map(h=>({label:fmtDate(h.generated_at),...h}));
     const bm=(p.by_month||[]).filter(m=>n0(m.billed_items)>0);
-    return `<div class="kpis k6 k7">${[
+    return devSummary()+`<div class="kpis k6 k7">${[
       kpi('Active users 7d',n0(u.active_last_7d),`of ${u.total??'—'} users`,spark(history.map(h=>h.users_active7))),
       kpi('Billed Items this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · ${n0(p.live_items??p.active_items)} live now`,spark(bm.map(m=>n0(m.billed_items)))),
       kpi('Est. Plaid cost / mo',usd(estMo(p)),taxShort(),spark(bm.map(estM))),
@@ -804,18 +804,22 @@ body.mopen{overflow:hidden}
   const devPri={high:['warn','High'],medium:['mute','Medium'],low:['mute','Low']};
   const devRank={high:0,medium:1,low:2};
   const devCI=c=>c==='success'?['good','Passed']:['failure','timed_out','startup_failure'].includes(c)?['bad','Failed']:!c?['info','Running']:['mute',String(c)];
-  const DEV_SEC=[['now','Now'],['owner','For you'],['today','Done today'],['waiting','Waiting on others']];
+  const DEV_SEC=[['now','Now'],['owner','For you'],['waiting','Waiting'],['today','Done today']];
   const DEV_WHO=[['owner','Owner'],['claude','Claude'],['external','External'],['later','Later'],['all','All']];
+  const devSummary=()=>{
+    if(!dev||!dev.data||typeof dev.data!=='object') return '';
+    const sum=arr(dev.data.summary_ko).filter(r=>r&&typeof r==='object'), by=k=>sum.filter(r=>r.section===k).sort((a,b)=>n0(a.order)-n0(b.order));
+    const up=by('updated')[0], stale=dev.updated_at&&dOf(dev.updated_at)&&(Date.now()-dOf(dev.updated_at))/36e5>6;
+    const top=`<p>${up?`<span lang="ko" style="overflow-wrap:anywhere">${esc(up.text)}</span> · `:''}<span class="note">Pushed ${esc(ago(dev.updated_at))}</span>${stale?' <span class="pill warn">Stale</span>':''}</p>`;
+    const secs=DEV_SEC.map(([k,h])=>{const r=by(k);return r.length?`<section><div class="sechead"><h2>${h}</h2></div><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${r.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></section>`:''}).join('');
+    return top+secs;
+  };
   P.dev=()=>{
     if(devLoading&&!dev&&!devErr) return skeleton();
     const err=devErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(devErr)}</span><button class="btn" type="button" data-devretry="1">Retry</button></div>`:'';
     if(!dev) return err||skeleton();
     const d=dev.data;
     if(!d||typeof d!=='object') return err+`<div class="empty"><span class="eico neutral">${svg('check')}</span><p>No dev data yet.</p><p>Run make dev-dash-push on the Mac.</p></div>`;
-    const sum=arr(d.summary_ko).filter(r=>r&&typeof r==='object'), by=k=>sum.filter(r=>r.section===k).sort((a,b)=>n0(a.order)-n0(b.order));
-    const up=by('updated')[0], stale=dev.updated_at&&dOf(dev.updated_at)&&(Date.now()-dOf(dev.updated_at))/36e5>24;
-    const top=`<p>${up?`<span lang="ko" style="overflow-wrap:anywhere">${esc(up.text)}</span> · `:''}<span class="note">Pushed ${esc(ago(dev.updated_at))}</span>${stale?' <span class="pill warn">Stale</span>':''}</p>`;
-    const secs=DEV_SEC.map(([k,h])=>{const r=by(k);return r.length?`<section><div class="sechead"><h2>${h}</h2></div><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${r.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></section>`:''}).join('');
     const rank={bad:0,warn:1,ok:2};
     const checks=arr(d.status).filter(r=>r&&typeof r==='object').sort((a,b)=>(rank[a.state]??3)-(rank[b.state]??3)).map(r=>{const m=devSt[r.state]||['mute',String(r.state??'—')];return `<tr><td>${esc(r.check)}</td><td>${esc(r.value)}</td><td><span class="pill ${m[0]}">${esc(m[1])}</span></td><td class="note" style="overflow-wrap:anywhere">${esc(r.detail||'')}</td></tr>`});
     const items=arr(d.open_items).filter(r=>r&&typeof r==='object');
@@ -827,7 +831,7 @@ body.mopen{overflow:hidden}
     const sn=snap.sentry||{};
     const sen=(sn.items||[]).slice(0,10).map(x=>`<tr><td><a class="mono" href="${esc(x.permalink||'#')}" target="_blank" rel="noopener">${esc(x.short_id||'—')}</a></td><td style="overflow-wrap:anywhere">${esc(x.title||'')}${devNote('sentry:'+x.short_id)?`<div class="note">${esc(devNote('sentry:'+x.short_id))}</div>`:''}</td><td>${devNote('sentry:'+x.short_id)?'<span class="pill good">Handled</span>':`<span class="pill ${x.level==='error'||x.level==='fatal'?'bad':'warn'}">${esc(x.level||'—')}</span>`}</td><td class="r num">${esc(n0(x.count))}</td><td class="r num">${esc(n0(x.user_count))}</td><td>${esc(ago(x.last_seen))}</td></tr>`);
     const senNote=sn.configured===false?'<p class="note">Sentry not connected.</p>':sn.error?`<p class="note" style="overflow-wrap:anywhere">${esc(sn.error)}</p>`:'';
-    return err+`<section><div class="sechead"><h2>App errors</h2><a class="note" href="https://blo-vault-05.sentry.io/issues/" target="_blank" rel="noopener">Open Sentry</a></div>${senNote}${table(['Issue','Title','Level','>Events','>Users','Last seen'],sen,'No open app errors in 24 hours.')}</section>`+top+secs+`
+    return err+`<section><div class="sechead"><h2>App errors</h2><a class="note" href="https://blo-vault-05.sentry.io/issues/" target="_blank" rel="noopener">Open Sentry</a></div>${senNote}${table(['Issue','Title','Level','>Events','>Users','Last seen'],sen,'No open app errors in 24 hours.')}</section>`+`
     <section><div class="sechead"><h2>Checks</h2></div>${table(['Check','Value','State','Detail'],checks,'No checks reported.')}</section>
     <section><div class="sechead"><h2>Open items</h2><div class="filters" role="group" aria-label="Filter by owner">${DEV_WHO.map(([k,l])=>`<button class="btn" type="button" data-devwho="${k}" aria-pressed="${devWho===k}">${l} ${cnt(k)}</button>`).join('')}</div></div>${table(['Item','Area','Priority','Status'],rows,'Nothing here.')}</section>
     <section><div class="sechead"><h2>Recent commits</h2></div>${table(['When','Commit','Subject','Shipped'],commits,'No commits.')}</section>
@@ -1659,11 +1663,11 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="region" tabindex="0" aria-label="${esc(TABS.find(t=>t[0]===tab)[1])}">${subnav()}${P[tab]()}</div>`;
-    if((tab==='dev'||tab==='team'||tab==='marketing')&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
+    if((tab==='overview'||tab==='dev'||tab==='team'||tab==='marketing')&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
     if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
-  function go(k){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
+  function go(k){tab=k;if(groupOf(k)[3].includes(k))lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
   function history_replace(k){try{window.history.replaceState(null,'','#'+k)}catch(e){location.hash=k}}
 
   function recordHistory(){
@@ -1825,7 +1829,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='dev'||tab==='team'||tab==='marketing')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='overview'||tab==='dev'||tab==='team'||tab==='marketing')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
@@ -1838,7 +1842,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     btn.disabled=false; btn.textContent='Sign in';
   });
   document.addEventListener('pointermove',e=>{if(e.target.closest&&e.target.closest('.mkch svg'))mkHover(e);else mkLeave();});
-  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);render();}});
+  window.addEventListener('hashchange',()=>{const k=tabAlias((location.hash||'').slice(1)); if(TABS.some(t=>t[0]===k)&&k!==tab){tab=k;if(groupOf(k)[3].includes(k))lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);render();}});
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&session&&Date.now()-lastLoadAt>60000){ load(); if(tab==='dev'||tab==='team'||tab==='marketing') loadDev(); } });
 
   sb.auth.onAuthStateChange((event,s)=>{
