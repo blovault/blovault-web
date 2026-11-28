@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-piDeEk54xV/m5OuR8zHwhcuD8Xyd5s63Cma3LM2ZOyo='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-AbKjwivFvsNdiRsXoJ+Qn9EM3ME+AURABclxTzp6nbQ='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -569,8 +569,8 @@ body.mopen{overflow:hidden}
   const STATUS=[['pending','New','info'],['approved','Accepted','warn'],['implementing','Fixing','warn'],['implemented','Fixed','good'],['rejected','Won’t fix','mute']];
   const statusMeta=s=>STATUS.find(x=>x[0]===s)||[s,s||'—','mute'];
   // Sections are the old tab keys (and hashes). GROUPS puts them under the five navigation entries.
-  const TABS=[['overview','Today'],['briefs','Briefs'],['team','Team'],['marketing','Marketing'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
-  const GROUPS=[['home','Home','home',['overview','team','marketing']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
+  const TABS=[['overview','Today'],['briefs','Brief'],['team','Team'],['marketing','Marketing'],['inbox','Inbox'],['requests','Requests'],['plaid','Cost'],['items','Items'],['sync','Sync'],['users','Users'],['testers','Testers'],['builds','Builds'],['features','Features'],['cleanup','Cleanup job'],['dev','Dev'],['tools','Tools']];
+  const GROUPS=[['home','Home','home',['briefs','overview','team','marketing']],['inbox','Inbox','inbox',['inbox','requests']],['money','Money','dollar',['plaid','items','sync']],['users','Users','users',['users','testers','builds','features']],['ops','Ops','ops',['cleanup','dev','tools']]];
   const groupOf=k=>GROUPS.find(g=>g[3].includes(k))||GROUPS[0];
   // Old hashes and group names land on a section. #beta was the push alert for invite requests.
   const ALIAS={bugs:'inbox',beta:'requests',home:'overview',money:'plaid',ops:'cleanup',admin:'tools',shortcuts:'tools',activity:'tools',alerts:'tools',testflight:'builds',flags:'features',invites:'testers'};
@@ -752,19 +752,12 @@ body.mopen{overflow:hidden}
 
   /* ---------- panels ---------- */
   const P={};
-  const briefInline=()=>{
-    if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
-    const head=`<div class="sechead"><h2>Latest brief</h2><button class="btn" type="button" data-tab="briefs">All briefs</button></div>`;
-    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading brief…</p>'}</section>`;
-    const x=br.items[0];
-    return `<section>${head}${x?`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`:`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
-  };
   P.overview=()=>{
     const u=snap.users||{},p=snap.plaid||{},f=snap.feedback||{};
     const open=(f.items||[]).filter(isOpen);
     const H=history.map(h=>({label:fmtDate(h.generated_at),...h}));
     const bm=(p.by_month||[]).filter(m=>n0(m.billed_items)>0);
-    return devSummary()+`<div class="kpis k6 k7">${[
+    return `<div class="kpis k6 k7">${[
       kpi('Active users 7d',n0(u.active_last_7d),`of ${u.total??'—'} users`,spark(history.map(h=>h.users_active7))),
       kpi('Billed Items this month',p.billed_this_month??p.active_items??'—',`${monthName(p.billing_month)} · ${n0(p.live_items??p.active_items)} live now`,spark(bm.map(m=>n0(m.billed_items)))),
       kpi('Est. Plaid cost / mo',usd(estMo(p)),taxShort(),spark(bm.map(estM))),
@@ -1173,6 +1166,9 @@ body.mopen{overflow:hidden}
   // First line is the greeting, bullet lines group into one list, other lines are section heads.
   const brBody=b=>{const L=String(b).split('\n').map(l=>l.trim()).filter(Boolean);let o='',ul=false;L.forEach((l,i)=>{const bl=i>0&&l[0]==='\u2022';if(ul&&!bl){o+='</ul>';ul=false;}if(bl){if(!ul){o+='<ul class="brlist">';ul=true;}o+=`<li>${esc(l.slice(1).trim())}</li>`;}else o+=`<p class="${i?'brhead':'note'}">${esc(l)}</p>`;});return o+(ul?'</ul>':'');};
   P.briefs=()=>{
+    return devSummary()+briefsList();
+  };
+  const briefsList=()=>{
     if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
     const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
     if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
@@ -1663,8 +1659,8 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(snap.webhook_flags_error) secErr.push('webhook_flags: '+snap.webhook_flags_error);
     const secBanner=secErr.length?`<div class="banner" role="alert"><span>${svg('alert')}Some sections failed: ${esc(secErr.join(' · '))}</span></div>`:'';
     $('main').innerHTML=banner+secBanner+`<div class="panel" id="panel" role="region" tabindex="0" aria-label="${esc(TABS.find(t=>t[0]===tab)[1])}">${subnav()}${P[tab]()}</div>`;
-    if((tab==='overview'||tab==='dev'||tab==='team'||tab==='marketing')&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
-    if(tab==='overview'&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
+    if((tab==='overview'||tab==='briefs'||tab==='dev'||tab==='team'||tab==='marketing')&&!devLoading&&Date.now()-devAt>60000) setTimeout(loadDev,0);
+    if((tab==='overview'||tab==='briefs')&&session&&!dev&&!devTried&&!devLoading){devTried=true;setTimeout(loadDev,0);}
     document.querySelectorAll('#main .tablebox table').forEach(t=>{const h=[...t.tHead.rows[0].cells].map(c=>c.textContent);t.querySelectorAll('tbody td:not(.tempty)').forEach(d=>{d.dataset.label=h[d.cellIndex]||'';d.classList.toggle('nil',d.cellIndex>0&&!d.querySelector('button,input')&&/^[—–]?$/.test(d.textContent.trim()))})});
   }
   function go(k){tab=k;if(groupOf(k)[3].includes(k))lastSub[groupOf(k)[0]]=k;lsSet('ops_tab',k);if(location.hash.slice(1)!==k) history_replace(k);render();window.scrollTo(0,0);}
@@ -1816,7 +1812,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     if(e.target.closest('[data-devretry]')){devAt=0;loadDev();return;}
     if(e.target.closest('[data-retry]')){load();return;}
     if(e.target.closest('[data-tfrefresh]')){loadTf();return;}
-    if(e.target.closest('[data-brrefresh]')){loadBriefs();return;}
+    if(e.target.closest('[data-brrefresh]')){devAt=0;loadDev();loadBriefs();return;}
     if(e.target.closest('[data-signout]')){sb.auth.signOut();return;}
     const b=e.target.closest('[data-status]'); if(b&&!b.disabled) setStatus(b.dataset.id,b.dataset.status);
   });
@@ -1829,7 +1825,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
   });
   $('tabs').addEventListener('scroll',updateFade,{passive:true});
   window.addEventListener('resize',updateFade);
-  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='overview'||tab==='dev'||tab==='team'||tab==='marketing')loadDev();if(tab==='briefs'||tab==='overview')loadBriefs();});
+  $('refreshBtn').addEventListener('click',()=>{load();if(tab==='overview'||tab==='briefs'||tab==='dev'||tab==='team'||tab==='marketing')loadDev();if(tab==='briefs')loadBriefs();});
   $('signOutBtn').addEventListener('click',()=>sb.auth.signOut());
   $('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();
