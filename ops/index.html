@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-td2z3OBs7oP7Y3frhMesh1sFjuNjNY+1YR/XrbVYfeE='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-Uhk5YJtbtrfCrKeL5RuXb9inG5xtOQiJmoQMGoSZDiw='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -844,7 +844,7 @@ body.mopen{overflow:hidden}
   }
   const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${tmUrls[m.id]?`<img src="${esc(tmUrls[m.id])}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
   const tmTeam=()=>{const t=dev&&dev.data&&dev.data.team;return t&&typeof t==='object'?t:null};
-  const TM_ZONES=[['총괄',['karina']],['출시·돈 계산',['yujin','tiffany']],['디자인·마케팅',['wonyoung','winter']],['지원',['yoona','sejeong']]];
+  const TM_ZONES=[['Leadership',['karina']],['Product Quality',['yujin','tiffany']],['Brand & Growth',['wonyoung','winter']],['Operations & Support',['yoona','sejeong']]];
   let tmRepAll=false;
   const tmDate=w=>{const m=/^(\d{1,2})\/(\d{1,2})/.exec(String(w||''));if(!m)return null;const n=new Date(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate());let d=new Date(n.getFullYear(),m[1]-1,m[2]);if(d<new Date(t0.getTime()-18144e6))d=new Date(n.getFullYear()+1,m[1]-1,m[2]);return {d,t0}};
   const MK_P=[['youtube','YouTube','var(--accent)'],['tiktok','TikTok','var(--teal)'],['instagram','Instagram','var(--warn)']];
@@ -923,8 +923,8 @@ body.mopen{overflow:hidden}
     const row=m=>{const k=TM_ST[m.status]?m.status:'waiting',n=arr(m.next).find(x=>x&&typeof x==='object');return `<button type="button" class="tm2r" data-tm="${esc(m.id)}" lang="ko" aria-label="${esc(m.name)} ${esc(m.role||'')} ${TM_ST[k][0]}">${tmAv(m)}<span class="tm2t"><span class="tm2h"><b>${esc(m.name)}</b><span class="tm2s">${esc(m.role||'')}</span><span class="tm2st ${k}">${k==='blocked'?svg('alert'):''}${TM_ST[k][0]}</span></span><span class="tm2k">${esc(m.task||'—')}</span>${n?`<span class="tm2s tm2n">다음 ${esc(n.what)} · ${esc(n.when)}</span>`:''}</span></button>`};
     const used=new Set(), zones=TM_ZONES.map(([n,ids])=>[n,ids.map(id=>ms.find(m=>m.id===id)).filter(Boolean)]);
     zones.forEach(z=>z[1].forEach(m=>used.add(m.id)));
-    const extra=ms.filter(m=>!used.has(m.id)); if(extra.length) zones.push(['기타',extra]);
-    const floor=zones.filter(z=>z[1].length).map((z,i)=>`<div class="tm2z${i===0?' first':''}"><div class="tm2zl" lang="ko">${esc(z[0])}</div><div class="tm2card">${z[1].map(row).join('')}</div></div>`).join('');
+    const extra=ms.filter(m=>!used.has(m.id)); if(extra.length) zones.push(['Other',extra]);
+    const floor=zones.filter(z=>z[1].length).map((z,i)=>`<div class="tm2z${i===0?' first':''}"><div class="tm2zl" lang="en">${esc(z[0])}</div><div class="tm2card">${z[1].map(row).join('')}</div></div>`).join('');
     const kb=(k,c)=>{const n=cnt(k),l=TM_ST[k][0];return `<button type="button" data-tmstat="${k}" class="tmchip" aria-label="${l} ${n}명 보기"><b>${n}</b><span><i style="background:${c}"></i>${l}</span></button>`};
     const items=[]; ms.forEach(m=>arr(m.next).forEach(n=>{if(n&&typeof n==='object') items.push({m,what:n.what,when:n.when,p:tmDate(n.when)})}));
     const dated=items.filter(x=>x.p&&x.p.d>=x.p.t0&&x.p.d<new Date(x.p.t0.getTime()+8*864e5)).sort((a,b)=>a.p.d-b.p.d||String(a.when).localeCompare(String(b.when)));
