@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-sftoW8JHldHB9XfCyzpuki6yb1vBrnGdMtUW2wBuvDY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-ekpHNQ8ldvVHH36cLr0Q8Sw3xQfSiOYTihwYa+qxbZ4='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -66,6 +66,7 @@ input,button{accent-color:var(--accent);caret-color:var(--accent)}
 .tablebox,nav.tabs{scrollbar-color:var(--line2) transparent;scrollbar-width:thin}
 th,td,.kpi,.bar,.count,.legend{font-variant-numeric:tabular-nums}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+details>summary{cursor:pointer;padding:8px 0}
 h1,h2,h3{margin:0}
 h2{font-size:17px;font-weight:650;letter-spacing:-.005em;text-wrap:balance}
 h3{font-size:14px;font-weight:600;color:var(--fg2)}
@@ -796,16 +797,7 @@ body.mopen{overflow:hidden}
   const devPri={high:['warn','High'],medium:['mute','Medium'],low:['mute','Low']};
   const devRank={high:0,medium:1,low:2};
   const devCI=c=>c==='success'?['good','Passed']:['failure','timed_out','startup_failure'].includes(c)?['bad','Failed']:!c?['info','Running']:['mute',String(c)];
-  const DEV_SEC=[['now','Now'],['owner','For you'],['waiting','Waiting'],['today','Done today']];
   const DEV_WHO=[['owner','Owner'],['claude','Claude'],['external','External'],['later','Later'],['all','All']];
-  const devSummary=()=>{
-    if(!dev||!dev.data||typeof dev.data!=='object') return '';
-    const sum=arr(dev.data.summary_ko).filter(r=>r&&typeof r==='object'), by=k=>sum.filter(r=>r.section===k).sort((a,b)=>n0(a.order)-n0(b.order));
-    const up=by('updated')[0], stale=dev.updated_at&&dOf(dev.updated_at)&&(Date.now()-dOf(dev.updated_at))/36e5>6;
-    const top=`<p>${up?`<span lang="ko" style="overflow-wrap:anywhere">${esc(up.text)}</span> · `:''}<span class="note">Pushed ${esc(ago(dev.updated_at))}</span>${stale?' <span class="pill warn">Stale</span>':''}</p>`;
-    const secs=DEV_SEC.map(([k,h])=>{const r=by(k);return r.length?`<section><div class="sechead"><h2>${h}</h2></div><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${r.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></section>`:''}).join('');
-    return top+secs;
-  };
   P.dev=()=>{
     if(devLoading&&!dev&&!devErr) return skeleton();
     const err=devErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(devErr)}</span><button class="btn" type="button" data-devretry="1">Retry</button></div>`:'';
@@ -1165,13 +1157,16 @@ body.mopen{overflow:hidden}
   // First line is the greeting, bullet lines group into one list, other lines are section heads.
   const brBody=b=>{const L=String(b).split('\n').map(l=>l.trim()).filter(Boolean);let o='',ul=false;L.forEach((l,i)=>{const bl=i>0&&l[0]==='\u2022';if(ul&&!bl){o+='</ul>';ul=false;}if(bl){if(!ul){o+='<ul class="brlist">';ul=true;}o+=`<li>${esc(l.slice(1).trim())}</li>`;}else o+=`<p class="${i?'brhead':'note'}">${esc(l)}</p>`;});return o+(ul?'</ul>':'');};
   P.briefs=()=>{
-    return devSummary()+briefsList();
-  };
-  const briefsList=()=>{
     if(br.items===null&&!br.loading&&!br.err) setTimeout(loadBriefs,0);
-    const head=`<div class="sechead"><h2>Briefs</h2><span class="note">Morning and evening briefings, newest first</span><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
-    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs…</p>'}</section>`;
-    return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?br.items.map(x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} · ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`).join(''):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}</section>`;
+    const head=`<div class="sechead"><h2 lang="ko">\uC724\uC544 \uBE0C\uB9AC\uD551</h2><button class="btn" type="button" data-brrefresh="1"${br.loading?' disabled':''}>Refresh</button></div>`;
+    if(br.items===null) return `<section>${head}${br.err?`<div class="banner" role="alert"><span>${svg('alert')}${esc(br.err)}</span><button class="btn" type="button" data-brrefresh="1">Retry</button></div>`:'<p class="note" role="status">Loading briefs\u2026</p>'}</section>`;
+    const card=x=>`<article class="card"><div class="ctop"><span class="ctitle">${esc(x.title)}</span><span class="note">${esc(fmtDT(x.created_at))} \u00B7 ${esc(ago(x.created_at))}</span></div>${brBody(x.body)}</article>`;
+    const sum=dev&&dev.data&&typeof dev.data==='object'?arr(dev.data.summary_ko).filter(r=>r&&typeof r==='object'):[], by=k=>sum.filter(r=>r.section===k).sort((a,b)=>n0(a.order)-n0(b.order));
+    const lst=(k,h)=>{const r=by(k);return r.length?`<details><summary lang="ko">${h} (${r.length})</summary><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${r.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></details>`:''};
+    const up=by('updated')[0], stale=dev&&dev.updated_at&&dOf(dev.updated_at)&&(Date.now()-dOf(dev.updated_at))/36e5>6;
+    const wk=by('week'), wkSec=wk.length?`<section><div class="sechead"><h2 lang="ko">\uC774\uBC88 \uC8FC \uC77C\uC815</h2></div><ul lang="ko" style="max-width:80ch;overflow-wrap:anywhere">${wk.map(x=>`<li>${esc(x.text)}</li>`).join('')}</ul></section>`:'';
+    const note=dev&&dev.data?`<p>${up?`<span lang="ko" style="overflow-wrap:anywhere">${esc(up.text)}</span> \u00B7 `:''}<span class="note">Pushed ${esc(ago(dev.updated_at))}</span>${stale?' <span class="pill warn">Stale</span>':''}</p>`:'';
+    return `<section>${head}${br.err?`<p class="note">Could not refresh: ${esc(br.err)}</p>`:''}${br.items.length?card(br.items[0]):`<div class="empty"><span class="eico neutral">${svg('inbox')}</span><p>No briefs yet.</p></div>`}${wkSec}${lst('owner','\uB300\uD45C\uB2D8 \uD560 \uC77C \uC804\uCCB4')}${lst('waiting','\uAE30\uB2E4\uB9AC\uB294 \uAC83')}${note}${br.items.length>1?`<details><summary lang="ko">\uC9C0\uB09C \uBE0C\uB9AC\uD551 (${br.items.length-1})</summary>${br.items.slice(1).map(card).join('')}</details>`:''}</section>`;
   };
   P.requests=()=>reqSection()||'<div class="empty"><span class="eico neutral">'+svg('inbox')+'</span><p>No invite requests.</p></div>';
   P.builds=()=>tfSection();
