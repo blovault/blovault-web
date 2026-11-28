@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-0FDdSL9JZOlF+jTM49+h9NlIiyR+RjdnmJral5NdUyk='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-diV2Bid94PFxQJ1e2OWyVOsnamBYMcdoIp9MDuMGysw='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -405,8 +405,6 @@ body.mopen{overflow:hidden}
 .note a{color:var(--accent);font-weight:600}
 .modebox{display:flex;gap:var(--s3);align-items:center;justify-content:space-between;flex-wrap:wrap}
 .modebox .acts{display:flex;gap:var(--s2);flex-wrap:wrap}
-.tmbox{background:var(--sunken);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:var(--s3)}
-.tmgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
 .tmcard{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:136px;padding:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);text-align:left;font:inherit;color:var(--fg);cursor:pointer;width:100%;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
 .tmcard.lead{border:2px solid var(--accent);flex-direction:row;align-items:flex-start;gap:var(--s3);min-height:64px}
 .tmcard.row{flex-direction:row;align-items:flex-start;gap:var(--s3);min-height:64px}
@@ -420,15 +418,55 @@ body.mopen{overflow:hidden}
 .tmav{position:relative;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px}
 .tmcard.lead .tmav{width:56px;height:56px;font-size:22px}
 .tmav.big{width:72px;height:72px;font-size:30px}
-.tmdot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;border:3px solid #fff;box-sizing:content-box}
-.tmchips{display:flex;gap:8px}
-.tmchip{flex:1;min-width:0;min-height:56px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font:inherit;color:var(--fg3);font-size:13px;cursor:pointer;text-align:left}
-.tmchip:hover{background:var(--hover)}
-.tmchip i{flex:none;width:10px;height:10px;border-radius:50%}
-.tmchip b{margin-left:auto;font-size:20px;font-weight:700}
+.tmdot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;border:3px solid var(--surface);box-sizing:content-box}
 .tmfocus{background:var(--accent-bg);border-radius:var(--r-md);padding:var(--s3);margin:var(--s3) 0}
 .tmrow{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-bottom:1px solid var(--line)}
-.tmrep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s3);display:grid;gap:4px}
+.tm2{display:grid;gap:var(--s5)}
+.tm2 .tmav{background:var(--sunken)!important;color:var(--fg2)!important}
+.tm2 .tmdot{width:8px;height:8px;border:2px solid var(--surface);right:-3px;bottom:-3px}
+.tm2s{font-size:12px;color:var(--fg3)}
+.tmchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.tmchip{min-height:56px;display:flex;align-items:baseline;justify-content:center;gap:8px;padding:var(--s3) var(--s2);background:none;border:0;border-left:1px solid var(--line);font:inherit;color:var(--fg2);font-size:12px;cursor:pointer}
+.tmchip:first-child{border-left:0}
+.tmchip:hover{background:var(--hover)}
+.tmchip b{font-size:22px;font-weight:650;color:var(--fg);font-variant-numeric:tabular-nums}
+.tmchip span{display:inline-flex;align-items:center;gap:6px}
+.tmchip i{width:8px;height:8px;border-radius:50%;flex:none}
+.tm2floor{display:grid;gap:var(--s5) var(--s4)}
+.tm2zl{font-size:12px;font-weight:600;color:var(--fg3);padding:0 var(--s1) var(--s2)}
+.tm2card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.tm2r{display:flex;gap:var(--s3);align-items:flex-start;width:100%;min-height:44px;padding:var(--s3) var(--s4);background:none;border:0;border-top:1px solid var(--line);font:inherit;color:var(--fg);text-align:left;cursor:pointer;min-width:0;word-break:keep-all}
+.tm2r:first-child{border-top:0}
+.tm2r:hover{background:var(--hover)}
+.tm2r:active{background:var(--sunken)}
+.tm2t{min-width:0;flex:1;display:grid;gap:2px}
+.tm2h{display:flex;align-items:baseline;gap:var(--s2);min-width:0}
+.tm2h b{font-size:14px;font-weight:600;flex:none}
+.tm2h .tm2s{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm2st{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--fg3)}
+.tm2st.working{color:var(--good)}.tm2st.blocked{color:var(--warn)}
+.tm2st .i{width:12px;height:12px}
+.tm2k{font-size:14px;color:var(--fg2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm2n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm2lower{display:grid;gap:var(--s5);align-items:start}
+.tlday{display:grid;grid-template-columns:76px minmax(0,1fr);gap:var(--s3);padding:var(--s3) var(--s4);border-top:1px solid var(--line)}
+.tlday:first-child{border-top:0}
+.tldate{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fg3);font-variant-numeric:tabular-nums;min-height:28px}
+.tlday.today .tldate{color:var(--fg);font-weight:600}
+.tldate i{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.tlday.rec .tldate{font-style:normal}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.calits{display:grid;gap:var(--s2);min-width:0}
+.calit{display:flex;align-items:center;gap:var(--s2);min-height:28px}
+.cmem{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;background:var(--sunken);color:var(--fg2)}
+.calw{min-width:0;flex:1;font-size:14px;overflow-wrap:anywhere}
+.tlday.rec .calw{color:var(--fg2)}
+.fdit{display:flex;gap:var(--s3);padding:var(--s3) var(--s4);border-top:1px solid var(--line);align-items:flex-start}
+.fdit:first-child{border-top:0}
+.fdb{display:grid;gap:2px;min-width:0;word-break:keep-all;overflow-wrap:anywhere}
+.fdb b{font-size:14px;font-weight:600}
+.wbmore{display:block;width:calc(100% - 2*var(--s4));margin:var(--s2) var(--s4) var(--s3);min-height:44px}
+@media (min-width:900px){.tm2floor{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.tm2z.first{grid-column:1/-1}.tm2lower{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}}
 </style>
 </head>
 <body>
@@ -772,6 +810,9 @@ body.mopen{overflow:hidden}
   }
   const tmAv=(m,big)=>{const c=tmCol(m.id),st=TM_ST[m.status]||TM_ST.waiting;return `<span class="tmav${big?' big':''}" style="background:${c[0]};color:${c[1]}">${tmUrls[m.id]?`<img src="${esc(tmUrls[m.id])}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc(String(m.name||'?').charAt(0))}<span class="tmdot" role="img" aria-label="${st[0]}" style="background:${st[1]}"></span></span>`};
   const tmTeam=()=>{const t=dev&&dev.data&&dev.data.team;return t&&typeof t==='object'?t:null};
+  const TM_ZONES=[['총괄',['karina']],['출시·돈 계산',['yujin','tiffany']],['디자인·마케팅',['wonyoung','winter']],['지원',['yoona','sejeong']]];
+  let tmRepAll=false;
+  const tmDate=w=>{const m=/^(\d{1,2})\/(\d{1,2})/.exec(String(w||''));if(!m)return null;const n=new Date(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate());let d=new Date(n.getFullYear(),m[1]-1,m[2]);if(d<new Date(t0.getTime()-18144e6))d=new Date(n.getFullYear()+1,m[1]-1,m[2]);return {d,t0}};
   P.team=()=>{
     if(devLoading&&!dev&&!devErr) return skeleton();
     const err=devErr?`<div class="banner" role="alert"><span>${svg('alert')}${esc(devErr)}</span><button class="btn" type="button" data-devretry="1">Retry</button></div>`:'';
@@ -779,14 +820,28 @@ body.mopen{overflow:hidden}
     const t=tmTeam();
     if(!t) return err+`<div class="empty"><span class="eico neutral">${svg('check')}</span><p>No team data yet.</p><p>Run make dev-dash-push on the Mac.</p></div>`;
     const ms=arr(t.members).filter(m=>m&&typeof m==='object'), cnt=k=>ms.filter(m=>m.status===k).length;
-    const card=m=>`<button type="button" class="tmcard${m.lead?' lead':''}" data-tm="${esc(m.id)}" lang="ko">${tmAv(m)}<span class="tmt"><span><b>${esc(m.name)}</b>${tmPill(m)} <span class="tmr">${esc(m.role||'')}</span></span><span class="tmk">${esc(m.task||'')}</span></span></button>`;
-    const lead=ms.filter(m=>m.lead), rest=ms.filter(m=>!m.lead);
-    const rep=arr(t.reports).filter(r=>r&&typeof r==='object').map(r=>{const m=ms.find(x=>x.id===r.who)||{},c=tmCol(r.who);return `<div class="tmrep" lang="ko"><span style="font-size:13px;font-weight:600;color:${c[1]}">${esc(m.name||r.who||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="note">${esc(r.detail)}</span>`:''}</div>`}).join('');
-    const kb=(k,c)=>{const n=cnt(k),l=TM_ST[k][0];return `<button type="button" data-tmstat="${k}" class="tmchip" aria-label="${l} ${n}\uba85 \ubcf4\uae30"><i style="background:${TM_ST[k][1]}"></i>${l}<b style="color:${c}">${n}</b></button>`};
-    return err+`<div class="tmchips" lang="ko">${kb('working','var(--good)')}${kb('waiting','var(--fg)')}${kb('blocked','var(--warn)')}</div>
-    <section><div class="sechead"><h2 lang="ko">\uc0ac\ubb34\uc2e4</h2></div><div class="tmbox">${lead.map(card).join('')}<div class="tmgrid">${rest.map(card).join('')}</div></div></section>
-    <section><div class="sechead"><h2 lang="ko">오늘 보고 · 윤아 → 대표님</h2></div>${rep?`<div style="display:grid;gap:var(--s3)">${rep}</div>`:'<p class="note">No reports.</p>'}</section>
-    <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p>`;
+    const row=m=>{const k=TM_ST[m.status]?m.status:'waiting',n=arr(m.next).find(x=>x&&typeof x==='object');return `<button type="button" class="tm2r" data-tm="${esc(m.id)}" lang="ko" aria-label="${esc(m.name)} ${esc(m.role||'')} ${TM_ST[k][0]}">${tmAv(m)}<span class="tm2t"><span class="tm2h"><b>${esc(m.name)}</b><span class="tm2s">${esc(m.role||'')}</span><span class="tm2st ${k}">${k==='blocked'?svg('alert'):''}${TM_ST[k][0]}</span></span><span class="tm2k">${esc(m.task||'—')}</span>${n?`<span class="tm2s tm2n">다음 ${esc(n.what)} · ${esc(n.when)}</span>`:''}</span></button>`};
+    const used=new Set(), zones=TM_ZONES.map(([n,ids])=>[n,ids.map(id=>ms.find(m=>m.id===id)).filter(Boolean)]);
+    zones.forEach(z=>z[1].forEach(m=>used.add(m.id)));
+    const extra=ms.filter(m=>!used.has(m.id)); if(extra.length) zones.push(['기타',extra]);
+    const floor=zones.filter(z=>z[1].length).map((z,i)=>`<div class="tm2z${i===0?' first':''}"><div class="tm2zl" lang="ko">${esc(z[0])}</div><div class="tm2card">${z[1].map(row).join('')}</div></div>`).join('');
+    const kb=(k,c)=>{const n=cnt(k),l=TM_ST[k][0];return `<button type="button" data-tmstat="${k}" class="tmchip" aria-label="${l} ${n}명 보기"><b>${n}</b><span><i style="background:${c}"></i>${l}</span></button>`};
+    const items=[]; ms.forEach(m=>arr(m.next).forEach(n=>{if(n&&typeof n==='object') items.push({m,what:n.what,when:n.when,p:tmDate(n.when)})}));
+    const dated=items.filter(x=>x.p&&x.p.d>=x.p.t0&&x.p.d<new Date(x.p.t0.getTime()+8*864e5)).sort((a,b)=>a.p.d-b.p.d||String(a.when).localeCompare(String(b.when)));
+    const rec=items.filter(x=>!x.p);
+    const chipM=m=>`<span class="cmem" role="img" aria-label="${esc(m.name)}">${esc(String(m.name||'?').charAt(0))}</span>`;
+    const calRow=(x,lbl)=>`<div class="calit">${chipM(x.m)}<span class="calw">${esc(x.what)}</span>${lbl?`<span class="tm2s">${esc(lbl)}</span>`:''}</div>`;
+    const days=[]; dated.forEach(x=>{const key=x.p.d.getTime();let g=days.find(y=>y.key===key);if(!g){g={key,d:x.p.d,t0:x.p.t0,xs:[]};days.push(g)}g.xs.push(x)});
+    const pad=n=>String(n).padStart(2,'0');
+    const cal=days.map(g=>{const td=g.d.getTime()===g.t0.getTime();return `<div class="tlday${td?' today':''}"><div class="tldate">${td?'<i aria-hidden="true"></i><span class="vh">오늘 </span>':''}${pad(g.d.getMonth()+1)}.${pad(g.d.getDate())} ${'일월화수목금토'.charAt(g.d.getDay())}</div><div class="calits">${g.xs.map(x=>calRow(x,String(x.when).replace(/^\d{1,2}\/\d{1,2}\s*/,''))).join('')}</div></div>`}).join('')
+      +(rec.length?`<div class="tlday rec"><div class="tldate">매일</div><div class="calits">${rec.map(x=>calRow(x,x.when.replace(/^매일\s*/,''))).join('')}</div></div>`:'');
+    const reps=arr(t.reports).filter(r=>r&&typeof r==='object'), shownReps=tmRepAll?reps:reps.slice(0,5);
+    const rep=shownReps.map(r=>{const m=ms.find(x=>x.id===r.who)||{name:r.who};return `<div class="fdit" lang="ko">${chipM(m)}<div class="fdb"><span class="tm2s">${esc(m.name||'')} · ${esc(r.area||'')}</span><b>${esc(r.title||'')}</b>${r.detail?`<span class="tm2s">${esc(r.detail)}</span>`:''}</div></div>`}).join('');
+    return err+`<div class="tm2"><div class="tmchips" lang="ko" role="group" aria-label="출근 현황">${kb('working','var(--good)')}${kb('waiting','#8A93A5')}${kb('blocked','#D9A400')}</div>
+    <section><div class="sechead"><h2 lang="ko">사무실</h2></div><div class="tm2floor">${floor}</div></section>
+    <div class="tm2lower"><section><div class="sechead"><h2 lang="ko">이번 주 일정</h2></div><div class="tm2card tmtl" lang="ko">${cal||'<p class="note">예정 없음</p>'}</div></section>
+    <section><div class="sechead"><h2 lang="ko">오늘 보고 · 윤아 → 대표님</h2></div>${rep?`<div class="tm2card tmfeed">${rep}${reps.length>5?`<button type="button" class="btn wbmore" data-tmrep="1" aria-expanded="${tmRepAll}" lang="ko">${tmRepAll?'접기':'더 보기 ('+(reps.length-5)+')'}</button>`:''}</div>`:'<p class="note">No reports.</p>'}</section></div>
+    <p class="note">Updated ${esc(fmtDT(t.updated_at))}</p></div>`;
   };
   function actTeamStat(k,btn){
     const t=tmTeam(), st=TM_ST[k]; if(!t||!st) return;
@@ -1629,6 +1684,7 @@ const p={terminated:'Bank connections were removed at Plaid.',no_plaid_user:'No 
     const ua=e.target.closest('[data-uact]');
     if(ua){ const x=(snap.users?.items||[]).find(u=>u.id===selUser), k=ua.dataset.uact; if(k==='close'){selUser=null;render();} else if(x) actItemRemoval(x,ua,k==='sched'); return; }
     const io=e.target.closest('[data-itemopen]'); if(io){ const x=(snap.plaid?.items||[])[+io.dataset.itemopen]; if(x) actItem(x,io); return; }
+    const tr=e.target.closest('[data-tmrep]'); if(tr){ tmRepAll=!tmRepAll; render(); return; }
     const ts=e.target.closest('[data-tmstat]'); if(ts){ actTeamStat(ts.dataset.tmstat,ts); return; }
     const tp=e.target.closest('[data-tmphoto]'); if(tp){ const f=$('tmFile'); if(f&&!tp.disabled) f.click(); return; }
     const td=e.target.closest('[data-tmdel]'); if(td){ actTeamPhotoDel(td.dataset.tmdel,td); return; }
