@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#FBFCFE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-AbKjwivFvsNdiRsXoJ+Qn9EM3ME+AURABclxTzp6nbQ='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'sha256-Ie9Ca3x5DgvUd6E2iyhGcA7XSBy4jF/eS0dWnnYBAR8=' 'sha256-sftoW8JHldHB9XfCyzpuki6yb1vBrnGdMtUW2wBuvDY='; connect-src 'self' https://nagsivpurrsrkwfdojdj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https: https://nagsivpurrsrkwfdojdj.supabase.co; base-uri 'none'; form-action 'self'">
 <script>if(location.protocol==='http:'&&location.hostname==='blovault.com')location.replace('https://'+location.host+location.pathname+location.search+location.hash);</script>
 <meta name="robots" content="noindex,nofollow">
 <title>BLO VAULT Ops</title>
@@ -766,7 +766,6 @@ body.mopen{overflow:hidden}
       kpi('App errors 24h',snap.sentry?.configured?n0(snap.sentry.events_24h):'—',snap.sentry?.configured?`${n0(snap.sentry.unresolved)} open · ${n0(snap.sentry.new_24h)} new`:'Sentry not connected'),
       kpi('Pending sync signals',flagsOf().length,flagsOf().length?'waiting for the app':'all caught up')].join('')}</div>
     <section><div class="sechead"><h2>Needs attention</h2></div>${attnHtml(attentionRows())}</section>
-    ${briefInline()}
     <section><div class="sechead"><h2>Trends</h2><span class="note">Plaid months from the ledger; other charts from this device's visits</span></div>
       <div class="grid2 g22">
         <div class="box"><div class="bh"><h3>Billed Items by month</h3></div><div class="chart">${lineChart(bm.map(m=>({label:monthName(m.billing_month),v:n0(m.billed_items)})),{title:'Billed Items by month',minPts:3})}</div></div>
